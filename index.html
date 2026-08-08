@@ -260,6 +260,109 @@
     border-radius:3px;
   }
 
+  /* ---------- gallery ---------- */
+  .gallery{padding:4px 0 8px;}
+  .gsec{margin-bottom:26px;}
+  .gsec:last-child{margin-bottom:6px;}
+  .glabel{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    padding:0 24px 14px;
+  }
+  .glabel i{
+    display:block;height:1px;flex:1;max-width:70px;
+    background:linear-gradient(to right,transparent,var(--line));
+  }
+  .glabel i:last-child{background:linear-gradient(to left,transparent,var(--line));}
+  .glabel span{
+    font-size:14px;
+    letter-spacing:3px;
+    font-weight:700;
+    color:var(--red);
+    white-space:nowrap;
+  }
+  .glabel em{
+    display:block;
+    font-family:var(--serif-en);
+    font-style:italic;
+    font-size:10.5px;
+    letter-spacing:2px;
+    font-weight:400;
+    color:var(--ink-soft);
+    margin-top:3px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:5px;
+    padding:0 5px;
+  }
+  .tile{
+    position:relative;
+    display:block;
+    padding:0;
+    margin:0;
+    border:none;
+    background:var(--field);
+    overflow:hidden;
+    cursor:zoom-in;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .tile.full{grid-column:1 / -1;}
+  .tile.r32{aspect-ratio:3 / 2;}
+  .tile.r23{aspect-ratio:2 / 3;}
+  .tile.r11{aspect-ratio:1 / 1;}
+  .tile img{
+    width:100%;height:100%;
+    object-fit:cover;
+    display:block;
+    transition:transform .5s cubic-bezier(.22,.7,.3,1);
+  }
+  /* keep faces in frame when a portrait shot is cropped square */
+  .tile.r11 img{object-position:center 32%;}
+  @media (hover:hover){
+    .tile:hover img{transform:scale(1.035);}
+  }
+
+  /* ---------- lightbox ---------- */
+  .lightbox{
+    position:fixed;
+    inset:0;
+    z-index:50;
+    background:rgba(30,24,19,.94);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    animation:fade .22s ease both;
+  }
+  .lightbox[hidden]{display:none;}
+  @keyframes fade{from{opacity:0;}to{opacity:1;}}
+  .lightbox img{
+    max-width:94vw;
+    max-height:86vh;
+    object-fit:contain;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+  }
+  .lb-close,.lb-nav{
+    position:absolute;
+    background:none;
+    border:none;
+    color:#f2ece1;
+    cursor:pointer;
+    line-height:1;
+    padding:12px 16px;
+    opacity:.75;
+    transition:opacity .16s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .lb-close:hover,.lb-nav:hover{opacity:1;}
+  .lb-close{top:6px;right:8px;font-size:34px;}
+  .lb-nav{top:50%;transform:translateY(-50%);font-size:44px;}
+  .lb-prev{left:2px;}
+  .lb-next{right:2px;}
+
   /* ---------- footer ---------- */
   .footer{
     padding:24px 24px 34px;
@@ -298,7 +401,43 @@
       <i></i>
     </div>
 
-    <img class="invitation-image reveal d2" src="images/couple.jpg" alt="陶林伟 & 肖佩韦 婚纱照">
+    <div class="rsvp reveal d2">
+      <div class="rsvp-head">
+        <h2>出席登记</h2>
+      </div>
+      <form id="rsvpForm">
+        <div class="field">
+          <label for="name">姓名</label>
+          <input type="text" id="name" name="name" required>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="attend">是否出席</label>
+            <select id="attend" name="attend">
+              <option value="出席">出席</option>
+              <option value="不出席">不出席</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="count">出席人数</label>
+            <select id="count" name="count">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="note">备注</label>
+          <textarea id="note" name="note" placeholder="如有饮食禁忌或其他需要告知的事项，请在此留言"></textarea>
+        </div>
+        <button type="submit" class="submit-btn" id="submitBtn">提交登记</button>
+      </form>
+      <p class="success-msg" id="successMsg"></p>
+      <p class="rsvp-note">登记信息将自动保存；如需修改，用同样的姓名重新提交一次即可覆盖之前的登记</p>
+    </div>
 
     <div class="parade reveal d3" aria-hidden="true">
       <div class="ground"></div>
@@ -409,48 +548,57 @@
       </div>
     </div>
 
-    <div class="rsvp reveal d4">
-      <div class="rsvp-head">
-        <h2>出席登记</h2>
+    <div class="gallery reveal d3">
+
+      <div class="gsec">
+        <div class="glabel"><i></i><span>婚 纱 照<em>Wedding</em></span><i></i></div>
+        <div class="grid">
+          <button type="button" class="tile full r32"><img src="images/gallery/wedding-1.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-6.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-2.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/wedding-4.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-5.jpg" alt="中式婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-3.jpg" alt="中式婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile full r23"><img src="images/gallery/wedding-7.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+        </div>
       </div>
-      <form id="rsvpForm">
-        <div class="field">
-          <label for="name">姓名</label>
-          <input type="text" id="name" name="name" required>
+
+      <div class="gsec">
+        <div class="glabel"><i></i><span>我 们 的 日 常<em>Everyday</em></span><i></i></div>
+        <div class="grid">
+          <button type="button" class="tile r23"><img src="images/gallery/travel-2.jpg" alt="冰岛旅行" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/travel-1.jpg" alt="冰岛旅行" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r11"><img src="images/gallery/cat-1.jpg" alt="英短蓝白" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r11"><img src="images/gallery/cat-2.jpg" alt="英短蓝白" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r11"><img src="images/gallery/cat-3.jpg" alt="美短" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r11"><img src="images/gallery/cat-4.jpg" alt="金吉拉" loading="lazy" decoding="async"></button>
         </div>
-        <div class="row2">
-          <div class="field">
-            <label for="attend">是否出席</label>
-            <select id="attend" name="attend">
-              <option value="出席">出席</option>
-              <option value="不出席">不出席</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="count">出席人数</label>
-            <select id="count" name="count">
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-            </select>
-          </div>
+      </div>
+
+      <div class="gsec">
+        <div class="glabel"><i></i><span>生 活 漫 画<em>Illustrated</em></span><i></i></div>
+        <div class="grid">
+          <button type="button" class="tile r11"><img src="images/gallery/comic-1.jpg" alt="生活漫画" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r11"><img src="images/gallery/comic-2.jpg" alt="生活漫画" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r11"><img src="images/gallery/comic-3.jpg" alt="生活漫画" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r11"><img src="images/gallery/comic-4.jpg" alt="生活漫画" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r11"><img src="images/gallery/comic-5.jpg" alt="生活漫画" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r11"><img src="images/gallery/comic-6.jpg" alt="生活漫画" loading="lazy" decoding="async"></button>
         </div>
-        <div class="field">
-          <label for="note">备注</label>
-          <textarea id="note" name="note" placeholder="如有饮食禁忌或其他需要告知的事项，请在此留言"></textarea>
-        </div>
-        <button type="submit" class="submit-btn" id="submitBtn">提交登记</button>
-      </form>
-      <p class="success-msg" id="successMsg"></p>
-      <p class="rsvp-note">登记信息将自动保存；如需修改，用同样的姓名重新提交一次即可覆盖之前的登记</p>
+      </div>
     </div>
 
     <div class="footer">
       <p class="names">陶林伟 &amp; 肖佩韦</p>
       <p class="date">2026 . 10 . 17</p>
     </div>
+  </div>
+
+  <div class="lightbox" id="lightbox" hidden>
+    <button class="lb-close" id="lbClose" aria-label="关闭">&times;</button>
+    <button class="lb-nav lb-prev" id="lbPrev" aria-label="上一张">&#8249;</button>
+    <img id="lbImg" alt="">
+    <button class="lb-nav lb-next" id="lbNext" aria-label="下一张">&#8250;</button>
   </div>
 
 <script>
@@ -512,6 +660,51 @@
         submitBtn.textContent = '提交登记';
       });
   });
+
+  // ---- gallery lightbox ----
+  (function(){
+    var tiles = [].slice.call(document.querySelectorAll('.tile'));
+    if (!tiles.length) return;
+    var box = document.getElementById('lightbox');
+    var img = document.getElementById('lbImg');
+    var at = 0;
+
+    function show(i){
+      at = (i + tiles.length) % tiles.length;
+      var src = tiles[at].querySelector('img');
+      img.src = src.src;
+      img.alt = src.alt;
+    }
+    function open(i){
+      show(i);
+      box.hidden = false;
+      document.body.style.overflow = 'hidden';
+    }
+    function close(){
+      box.hidden = true;
+      img.src = '';
+      document.body.style.overflow = '';
+    }
+
+    tiles.forEach(function(t, i){
+      t.addEventListener('click', function(){ open(i); });
+    });
+    document.getElementById('lbClose').addEventListener('click', close);
+    document.getElementById('lbPrev').addEventListener('click', function(e){
+      e.stopPropagation(); show(at - 1);
+    });
+    document.getElementById('lbNext').addEventListener('click', function(e){
+      e.stopPropagation(); show(at + 1);
+    });
+    // tapping the backdrop closes; tapping the photo itself does not
+    box.addEventListener('click', function(e){ if (e.target === box || e.target === img) close(); });
+    document.addEventListener('keydown', function(e){
+      if (box.hidden) return;
+      if (e.key === 'Escape') close();
+      else if (e.key === 'ArrowLeft') show(at - 1);
+      else if (e.key === 'ArrowRight') show(at + 1);
+    });
+  })();
 </script>
 </body>
 </html>
