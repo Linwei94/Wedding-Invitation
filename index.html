@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>陶林伟 & 肖佩韦 · 婚礼请柬</title>
+<style>
+  :root{
+    --paper:#efe8d8;
+    --paper-dark:#e4dcc6;
+    --ink:#3a2e26;
+    --red:#7a1f1f;
+    --red-soft:#8f2a2a;
+    --line:#c9b998;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:#d8cfb8;
+    font-family:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+    color:var(--ink);
+    display:flex;
+    justify-content:center;
+    padding:24px 12px;
+  }
+  .card{
+    position:relative;
+    width:100%;
+    max-width:560px;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(255,255,255,0.25), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(0,0,0,0.05), transparent 45%),
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.015) 0px, rgba(0,0,0,0.015) 1px, transparent 1px, transparent 3px),
+      var(--paper);
+    border:1px solid var(--ink);
+    outline:1px solid var(--ink);
+    outline-offset:-6px;
+    padding:48px 32px 40px;
+    text-align:center;
+  }
+  .kicker{
+    color:var(--red);
+    font-size:26px;
+    letter-spacing:8px;
+    font-weight:700;
+    margin:0 0 18px;
+  }
+  .en-sub{
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:13px;
+    letter-spacing:1px;
+    line-height:1.7;
+    color:var(--ink);
+    margin:0 0 22px;
+  }
+  .en-sub b{font-weight:700;}
+  .wedding-of{
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:14px;
+    letter-spacing:3px;
+    font-weight:700;
+    margin:0 0 22px;
+  }
+  .names{
+    font-size:34px;
+    letter-spacing:6px;
+    font-weight:700;
+    margin:0 0 26px;
+  }
+  .date-en{
+    font-family:Georgia,"Times New Roman",serif;
+    font-style:italic;
+    font-size:26px;
+    letter-spacing:2px;
+    margin:0 0 6px;
+  }
+  .date-cn{
+    font-size:16px;
+    letter-spacing:3px;
+    margin:0 0 28px;
+  }
+  .schedule{
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    gap:28px;
+    margin:0 0 34px;
+  }
+  .schedule .item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:120px;
+  }
+  .schedule .icon{
+    width:44px;height:44px;
+    margin-bottom:8px;
+    color:var(--red);
+  }
+  .schedule .icon svg{width:100%;height:100%;fill:none;stroke:var(--red);stroke-width:1.4;}
+  .schedule .cn{font-size:13px;margin:0;}
+  .schedule .en{font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:13px;margin:2px 0;}
+  .schedule .time{font-family:Georgia,"Times New Roman",serif;font-size:13px;margin:2px 0 0;}
+  .schedule .divider{
+    align-self:center;
+    width:34px;height:1px;
+    background:var(--ink);
+    margin-top:-30px;
+    position:relative;
+  }
+  .schedule .divider::before,.schedule .divider::after{
+    content:"";
+    position:absolute;top:-2.5px;
+    width:5px;height:5px;
+    border-radius:50%;
+    background:var(--ink);
+  }
+  .schedule .divider::before{left:-2px;}
+  .schedule .divider::after{right:-2px;}
+
+  .centerpiece{width:220px;max-width:70%;margin:0 auto 30px;color:var(--red);}
+  .centerpiece svg{width:100%;height:auto;fill:none;stroke:var(--red-soft);stroke-width:1.2;}
+
+  .addr-title{
+    font-size:15px;
+    letter-spacing:4px;
+    margin:0 0 10px;
+  }
+  .addr-line{
+    font-size:15px;
+    line-height:1.8;
+    margin:0;
+  }
+  .closing{
+    margin-top:26px;
+    font-size:15px;
+    line-height:2;
+  }
+
+  .rsvp{
+    margin-top:38px;
+    padding-top:30px;
+    border-top:1px dashed var(--line);
+    text-align:left;
+  }
+  .rsvp h2{
+    text-align:center;
+    font-size:17px;
+    letter-spacing:4px;
+    margin:0 0 6px;
+    color:var(--red);
+  }
+  .rsvp .deadline{
+    text-align:center;
+    font-size:13px;
+    color:#6b5c46;
+    margin:0 0 20px;
+  }
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;
+    font-size:13px;
+    margin-bottom:6px;
+    color:var(--ink);
+  }
+  .field input,.field select,.field textarea{
+    width:100%;
+    padding:9px 10px;
+    font-size:14px;
+    font-family:inherit;
+    border:1px solid var(--line);
+    background:#fbf8f0;
+    color:var(--ink);
+    border-radius:2px;
+  }
+  .field textarea{resize:vertical;min-height:60px;}
+  .row2{display:flex;gap:12px;}
+  .row2 .field{flex:1;}
+  .submit-btn{
+    display:block;
+    width:100%;
+    margin-top:6px;
+    padding:12px;
+    background:var(--red);
+    color:#f5ecdc;
+    border:none;
+    font-size:15px;
+    letter-spacing:4px;
+    font-family:inherit;
+    cursor:pointer;
+    border-radius:2px;
+  }
+  .submit-btn:active{background:var(--red-soft);}
+  .rsvp-note{
+    font-size:12px;
+    color:#6b5c46;
+    text-align:center;
+    margin-top:12px;
+    line-height:1.6;
+  }
+  .success-msg{
+    display:none;
+    text-align:center;
+    color:var(--red);
+    font-size:14px;
+    margin-top:14px;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <p class="kicker">「 婚 礼 请 柬 」</p>
+    <p class="en-sub"><b>The Honour Of Your Presence</b><br><b>Is Requested At</b></p>
+    <p class="wedding-of">THE WEDDING OF</p>
+    <p class="names">陶林伟 &amp; 肖佩韦</p>
+    <p class="date-en">2026.10.17</p>
+    <p class="date-cn">丙午年九月初八 &nbsp;星期六</p>
+
+    <div class="schedule">
+      <div class="item">
+        <span class="icon">
+          <svg viewBox="0 0 48 48"><rect x="6" y="16" width="36" height="24" rx="2"/><path d="M17 16l3-6h8l3 6"/><circle cx="24" cy="28" r="7"/><circle cx="36" cy="21" r="1.4" fill="currentColor" stroke="none"/></svg>
+        </span>
+        <p class="cn">签到合影</p>
+        <p class="en">Group Photo</p>
+        <p class="time">17:08pm</p>
+      </div>
+      <div class="divider"></div>
+      <div class="item">
+        <span class="icon">
+          <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="17"/><path d="M16 15v10M16 15c0 2-1.5 3-1.5 3M16 15c0 2 1.5 3 1.5 3M16 25v9"/><path d="M32 15v9c0 2-1.5 3-3 3v7"/><circle cx="24" cy="24" r="3"/></svg>
+        </span>
+        <p class="cn">晚宴仪式</p>
+        <p class="en">Dinner</p>
+        <p class="time">18:08pm</p>
+      </div>
+    </div>
+
+    <div class="centerpiece">
+      <svg viewBox="0 0 220 160">
+        <ellipse cx="60" cy="130" rx="30" ry="8"/>
+        <ellipse cx="160" cy="130" rx="30" ry="8"/>
+        <ellipse cx="110" cy="140" rx="34" ry="9"/>
+        <path d="M40 100 L48 128 L72 128 L80 100 Z"/>
+        <line x1="60" y1="100" x2="60" y2="60"/>
+        <line x1="52" y1="60" x2="68" y2="60"/>
+        <path d="M150 100 L158 128 L182 128 L190 100 Z"/>
+        <line x1="170" y1="100" x2="170" y2="60"/>
+        <line x1="162" y1="60" x2="178" y2="60"/>
+        <path d="M95 60 Q100 20 110 15 Q120 20 125 60 Z"/>
+        <path d="M80 65 Q90 30 110 25 Q130 30 140 65 Z"/>
+        <path d="M100 40 Q110 25 120 40" />
+        <circle cx="110" cy="45" r="6"/>
+      </svg>
+    </div>
+
+    <p class="addr-title">丨 婚 礼 地 址 丨</p>
+    <p class="addr-line">松江广富林希尔顿酒店会议中心 · 一楼大宴会厅</p>
+    <p class="addr-line">上海市松江区广轩路1199号</p>
+
+    <p class="closing">愿您永远被爱和快乐包围<br>期待 · 婚礼见</p>
+
+    <div class="rsvp">
+      <h2>出席登记</h2>
+      <p class="deadline">为方便统计与订房，请于 2026 年 8 月 30 日前完成登记</p>
+      <form id="rsvpForm">
+        <div class="field">
+          <label for="name">姓名</label>
+          <input type="text" id="name" name="name" required>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="attend">是否出席</label>
+            <select id="attend" name="attend">
+              <option value="出席">出席</option>
+              <option value="不出席">不出席</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="count">出席人数</label>
+            <input type="number" id="count" name="count" min="1" value="1">
+          </div>
+        </div>
+        <div class="field">
+          <label for="city">所在城市</label>
+          <input type="text" id="city" name="city" value="上海">
+        </div>
+        <div class="field">
+          <label for="note">备注</label>
+          <textarea id="note" name="note" placeholder="如有饮食禁忌或其他需要告知的事项，请在此留言"></textarea>
+        </div>
+        <button type="submit" class="submit-btn">提 交 登 记</button>
+      </form>
+      <p class="success-msg" id="successMsg">已为您打开邮件发送窗口，请点击发送以完成登记，感谢您的回复！</p>
+      <p class="rsvp-note">登记信息将通过邮件发送给新人，用于统计出席人数与安排酒店房间</p>
+    </div>
+  </div>
+
+<script>
+  document.getElementById('rsvpForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var name = document.getElementById('name').value.trim();
+    var attend = document.getElementById('attend').value;
+    var count = document.getElementById('count').value;
+    var city = document.getElementById('city').value.trim();
+    var note = document.getElementById('note').value.trim();
+
+    var subject = encodeURIComponent('婚礼出席登记 - ' + name);
+    var body = encodeURIComponent(
+      '姓名：' + name + '\n' +
+      '是否出席：' + attend + '\n' +
+      '出席人数：' + count + '\n' +
+      '所在城市：' + city + '\n' +
+      '备注：' + (note || '无')
+    );
+
+    window.location.href = 'mailto:dylan.tao94@gmail.com?subject=' + subject + '&body=' + body;
+    document.getElementById('successMsg').style.display = 'block';
+  });
+</script>
+</body>
+</html>
