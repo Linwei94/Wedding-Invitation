@@ -36,6 +36,18 @@
     height:auto;
     margin:0;
   }
+  .ornament-divider{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px 0;
+  }
+  .ornament-divider svg{
+    width:120px;height:16px;
+    stroke:var(--red);
+    stroke-width:1;
+    fill:none;
+  }
 
   .parade{
     position:relative;
@@ -155,6 +167,9 @@
 <body>
   <div class="card">
     <img class="invitation-image" src="images/invitation.jpg" alt="陶林伟 & 肖佩韦 婚礼请柬，2026.10.17 丙午年九月初八 星期六，松江广富林希尔顿酒店会议中心一楼大宴会厅">
+    <div class="ornament-divider" aria-hidden="true">
+      <svg viewBox="0 0 100 16"><line x1="0" y1="8" x2="42" y2="8"/><rect x="46" y="4" width="8" height="8" transform="rotate(45 50 8)"/><line x1="58" y1="8" x2="100" y2="8"/></svg>
+    </div>
     <img class="invitation-image" src="images/couple.jpg" alt="陶林伟 & 肖佩韦 婚纱照">
 
     <div class="parade" aria-hidden="true">
