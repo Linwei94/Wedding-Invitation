@@ -7,7 +7,6 @@
 <style>
   :root{
     --paper:#efe8d8;
-    --paper-dark:#e4dcc6;
     --ink:#3a2e26;
     --red:#7a1f1f;
     --red-soft:#8f2a2a;
@@ -29,106 +28,24 @@
     position:relative;
     width:100%;
     max-width:560px;
-    background:
-      radial-gradient(circle at 15% 20%, rgba(255,255,255,0.25), transparent 40%),
-      radial-gradient(circle at 85% 80%, rgba(0,0,0,0.05), transparent 45%),
-      repeating-linear-gradient(0deg, rgba(0,0,0,0.015) 0px, rgba(0,0,0,0.015) 1px, transparent 1px, transparent 3px),
-      var(--paper);
+    background:var(--paper);
     border:1px solid var(--ink);
     outline:1px solid var(--ink);
     outline-offset:-6px;
-    padding:48px 32px 40px;
+    padding:20px;
     text-align:center;
   }
-  .kicker{
-    font-family:var(--brush);
-    color:var(--red);
-    font-size:28px;
-    letter-spacing:8px;
-    font-weight:700;
-    margin:0 0 18px;
-  }
-  .en-sub{
-    font-family:Georgia,"Times New Roman",serif;
-    font-style:italic;
-    font-size:13px;
-    letter-spacing:1px;
-    line-height:1.7;
-    color:var(--ink);
-    margin:0 0 22px;
-  }
-  .en-sub b{font-weight:700;}
-  .wedding-of{
-    font-family:Georgia,"Times New Roman",serif;
-    font-style:italic;
-    font-size:14px;
-    letter-spacing:3px;
-    font-weight:700;
-    margin:0 0 22px;
-  }
-  .names{
-    font-family:var(--brush);
-    font-size:36px;
-    letter-spacing:6px;
-    font-weight:700;
-    margin:0 0 26px;
-  }
-  .date-en{
-    font-family:Georgia,"Times New Roman",serif;
-    font-style:italic;
-    font-size:26px;
-    letter-spacing:2px;
-    margin:0 0 6px;
-  }
-  .date-cn{
-    font-family:var(--brush);
-    font-size:17px;
-    letter-spacing:3px;
+  .invitation-image{
+    display:block;
+    width:100%;
+    height:auto;
     margin:0 0 28px;
   }
-  .schedule{
-    display:flex;
-    align-items:flex-start;
-    justify-content:center;
-    gap:28px;
-    margin:0 0 34px;
-  }
-  .schedule .item{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    width:120px;
-  }
-  .schedule .icon{
-    width:44px;height:44px;
-    margin-bottom:8px;
-    color:var(--red);
-  }
-  .schedule .icon svg{width:100%;height:100%;fill:none;stroke:var(--red);stroke-width:1.4;}
-  .schedule .cn{font-size:13px;margin:0;}
-  .schedule .en{font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:13px;margin:2px 0;}
-  .schedule .time{font-family:Georgia,"Times New Roman",serif;font-size:13px;margin:2px 0 0;}
-  .schedule .divider{
-    align-self:center;
-    width:34px;height:1px;
-    background:var(--ink);
-    margin-top:-30px;
-    position:relative;
-  }
-  .schedule .divider::before,.schedule .divider::after{
-    content:"";
-    position:absolute;top:-2.5px;
-    width:5px;height:5px;
-    border-radius:50%;
-    background:var(--ink);
-  }
-  .schedule .divider::before{left:-2px;}
-  .schedule .divider::after{right:-2px;}
 
   .parade{
     position:relative;
     height:56px;
-    margin:0 0 22px;
+    margin:0 0 8px;
     overflow:hidden;
   }
   .parade .sprite{
@@ -166,86 +83,8 @@
     .parade .sprite{animation:none; display:none;}
   }
 
-  .centerpiece{
-    position:relative;
-    width:170px;max-width:55%;
-    height:190px;
-    margin:0 auto 30px;
-  }
-  .centerpiece .bouquet{
-    width:100%;height:100%;
-    fill:none;
-    stroke:var(--red-soft);
-    stroke-width:1.3;
-    stroke-linecap:round;
-    stroke-linejoin:round;
-    transform-origin:50% 94%;
-    animation:sway 6s ease-in-out infinite;
-  }
-  .centerpiece .bloom{
-    transform-box:fill-box;
-    transform-origin:center;
-    opacity:0;
-    animation:bloom 1.4s ease-out forwards;
-  }
-  .centerpiece .bloom.b1{animation-delay:.1s;}
-  .centerpiece .bloom.b2{animation-delay:.4s;}
-  .centerpiece .bloom.b3{animation-delay:.7s;}
-  .centerpiece .bloom-dot{fill:var(--red-soft);stroke:none;}
-  @keyframes sway{
-    0%,100%{transform:rotate(-2deg);}
-    50%{transform:rotate(2deg);}
-  }
-  @keyframes bloom{
-    0%{transform:scale(.2);opacity:0;}
-    100%{transform:scale(1);opacity:1;}
-  }
-  .petals{position:absolute;inset:0;pointer-events:none;overflow:visible;}
-  .petals span{
-    position:absolute;
-    bottom:14%;
-    width:6px;height:8px;
-    background:var(--red-soft);
-    border-radius:70% 70% 70% 0;
-    opacity:0;
-    animation:petal-float 6s ease-in infinite;
-  }
-  .petals span:nth-child(1){left:20%; animation-delay:.2s;}
-  .petals span:nth-child(2){left:38%; animation-delay:2s;}
-  .petals span:nth-child(3){left:52%; animation-delay:3.6s;}
-  .petals span:nth-child(4){left:64%; animation-delay:1.1s;}
-  .petals span:nth-child(5){left:78%; animation-delay:4.4s;}
-  @keyframes petal-float{
-    0%{bottom:14%; opacity:0; transform:translateX(0) rotate(0deg);}
-    12%{opacity:.85;}
-    100%{bottom:100%; opacity:0; transform:translateX(18px) rotate(200deg);}
-  }
-  @media (prefers-reduced-motion: reduce){
-    .centerpiece .bouquet{animation:none;}
-    .centerpiece .bloom{animation:none;opacity:1;}
-    .petals span{animation:none;display:none;}
-  }
-
-  .addr-title{
-    font-family:var(--brush);
-    font-size:16px;
-    letter-spacing:4px;
-    margin:0 0 10px;
-  }
-  .addr-line{
-    font-size:15px;
-    line-height:1.8;
-    margin:0;
-  }
-  .closing{
-    font-family:var(--brush);
-    margin-top:26px;
-    font-size:17px;
-    line-height:2;
-  }
-
   .rsvp{
-    margin-top:38px;
+    margin-top:20px;
     padding-top:30px;
     border-top:1px dashed var(--line);
     text-align:left;
@@ -319,32 +158,7 @@
 </head>
 <body>
   <div class="card">
-    <p class="kicker">「 婚 礼 请 柬 」</p>
-    <p class="en-sub"><b>The Honour Of Your Presence</b><br><b>Is Requested At</b></p>
-    <p class="wedding-of">THE WEDDING OF</p>
-    <p class="names">陶林伟 &amp; 肖佩韦</p>
-    <p class="date-en">2026.10.17</p>
-    <p class="date-cn">丙午年九月初八 &nbsp;星期六</p>
-
-    <div class="schedule">
-      <div class="item">
-        <span class="icon">
-          <svg viewBox="0 0 48 48"><rect x="6" y="16" width="36" height="24" rx="2"/><path d="M17 16l3-6h8l3 6"/><circle cx="24" cy="28" r="7"/><circle cx="36" cy="21" r="1.4" fill="currentColor" stroke="none"/></svg>
-        </span>
-        <p class="cn">签到合影</p>
-        <p class="en">Group Photo</p>
-        <p class="time">17:08pm</p>
-      </div>
-      <div class="divider"></div>
-      <div class="item">
-        <span class="icon">
-          <svg viewBox="0 0 48 48"><circle cx="24" cy="25" r="10"/><path d="M7,7 v9 M10,7 v9 M13,7 v9"/><path d="M10,16 v25"/><path d="M38,7 c2.5,3 2.5,7 0,9 q-1.2,1 0,2 v22"/></svg>
-        </span>
-        <p class="cn">晚宴仪式</p>
-        <p class="en">Dinner</p>
-        <p class="time">18:08pm</p>
-      </div>
-    </div>
+    <img class="invitation-image" src="images/invitation.jpg" alt="陶林伟 & 肖佩韦 婚礼请柬，2026.10.17 丙午年九月初八 星期六，松江广富林希尔顿酒店会议中心一楼大宴会厅">
 
     <div class="parade" aria-hidden="true">
       <div class="sprite" style="--dur:16s; --delay:0s;" title="英短蓝白">
@@ -392,66 +206,6 @@
         <svg viewBox="0 0 60 46"><ellipse cx="22" cy="28" rx="16" ry="10" transform="rotate(-8 22 28)"/><circle cx="44" cy="16" r="10"/><path d="M36,8 L40,2 L43,9 Z"/><path d="M46,7 L50,1 L52,9 Z"/><path d="M40,8 L41,11 M43,7 L43,11 M46,8 L45,11"/><path d="M40,16 q2,-3 4,0"/><path d="M47,16 q2,-3 4,0"/><path d="M44,19 l-1.5,2 h3 Z"/><path d="M48,21 L56,19 M48,23 L56,25"/><path d="M16,22 Q20,20 24,22"/><path d="M14,28 Q18,26 22,28"/><path d="M18,34 Q22,32 26,34"/><path d="M6,26 Q-2,18 4,10 Q8,6 12,10"/><path d="M5,16 Q7,17 6,19"/><path d="M2,21 Q4,22 3,24"/><path d="M12,37 Q10,41 9,44"/><path d="M18,38 Q19,42 20,45"/><path d="M28,38 Q27,42 26,45"/><path d="M34,37 Q36,41 37,44"/></svg>
       </div>
     </div>
-
-    <div class="centerpiece">
-      <div class="petals">
-        <span></span><span></span><span></span><span></span><span></span>
-      </div>
-      <svg class="bouquet" viewBox="0 0 200 220">
-        <path d="M100,205 Q86,150 70,102"/>
-        <path d="M100,205 Q100,145 100,78"/>
-        <path d="M100,205 Q114,150 130,104"/>
-
-        <path d="M100,150 C114,145 123,136 118,127 C109,134 100,141 100,150 Z"/>
-        <path d="M100,172 C86,168 77,159 82,150 C91,157 100,163 100,172 Z"/>
-
-        <g class="bloom b1">
-          <g transform="translate(70,102)">
-            <ellipse class="petal" cx="0" cy="-14" rx="6" ry="13" transform="rotate(0)"/>
-            <ellipse class="petal" cx="0" cy="-14" rx="6" ry="13" transform="rotate(60)"/>
-            <ellipse class="petal" cx="0" cy="-14" rx="6" ry="13" transform="rotate(120)"/>
-            <ellipse class="petal" cx="0" cy="-14" rx="6" ry="13" transform="rotate(180)"/>
-            <ellipse class="petal" cx="0" cy="-14" rx="6" ry="13" transform="rotate(240)"/>
-            <ellipse class="petal" cx="0" cy="-14" rx="6" ry="13" transform="rotate(300)"/>
-            <circle class="bloom-dot" r="3.5"/>
-          </g>
-        </g>
-
-        <g class="bloom b2">
-          <g transform="translate(100,76)">
-            <ellipse class="petal" cx="0" cy="-18" rx="7.5" ry="17" transform="rotate(0)"/>
-            <ellipse class="petal" cx="0" cy="-18" rx="7.5" ry="17" transform="rotate(60)"/>
-            <ellipse class="petal" cx="0" cy="-18" rx="7.5" ry="17" transform="rotate(120)"/>
-            <ellipse class="petal" cx="0" cy="-18" rx="7.5" ry="17" transform="rotate(180)"/>
-            <ellipse class="petal" cx="0" cy="-18" rx="7.5" ry="17" transform="rotate(240)"/>
-            <ellipse class="petal" cx="0" cy="-18" rx="7.5" ry="17" transform="rotate(300)"/>
-            <circle class="bloom-dot" r="4.5"/>
-          </g>
-        </g>
-
-        <g class="bloom b3">
-          <g transform="translate(130,104)">
-            <ellipse class="petal" cx="0" cy="-13" rx="5.5" ry="12" transform="rotate(0)"/>
-            <ellipse class="petal" cx="0" cy="-13" rx="5.5" ry="12" transform="rotate(60)"/>
-            <ellipse class="petal" cx="0" cy="-13" rx="5.5" ry="12" transform="rotate(120)"/>
-            <ellipse class="petal" cx="0" cy="-13" rx="5.5" ry="12" transform="rotate(180)"/>
-            <ellipse class="petal" cx="0" cy="-13" rx="5.5" ry="12" transform="rotate(240)"/>
-            <ellipse class="petal" cx="0" cy="-13" rx="5.5" ry="12" transform="rotate(300)"/>
-            <circle class="bloom-dot" r="3"/>
-          </g>
-        </g>
-
-        <path d="M100,205 L82,196 L86,214 Z"/>
-        <path d="M100,205 L118,196 L114,214 Z"/>
-        <ellipse cx="100" cy="205" rx="5.5" ry="4.5"/>
-      </svg>
-    </div>
-
-    <p class="addr-title">丨 婚 礼 地 址 丨</p>
-    <p class="addr-line">松江广富林希尔顿酒店会议中心 · 一楼大宴会厅</p>
-    <p class="addr-line">上海市松江区广轩路1199号</p>
-
-    <p class="closing">愿您永远被爱和快乐包围<br>期待 · 婚礼见</p>
 
     <div class="rsvp">
       <h2>出席登记</h2>
