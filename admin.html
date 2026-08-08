@@ -87,6 +87,8 @@
 </div>
 
 <script>
+  function apiBase(){ return location.pathname.replace(/[^/]*$/, ''); }
+
   var tokenInput = document.getElementById('token');
   var msgEl = document.getElementById('msg');
   var loginPanel = document.getElementById('loginPanel');
@@ -111,7 +113,7 @@
     loadBtn.disabled = true;
     msgEl.style.display = 'none';
 
-    fetch('/api/list', { headers: { 'x-admin-token': token } })
+    fetch(apiBase() + 'api/list', { headers: { 'x-admin-token': token } })
       .then(function (res) { return res.json(); })
       .then(function (data) {
         if (!data.ok) throw new Error(data.error || '读取失败');

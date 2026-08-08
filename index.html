@@ -9,16 +9,16 @@
 <meta property="og:description" content="2026年10月17日 · 上海松江广富林希尔顿酒店，诚邀您的光临">
 <meta property="og:type" content="website">
 <!-- 微信/多数抓取程序只认绝对地址，换域名后这两行要一起改 -->
-<meta property="og:url" content="https://weddinginvitation-dpcecgtcs5rh.edgeone.cool/">
-<meta property="og:image" content="https://weddinginvitation-dpcecgtcs5rh.edgeone.cool/images/share.jpg">
+<meta property="og:url" content="https://www.taolinwei.com/Wedding-Invitation/">
+<meta property="og:image" content="https://www.taolinwei.com/Wedding-Invitation/images/share.jpg">
 <meta property="og:image:width" content="400">
 <meta property="og:image:height" content="400">
-<meta itemprop="image" content="https://weddinginvitation-dpcecgtcs5rh.edgeone.cool/images/share.jpg">
-<link rel="image_src" href="https://weddinginvitation-dpcecgtcs5rh.edgeone.cool/images/share.jpg">
+<meta itemprop="image" content="https://www.taolinwei.com/Wedding-Invitation/images/share.jpg">
+<link rel="image_src" href="https://www.taolinwei.com/Wedding-Invitation/images/share.jpg">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://weddinginvitation-dpcecgtcs5rh.edgeone.cool/images/share.jpg">
+<meta name="twitter:image" content="https://www.taolinwei.com/Wedding-Invitation/images/share.jpg">
 <link rel="icon" type="image/png" href="images/logo.png">
-<link rel="shortcut icon" href="/favicon.ico">
+<link rel="shortcut icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="images/logo.png">
 <style>
   :root{
@@ -465,6 +465,10 @@
   </div>
 
 <script>
+  // Strip any filename off the path so this works whether the page is served
+  // at the site root, at /Wedding-Invitation/, or as /Wedding-Invitation/index.html
+  function apiBase(){ return location.pathname.replace(/[^/]*$/, ''); }
+
   var form = document.getElementById('rsvpForm');
   var submitBtn = document.getElementById('submitBtn');
   var successMsg = document.getElementById('successMsg');
@@ -484,7 +488,7 @@
     successMsg.style.color = '';
     successMsg.style.display = 'none';
 
-    fetch('/api/rsvp', {
+    fetch(apiBase() + 'api/rsvp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
