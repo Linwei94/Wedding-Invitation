@@ -13,18 +13,21 @@
 <link rel="apple-touch-icon" href="images/logo.png">
 <style>
   :root{
-    --paper:#efe8d8;
+    --card:#ffffff;
+    --page:#f2ece1;
     --ink:#3a2e26;
+    --ink-soft:#7a6a58;
     --red:#7a1f1f;
     --red-soft:#8f2a2a;
-    --line:#c9b998;
+    --line:#dccfb6;
+    --field:#fbf8f2;
     --brush:"STKaiti","Kaiti SC","KaiTi","Xingkai SC","STXingkai","Noto Serif SC",serif;
   }
   *{box-sizing:border-box;}
   html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
   html,body{margin:0;padding:0;}
   body{
-    background:#ffffff;
+    background:var(--page);
     font-family:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
     color:var(--ink);
     display:flex;
@@ -34,202 +37,373 @@
     position:relative;
     width:100%;
     max-width:560px;
-    background:#ffffff;
+    background:var(--card);
     text-align:center;
+    overflow:hidden;
   }
+  @media (min-width:620px){
+    body{padding:36px 16px;}
+    .card{
+      border-radius:3px;
+      box-shadow:0 1px 2px rgba(58,46,38,.06), 0 18px 50px -16px rgba(58,46,38,.28);
+    }
+  }
+
+  /* initial state lives in the keyframes, so a browser without CSS
+     animation support still renders the content instead of hiding it */
+  .reveal{animation:rise .9s cubic-bezier(.22,.7,.3,1) both;}
+  .reveal.d1{animation-delay:.05s;}
+  .reveal.d2{animation-delay:.28s;}
+  .reveal.d3{animation-delay:.48s;}
+  .reveal.d4{animation-delay:.66s;}
+  @keyframes rise{
+    from{opacity:0;transform:translateY(14px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+
   .invitation-image{
     display:block;
     width:100%;
     height:auto;
     margin:0;
   }
-  .ornament-divider{
+
+  /* ---------- ornament divider ---------- */
+  .ornament{
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:16px 0;
+    gap:10px;
+    padding:22px 24px;
   }
-  .ornament-divider svg{
-    width:120px;height:16px;
-    stroke:var(--red);
-    stroke-width:1;
-    fill:none;
+  .ornament i{
+    display:block;
+    height:1px;
+    flex:1;
+    max-width:96px;
+    background:linear-gradient(to right,transparent,var(--line));
   }
+  .ornament i:last-child{background:linear-gradient(to left,transparent,var(--line));}
+  .ornament svg{width:36px;height:12px;fill:none;stroke:var(--red);stroke-width:1;}
 
+  /* ---------- walking parade ---------- */
   .parade{
     position:relative;
-    height:56px;
-    margin:8px 0 8px;
-    padding:0 20px;
+    height:66px;
+    margin:6px 0 0;
     overflow:hidden;
+  }
+  .parade .ground{
+    position:absolute;
+    left:24px;right:24px;bottom:9px;
+    border-bottom:1px dashed var(--line);
   }
   .parade .sprite{
     position:absolute;
-    bottom:2px;
-    left:-70px;
-    width:54px;
-    animation:walk-across var(--dur) linear infinite;
+    bottom:6px;
+    left:-96px;
+    width:52px;
+    animation:walk var(--dur) linear infinite;
     animation-delay:var(--delay);
     animation-fill-mode:backwards;
   }
-  .parade .sprite.small{width:38px;}
+  .parade .sprite.couple{width:84px;}
+  .parade .sprite.kitten{width:40px;}
   .parade .sprite svg{
+    display:block;
     width:100%;height:auto;
     fill:none;
     stroke:var(--red-soft);
-    stroke-width:1.4;
+    stroke-width:1.6;
     stroke-linecap:round;
     stroke-linejoin:round;
-    animation:bob .5s ease-in-out infinite alternate;
+    animation:bob .62s ease-in-out infinite alternate;
   }
-  @keyframes walk-across{
-    0%{left:-70px;}
-    100%{left:calc(100% + 70px);}
+  .parade .sprite.couple svg{stroke-width:1.5;}
+  .parade .fw{fill:var(--card);}
+  .parade .fk{fill:var(--red-soft);stroke:none;}
+  @keyframes walk{
+    from{left:-96px;}
+    to{left:calc(100% + 96px);}
   }
   @keyframes bob{
-    0%{transform:translateY(0);}
-    100%{transform:translateY(-2px);}
+    from{transform:translateY(0);}
+    to{transform:translateY(-1.5px);}
   }
-  .parade .legs-a{animation:leg-swap-a .7s steps(1) infinite;}
-  .parade .legs-b{animation:leg-swap-b .7s steps(1) infinite;}
-  @keyframes leg-swap-a{0%,49%{opacity:1;} 50%,100%{opacity:0;}}
-  @keyframes leg-swap-b{0%,49%{opacity:0;} 50%,100%{opacity:1;}}
+  .parade .leg{
+    transform-box:fill-box;
+    transform-origin:50% 0%;
+    animation:step-a .62s ease-in-out infinite alternate;
+  }
+  .parade .leg.b{animation-name:step-b;}
+  @keyframes step-a{from{transform:rotate(-14deg);}to{transform:rotate(14deg);}}
+  @keyframes step-b{from{transform:rotate(14deg);}to{transform:rotate(-14deg);}}
+  .parade .tail{
+    transform-box:fill-box;
+    transform-origin:100% 100%;
+    animation:wag 1.5s ease-in-out infinite alternate;
+  }
+  @keyframes wag{from{transform:rotate(-7deg);}to{transform:rotate(7deg);}}
+  .parade .skirt{
+    transform-box:fill-box;
+    transform-origin:50% 0%;
+    animation:sway 1.24s ease-in-out infinite alternate;
+  }
+  @keyframes sway{from{transform:rotate(-1.6deg);}to{transform:rotate(1.6deg);}}
+
   @media (prefers-reduced-motion: reduce){
-    .parade .sprite{animation:none; display:none;}
+    .parade .sprite,.parade .leg,.parade .tail,.parade .skirt,.parade .sprite svg{animation:none;}
+    .parade{display:none;}
+    .reveal{animation:none;}
   }
 
+  /* ---------- RSVP ---------- */
   .rsvp{
-    margin-top:20px;
-    padding:30px 20px 24px;
-    border-top:1px dashed var(--line);
+    padding:6px 24px 34px;
     text-align:left;
   }
+  .rsvp-head{text-align:center;margin-bottom:22px;}
   .rsvp h2{
     font-family:var(--brush);
-    text-align:center;
-    font-size:19px;
-    letter-spacing:4px;
-    margin:0 0 6px;
+    font-size:21px;
+    letter-spacing:6px;
+    font-weight:700;
+    margin:0 0 10px;
     color:var(--red);
+    text-indent:6px;
   }
   .rsvp .deadline{
-    text-align:center;
-    font-size:13px;
-    line-height:1.7;
-    color:#6b5c46;
-    margin:0 0 20px;
+    font-size:12.5px;
+    line-height:1.9;
+    color:var(--ink-soft);
+    margin:0;
   }
-  .field{margin-bottom:16px;}
+  .field{margin-bottom:15px;}
   .field label{
     display:block;
-    font-size:13px;
-    margin-bottom:6px;
-    color:var(--ink);
+    font-size:12.5px;
+    letter-spacing:1px;
+    margin-bottom:7px;
+    color:var(--ink-soft);
   }
   .field input,.field select,.field textarea{
     width:100%;
-    padding:9px 10px;
+    padding:11px 12px;
     font-size:16px;
     font-family:inherit;
-    border:1px solid var(--line);
-    background:#fbf8f0;
     color:var(--ink);
-    border-radius:2px;
+    border:1px solid var(--line);
+    background:var(--field);
+    border-radius:3px;
     -webkit-appearance:none;
     appearance:none;
+    transition:border-color .18s, box-shadow .18s, background .18s;
   }
-  .field textarea{resize:vertical;min-height:60px;}
+  .field input:focus,.field select:focus,.field textarea:focus{
+    outline:none;
+    background:var(--card);
+    border-color:var(--red-soft);
+    box-shadow:0 0 0 3px rgba(143,42,42,.09);
+  }
+  .field select{
+    background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' fill='none' stroke='%237a6a58' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 12px center;
+    background-size:11px;
+    padding-right:32px;
+  }
+  .field textarea{resize:vertical;min-height:62px;line-height:1.6;}
   .row2{display:flex;gap:12px;}
   .row2 .field{flex:1;}
   .submit-btn{
     display:block;
     width:100%;
-    margin-top:6px;
-    padding:12px;
+    margin-top:10px;
+    padding:14px;
     background:var(--red);
-    color:#f5ecdc;
+    color:#f7efe1;
     border:none;
     font-size:15px;
-    letter-spacing:4px;
-    font-family:inherit;
+    letter-spacing:6px;
+    text-indent:6px;
+    font-family:var(--brush);
+    font-weight:700;
     cursor:pointer;
-    border-radius:2px;
+    border-radius:3px;
+    box-shadow:0 6px 16px -8px rgba(122,31,31,.7);
+    transition:background .18s, transform .12s, box-shadow .18s;
   }
-  .submit-btn:active{background:var(--red-soft);}
+  .submit-btn:hover{background:var(--red-soft);}
+  .submit-btn:active{transform:translateY(1px);box-shadow:0 3px 10px -7px rgba(122,31,31,.7);}
+  .submit-btn:disabled{opacity:.6;cursor:default;}
   .rsvp-note{
-    font-size:12px;
-    color:#6b5c46;
+    font-size:11.5px;
+    color:var(--ink-soft);
     text-align:center;
-    margin-top:12px;
-    line-height:1.6;
+    margin:14px 0 0;
+    line-height:1.7;
   }
   .success-msg{
     display:none;
     text-align:center;
     color:var(--red);
-    font-size:14px;
-    margin-top:14px;
+    font-size:13.5px;
+    margin:14px 0 0;
+    padding:10px 12px;
+    background:var(--field);
+    border:1px solid var(--line);
+    border-radius:3px;
+  }
+
+  /* ---------- footer ---------- */
+  .footer{
+    padding:24px 24px 34px;
+    border-top:1px solid rgba(220,207,182,.6);
+    text-align:center;
+  }
+  .footer .names{
+    font-family:var(--brush);
+    font-size:16px;
+    letter-spacing:3px;
+    color:var(--red);
+    margin:0 0 6px;
+  }
+  .footer .date{
+    font-family:Georgia,"Times New Roman",serif;
+    font-style:italic;
+    font-size:12.5px;
+    letter-spacing:2px;
+    color:var(--ink-soft);
+    margin:0;
   }
 </style>
 </head>
 <body>
   <div class="card">
-    <img class="invitation-image" src="images/invitation.jpg" alt="陶林伟 & 肖佩韦 婚礼请柬，2026.10.17 丙午年九月初八 星期六，松江广富林希尔顿酒店会议中心一楼大宴会厅">
-    <div class="ornament-divider" aria-hidden="true">
-      <svg viewBox="0 0 100 16"><line x1="0" y1="8" x2="42" y2="8"/><rect x="46" y="4" width="8" height="8" transform="rotate(45 50 8)"/><line x1="58" y1="8" x2="100" y2="8"/></svg>
+    <img class="invitation-image reveal d1" src="images/invitation.jpg" alt="陶林伟 & 肖佩韦 婚礼请柬，2026.10.17 星期六，松江广富林希尔顿酒店会议中心一楼大宴会厅">
+
+    <div class="ornament reveal d2" aria-hidden="true">
+      <i></i>
+      <svg viewBox="0 0 36 12"><path d="M18,2 L22,6 L18,10 L14,6 Z"/><path d="M6,6 h5 M25,6 h5"/></svg>
+      <i></i>
     </div>
-    <img class="invitation-image" src="images/couple.jpg" alt="陶林伟 & 肖佩韦 婚纱照">
 
-    <div class="parade" aria-hidden="true">
-      <div class="sprite" style="--dur:16s; --delay:0s;" title="英短蓝白">
-        <svg viewBox="0 0 60 46"><path d="M8,30 Q0,27 -3,19 Q-2,13 4,15"/><ellipse cx="22" cy="28" rx="15" ry="11" transform="rotate(-6 22 28)"/><circle cx="44" cy="17" r="10"/><path d="M35,9 Q37,2 42,6 Q40,10 35,9 Z"/><path d="M47,6 Q52,2 54,9 Q49,10 47,6 Z"/><path d="M40,17 q2,-3 4,0"/><path d="M47,17 q2,-3 4,0"/><path d="M44,20 l-1.5,2 h3 Z"/><path d="M38,23 Q36,26 39,28"/><path d="M50,22 Q52,25 49,27"/><path d="M48,22 L56,20 M48,24 L56,26"/><path d="M34,25 Q26,33 16,35"/><g class="legs-a"><path d="M12,38 Q10,42 9,45"/><path d="M18,39 Q19,43 20,46"/><path d="M28,39 Q27,43 26,46"/><path d="M34,38 Q36,42 37,45"/></g><g class="legs-b"><path d="M12,38 Q14,42 15,45"/><path d="M18,39 Q17,43 16,46"/><path d="M28,39 Q30,43 31,46"/><path d="M34,38 Q32,42 31,45"/></g></svg>
-      </div>
-      <div class="sprite" style="--dur:20s; --delay:5s; width:76px;" title="陶林伟 & 肖佩韦">
-        <svg viewBox="0 0 90 50">
-          <circle cx="18" cy="10" r="7"/>
-          <path d="M12,6 Q18,2 24,6"/>
-          <path d="M11,17 Q18,13 25,17 L25,33 Q18,36 11,33 Z"/>
-          <path d="M13,17 L18,21 L23,17"/>
-          <path d="M18,21 L18,30"/>
-          <path d="M23,21 Q29,23 33,25"/>
-          <g class="legs-a">
-            <path d="M14,33 Q11,38 9,44 M9,44 L6,45"/>
-            <path d="M20,33 Q23,38 25,42 M25,42 L28,42"/>
-          </g>
-          <g class="legs-b">
-            <path d="M20,33 Q23,38 25,44 M25,44 L28,45"/>
-            <path d="M14,33 Q11,38 9,42 M9,42 L6,42"/>
-          </g>
+    <img class="invitation-image reveal d2" src="images/couple.jpg" alt="陶林伟 & 肖佩韦 婚纱照">
 
-          <circle cx="52" cy="10" r="7"/>
-          <path d="M45,8 Q41,17 46,23"/>
-          <path d="M59,8 Q63,17 58,23"/>
-          <path d="M52,17 Q40,27 37,40 Q52,45 67,40 Q64,27 52,17 Z"/>
-          <path d="M45,25 Q52,28 59,25"/>
-          <path d="M48,21 Q42,23 38,25"/>
-          <circle cx="67" cy="25" r="1.4"/><circle cx="69" cy="27" r="1.4"/><circle cx="67" cy="28" r="1.4"/>
-          <g class="legs-a">
-            <path d="M45,40 Q43,44 42,47"/>
-            <path d="M59,40 Q61,44 62,47"/>
-          </g>
-          <g class="legs-b">
-            <path d="M45,40 Q44,44 45,47"/>
-            <path d="M59,40 Q60,44 59,47"/>
-          </g>
-          <line x1="33" y1="25" x2="38" y2="25"/>
+    <div class="parade reveal d3" aria-hidden="true">
+      <div class="ground"></div>
+
+      <!-- 英短蓝白 -->
+      <div class="sprite" style="--dur:19s; --delay:0s;">
+        <svg viewBox="0 0 62 46">
+          <path class="tail" d="M10,28 C3,27 1,19 5,13"/>
+          <path class="leg" d="M15,34 L14,41.5 M12.7,41.5 h2.6"/>
+          <path class="leg b" d="M21,35 L22,41.5 M20.7,41.5 h2.6"/>
+          <path class="leg b" d="M28,35 L27,41.5 M25.7,41.5 h2.6"/>
+          <path class="leg" d="M34,33 L35,41.5 M33.7,41.5 h2.6"/>
+          <path class="fw" d="M37,20 C34,14 24,15 17,18 C10,21 8,28 12,33 C17,37 30,37 36,32 C39,28 39,24 37,20 Z"/>
+          <path d="M18,20 C15,25 15,30 18,34"/>
+          <path class="fw" d="M36.6,10.5 C36,5 37.6,2.4 39.4,3 C41.8,3.8 44,5 45.5,6 Z"/>
+          <path class="fw" d="M47.6,5.6 C49.4,4.2 52,2.6 53.6,3 C55.4,3.6 54.8,7.6 54,11.4 Z"/>
+          <circle class="fw" cx="44" cy="17" r="11"/>
+          <path d="M38.5,16.5 q2.2,-2.8 4.4,0"/>
+          <path d="M46.5,16.5 q2.2,-2.8 4.4,0"/>
+          <path class="fk" d="M43.7,20.5 l-1.5,2 h3 Z"/>
+          <path d="M43.7,22.6 q-1.6,1.6 -2.8,.2 M43.7,22.6 q1.6,1.6 2.8,.2"/>
+          <path d="M49.6,19 L57.4,17.2 M50,22 L58,23"/>
         </svg>
       </div>
-      <div class="sprite" style="--dur:14s; --delay:9s;" title="金吉拉白">
-        <svg viewBox="0 0 60 46"><path d="M3,33 C-10,30 -11,16 -2,11 C4,8 8,14 4,18 C9,22 6,29 3,33 Z"/><path d="M-9,20 l-3,-1 M-6,13 l-2,-2 M-2,11 l-1,-3"/><ellipse cx="23" cy="28" rx="16" ry="10" transform="rotate(-6 23 28)"/><circle cx="44" cy="17" r="10.5"/><path d="M38,9 Q39,5 42,7"/><path d="M49,7 Q52,5 53,9"/><circle cx="41" cy="16" r="2.1"/><circle cx="48" cy="16" r="2.1"/><circle cx="41.6" cy="15.4" r="0.6" fill="var(--red-soft)" stroke="none"/><circle cx="48.6" cy="15.4" r="0.6" fill="var(--red-soft)" stroke="none"/><path d="M43,20 h2"/><path d="M48,21 L57,20 M48,23 L57,25"/><g class="legs-a"><path d="M12,38 Q10,42 9,45"/><path d="M18,39 Q19,43 20,46"/><path d="M28,39 Q27,43 26,46"/><path d="M34,38 Q36,42 37,45"/></g><g class="legs-b"><path d="M12,38 Q14,42 15,45"/><path d="M18,39 Q17,43 16,46"/><path d="M28,39 Q30,43 31,46"/><path d="M34,38 Q32,42 31,45"/></g></svg>
+
+      <!-- 新郎 & 新娘 -->
+      <div class="sprite couple" style="--dur:25s; --delay:6.5s;">
+        <svg viewBox="0 0 96 50">
+          <path d="M20,24.5 C29,25.5 33,26.5 38,27"/>
+          <path d="M62,25 C54,26 47,26.6 41,27"/>
+          <path class="leg" d="M11,33 L9.5,45 M8,45 h3.2"/>
+          <path class="leg b" d="M21,33 L22.5,45 M21,45 h3.2"/>
+          <path class="fw" d="M9,21 C9,17.5 23,17.5 23,21 L24.5,34 C20,36 12,36 7.5,34 Z"/>
+          <path d="M12.6,18.4 L16,22.4 L19.4,18.4"/>
+          <path class="fk" d="M13.1,21.8 L15.9,23.5 L13.1,25.2 Z"/>
+          <path class="fk" d="M18.9,21.8 L16.1,23.5 L18.9,25.2 Z"/>
+          <circle class="fk" cx="16" cy="23.5" r=".75"/>
+          <circle class="fw" cx="16" cy="11" r="7.5"/>
+          <path class="fk" d="M8.7,9.8 C9,2 23,2 23.3,9.8 C21,6.8 11,6.8 8.7,9.8 Z"/>
+          <circle class="fk" cx="13.2" cy="12" r=".85"/>
+          <circle class="fk" cx="18.8" cy="12" r=".85"/>
+          <path d="M14.4,14.8 q1.6,1.5 3.2,0"/>
+          <path class="fk" d="M52.5,13 C52.5,0 69.5,0 69.5,13 C70,18 70.5,23 70.5,26 L67.8,26 C67.8,21 67.2,16 67,12.5 L55,12.5 C54.8,16 54.2,21 54.2,26 L51.5,26 C51.5,23 52,18 52.5,13 Z"/>
+          <g class="skirt">
+            <path class="fw" d="M61,20 C55,23 48,33 45,42.5 C52,46 70,46 77,42.5 C74,33 67,23 61,20 Z"/>
+            <path d="M48.6,34 C56,37 66,37 73.4,34"/>
+          </g>
+          <circle class="fw" cx="61" cy="12" r="7.5"/>
+          <path class="fk" d="M53.7,12.4 C54,5.4 68,5.4 68.3,12.4 C64.8,9.6 57.2,9.6 53.7,12.4 Z"/>
+          <circle class="fk" cx="58.2" cy="14" r=".85"/>
+          <circle class="fk" cx="63.8" cy="14" r=".85"/>
+          <path d="M59.4,16.6 q1.6,1.5 3.2,0"/>
+          <circle class="fw" cx="39.5" cy="27" r="1.9"/>
+          <path d="M75.4,30.4 L74,27.6"/>
+          <circle cx="76.6" cy="27.4" r="2"/>
+          <circle cx="79.3" cy="29.4" r="2"/>
+          <circle cx="76.2" cy="31" r="2"/>
+        </svg>
       </div>
-      <div class="sprite small" style="--dur:12s; --delay:2.5s;" title="美短">
-        <svg viewBox="0 0 60 46"><path d="M8,29 Q0,25 -2,17 Q-1,11 5,13"/><path d="M-1,19 Q1,20 0,22"/><ellipse cx="22" cy="28" rx="16" ry="10" transform="rotate(-8 22 28)"/><circle cx="44" cy="16" r="10"/><path d="M36,8 L40,2 L43,9 Z"/><path d="M46,7 L50,1 L52,9 Z"/><path d="M40,8 L41,11 M43,7 L43,11 M46,8 L45,11"/><path d="M40,16 q2,-3 4,0"/><path d="M47,16 q2,-3 4,0"/><path d="M44,19 l-1.5,2 h3 Z"/><path d="M48,21 L56,19 M48,23 L56,25"/><path d="M16,22 Q20,20 24,22"/><path d="M14,28 Q18,26 22,28"/><path d="M18,34 Q22,32 26,34"/><g class="legs-a"><path d="M12,37 Q10,41 9,44"/><path d="M18,38 Q19,42 20,45"/><path d="M28,38 Q27,42 26,45"/><path d="M34,37 Q36,41 37,44"/></g><g class="legs-b"><path d="M12,37 Q14,41 15,44"/><path d="M18,38 Q17,42 16,45"/><path d="M28,38 Q30,42 31,45"/><path d="M34,37 Q32,41 31,44"/></g></svg>
+
+      <!-- 金吉拉白 -->
+      <div class="sprite" style="--dur:16s; --delay:11s;">
+        <svg viewBox="0 0 62 46">
+          <path class="tail fw" d="M11,29 C4,28.4 0.6,21 3.4,14.6 C4.6,11.8 8,11 8.2,13.4 C8.4,15.4 6.2,16.6 6.4,19.4 C6.6,23 9.4,25.6 11,29 Z"/>
+          <path class="leg" d="M15,34 L14,41.5 M12.7,41.5 h2.6"/>
+          <path class="leg b" d="M21,35 L22,41.5 M20.7,41.5 h2.6"/>
+          <path class="leg b" d="M28,35 L27,41.5 M25.7,41.5 h2.6"/>
+          <path class="leg" d="M34,33 L35,41.5 M33.7,41.5 h2.6"/>
+          <path class="fw" d="M37,20 C34,14 27,14.6 22,16.4 C19.4,15.6 18.6,17.6 16.6,18.2 C13.6,19.4 12,20.6 11.4,22.6 C9.6,23.4 9.4,25.6 10.4,27.6 C9.6,29.6 11,32 13,33.4 C18,37 30,37 36,32 C39,28 39,24 37,20 Z"/>
+          <path class="fw" d="M36.6,10.5 L38.4,2.6 L45.5,6 Z"/>
+          <path class="fw" d="M47.6,5.6 L54.4,2.6 L54,11.4 Z"/>
+          <circle class="fw" cx="44" cy="17" r="11"/>
+          <path d="M34.4,13.6 l-3.4,-1.6 M34,17.4 l-3.6,.4 M35,21 l-3,1.8"/>
+          <path d="M53.6,12 l3.2,-2 M54.4,15.4 l3.6,-.6"/>
+          <circle cx="40.4" cy="16.4" r="2.2"/>
+          <circle cx="48" cy="16.4" r="2.2"/>
+          <circle class="fk" cx="40.9" cy="15.9" r=".62"/>
+          <circle class="fk" cx="48.5" cy="15.9" r=".62"/>
+          <path class="fk" d="M43.7,20.8 l-1.5,2 h3 Z"/>
+          <path d="M43.7,22.9 q-1.6,1.6 -2.8,.2 M43.7,22.9 q1.6,1.6 2.8,.2"/>
+          <path d="M50.4,20.6 L58,19.4 M50.6,23.4 L58,24.6"/>
+        </svg>
+      </div>
+
+      <!-- 美短 -->
+      <div class="sprite kitten" style="--dur:14s; --delay:3s;">
+        <svg viewBox="0 0 62 46">
+          <path class="tail" d="M10,28 C3,27 1,19 5,13"/>
+          <path d="M7.6,25.4 l-2.6,1.4 M4.4,20.6 l-2.8,.4 M4.6,16 l-2.4,-1"/>
+          <path class="leg" d="M15,34 L14,41.5 M12.7,41.5 h2.6"/>
+          <path class="leg b" d="M21,35 L22,41.5 M20.7,41.5 h2.6"/>
+          <path class="leg b" d="M28,35 L27,41.5 M25.7,41.5 h2.6"/>
+          <path class="leg" d="M34,33 L35,41.5 M33.7,41.5 h2.6"/>
+          <path class="fw" d="M37,20 C34,14 24,15 17,18 C10,21 8,28 12,33 C17,37 30,37 36,32 C39,28 39,24 37,20 Z"/>
+          <path d="M16,21.4 C19,20.2 22,19.6 25,19.6"/>
+          <path d="M13,26 C16,24.6 19.4,24 23,24"/>
+          <path d="M13.4,30.6 C16.4,29.4 19.6,28.8 23,28.8"/>
+          <path class="fw" d="M36.6,10.5 L38,1.8 L45.5,6 Z"/>
+          <path class="fw" d="M47.6,5.6 L54.6,1.8 L54,11.4 Z"/>
+          <circle class="fw" cx="44" cy="17" r="11"/>
+          <path d="M39.6,9.6 L40.6,12.4 M42.6,8.6 L42.6,12 M45.6,9.6 L44.6,12.4"/>
+          <path d="M38.5,17 q2.2,-2.8 4.4,0"/>
+          <path d="M46.5,17 q2.2,-2.8 4.4,0"/>
+          <path class="fk" d="M43.7,21 l-1.5,2 h3 Z"/>
+          <path d="M43.7,23.1 q-1.6,1.6 -2.8,.2 M43.7,23.1 q1.6,1.6 2.8,.2"/>
+          <path d="M49.6,19.4 L57.4,17.6 M50,22.4 L58,23.4"/>
+        </svg>
       </div>
     </div>
 
-    <div class="rsvp">
-      <h2>出席登记</h2>
-      <p class="deadline">为方便统计与订房，请于 2026 年 8 月 30 日前完成登记<br>10 月 17 日当晚的住宿由我们统一安排，请放心前来</p>
+    <div class="rsvp reveal d4">
+      <div class="rsvp-head">
+        <h2>出席登记</h2>
+        <p class="deadline">为方便统计与订房，请于 2026 年 8 月 30 日前完成登记<br>10 月 17 日当晚的住宿由我们统一安排，请放心前来</p>
+      </div>
       <form id="rsvpForm">
         <div class="field">
           <label for="name">姓名</label>
@@ -262,10 +436,15 @@
           <label for="note">备注</label>
           <textarea id="note" name="note" placeholder="如有饮食禁忌或其他需要告知的事项，请在此留言"></textarea>
         </div>
-        <button type="submit" class="submit-btn" id="submitBtn">提 交 登 记</button>
+        <button type="submit" class="submit-btn" id="submitBtn">提交登记</button>
       </form>
       <p class="success-msg" id="successMsg"></p>
       <p class="rsvp-note">登记信息将自动保存；如需修改，用同样的姓名重新提交一次即可覆盖之前的登记</p>
+    </div>
+
+    <div class="footer">
+      <p class="names">陶林伟 &amp; 肖佩韦</p>
+      <p class="date">2026 . 10 . 17</p>
     </div>
   </div>
 
@@ -285,7 +464,7 @@
     };
 
     submitBtn.disabled = true;
-    submitBtn.textContent = '提 交 中 ...';
+    submitBtn.textContent = '提交中…';
     successMsg.style.color = '';
     successMsg.style.display = 'none';
 
@@ -312,7 +491,7 @@
       })
       .finally(function(){
         submitBtn.disabled = false;
-        submitBtn.textContent = '提 交 登 记';
+        submitBtn.textContent = '提交登记';
       });
   });
 </script>
