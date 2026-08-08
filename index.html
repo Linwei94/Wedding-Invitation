@@ -289,33 +289,58 @@
           <label for="note">备注</label>
           <textarea id="note" name="note" placeholder="如有饮食禁忌或其他需要告知的事项，请在此留言"></textarea>
         </div>
-        <button type="submit" class="submit-btn">提 交 登 记</button>
+        <button type="submit" class="submit-btn" id="submitBtn">提 交 登 记</button>
       </form>
-      <p class="success-msg" id="successMsg">已为您打开邮件发送窗口，请点击发送以完成登记，感谢您的回复！</p>
-      <p class="rsvp-note">登记信息将通过邮件发送给新人，用于统计出席人数与安排酒店房间</p>
+      <p class="success-msg" id="successMsg"></p>
+      <p class="rsvp-note">登记信息将自动保存；如需修改，用同样的姓名重新提交一次即可覆盖之前的登记</p>
     </div>
   </div>
 
 <script>
-  document.getElementById('rsvpForm').addEventListener('submit', function(e){
+  var form = document.getElementById('rsvpForm');
+  var submitBtn = document.getElementById('submitBtn');
+  var successMsg = document.getElementById('successMsg');
+
+  form.addEventListener('submit', function(e){
     e.preventDefault();
-    var name = document.getElementById('name').value.trim();
-    var attend = document.getElementById('attend').value;
-    var count = document.getElementById('count').value;
-    var city = document.getElementById('city').value.trim();
-    var note = document.getElementById('note').value.trim();
+    var payload = {
+      name: document.getElementById('name').value.trim(),
+      attend: document.getElementById('attend').value,
+      count: document.getElementById('count').value,
+      city: document.getElementById('city').value.trim(),
+      note: document.getElementById('note').value.trim()
+    };
 
-    var subject = encodeURIComponent('婚礼出席登记 - ' + name);
-    var body = encodeURIComponent(
-      '姓名：' + name + '\n' +
-      '是否出席：' + attend + '\n' +
-      '出席人数：' + count + '\n' +
-      '所在城市：' + city + '\n' +
-      '备注：' + (note || '无')
-    );
+    submitBtn.disabled = true;
+    submitBtn.textContent = '提 交 中 ...';
+    successMsg.style.color = '';
+    successMsg.style.display = 'none';
 
-    window.location.href = 'mailto:dylan.tao94@gmail.com?subject=' + subject + '&body=' + body;
-    document.getElementById('successMsg').style.display = 'block';
+    fetch('/api/rsvp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+        if (data.ok) {
+          successMsg.textContent = data.mode === 'updated'
+            ? '已更新您的登记信息，感谢回复！'
+            : '登记成功，感谢回复！';
+          successMsg.style.display = 'block';
+        } else {
+          throw new Error(data.error || '提交失败');
+        }
+      })
+      .catch(function(err){
+        successMsg.style.color = '#b23b3b';
+        successMsg.textContent = '提交失败：' + err.message + '，请稍后重试或直接联系新人';
+        successMsg.style.display = 'block';
+      })
+      .finally(function(){
+        submitBtn.disabled = false;
+        submitBtn.textContent = '提 交 登 记';
+      });
   });
 </script>
 </body>
