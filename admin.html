@@ -87,7 +87,12 @@
 </div>
 
 <script>
-  function apiBase(){ return location.pathname.replace(/[^/]*$/, ''); }
+  // 与 index.html 里的 API_BASE 保持一致（接口部署在 EdgeOne 上，结尾带斜杠）
+  var API_BASE = 'https://weddinginvitation-dpcecgtcs5rh.edgeone.cool/';
+
+  function apiUrl(p){
+    return (API_BASE || location.pathname.replace(/[^/]*$/, '')) + p;
+  }
 
   var tokenInput = document.getElementById('token');
   var msgEl = document.getElementById('msg');
@@ -113,7 +118,7 @@
     loadBtn.disabled = true;
     msgEl.style.display = 'none';
 
-    fetch(apiBase() + 'api/list', { headers: { 'x-admin-token': token } })
+    fetch(apiUrl('api/list'), { headers: { 'x-admin-token': token } })
       .then(function (res) { return res.json(); })
       .then(function (data) {
         if (!data.ok) throw new Error(data.error || '读取失败');

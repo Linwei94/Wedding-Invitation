@@ -88,50 +88,64 @@ EdgeOne 自带的 KV 存储。**数据全程留在腾讯云内部**，不依赖�
 > 用"姓名"作为唯一标识。万一两位宾客同名，后填的会覆盖先填的。
 > 如果担心重名，告诉我，可以改成"姓名 + 手机号"一起作为标识。
 
-### 一次性配置（两步）
-
-1. **创建并绑定 KV 命名空间**
-   - EdgeOne 控制台 → Pages → 你的项目 → 「KV 存储」，新建一个命名空间
-   - 回到项目里把它绑定给函数，**变量名必须填 `RSVP_KV`**（代码里就是按这个名字取的）
-
-2. **设置后台口令**
-   - 项目 → 设置 → 环境变量，新增 `ADMIN_TOKEN`，值自己定一个密码
-   - 这个值不要写进代码仓库
-
-配置完重新部署一次即可生效。
-
-### 查看名单
-
-打开 `你的网址/admin.html`，输入 `ADMIN_TOKEN` 设的口令，就能看到：
-
-- 登记条数 / 出席家庭数 / 出席总人数 三个统计
-- 完整名单表格（姓名、是否出席、人数、城市、备注、登记时间）
-- 「导出 Excel（CSV）」按钮，导出的文件带 UTF-8 BOM，Excel 打开中文不乱码
-
-口令只在浏览器当前标签页里临时保存，关掉就没了。这个页面加了 `noindex`，
-不会被搜索引擎收录，但**知道网址的人仍然可以访问到登录框**——口令别设得太简单。
+具体怎么配置见下方「部署结构」。
 
 ## 本地预览
 
-直接用浏览器打开 `index.html` 可以看到页面样式和动画，但登记表单需要 EdgeOne Pages
-的边缘函数 + KV 环境才能跑通（本地静态打开无法调用 `/api/rsvp`）。
+直接用浏览器打开 `index.html` 可以看到页面样式和动画。登记表单需要后端函数，
+本地静态打开会提交失败，属正常现象。
 
-## 部署到 EdgeOne Pages（推荐：绑定 GitHub 自动部署）
+## 部署结构（重要）
 
-1. 把本仓库推送到你自己的 GitHub 账号下（已完成，仓库地址见 GitHub 页面）。
-2. 登录腾讯云 EdgeOne Pages 控制台，选择"创建项目" → 选择"导入 Git 仓库"，
-   授权并选择这个 GitHub 仓库。
-3. 构建配置：本项目是纯静态 HTML + Pages Functions，**不需要构建命令**，
-   输出目录填根目录（`/` 或留空）即可；`functions/` 目录会被 EdgeOne 自动识别为边缘函数。
-4. 按上面"一次性配置"绑定 KV 命名空间（`RSVP_KV`）并设置 `ADMIN_TOKEN`。
-5. 绑定完成后，以后每次把改动 push 到 GitHub 的这个仓库，EdgeOne 会自动重新部署，
-   不用再手动上传文件。
+页面和接口**分开部署在两个地方**，因为 GitHub Pages 只能托管静态文件、跑不了后端函数：
 
-### 如果使用"直接上传"方式部署
+```
+GitHub Pages                          EdgeOne Pages
+https://www.taolinwei.com/            https://<你的项目>.edgeone.cool/
+        Wedding-Invitation/                   └── api/rsvp   写入登记
+        ├── index.html                        └── api/list   读取名单
+        ├── admin.html          ── 跨域调用 ──▶
+        └── images/
+```
 
-需要把 `index.html`、`images/` 和 `functions/` 三者一起上传，且要确认 EdgeOne Pages
-的"直接上传"方式支持部署 Pages Functions（不同上传方式对 Functions 的支持可能不同，
-如果发现表单提交没反应，建议改用"绑定 GitHub 仓库"的方式部署）。
+两边的连接点是 `index.html` 和 `admin.html` 里的 `API_BASE` 常量，填 EdgeOne 项目
+的完整地址（结尾带斜杠）。**换了 EdgeOne 项目地址，这两个文件各改一行即可。**
+
+### 一、页面部署到 GitHub Pages
+
+1. 把分支合并到默认分支（`main`）
+2. 仓库 Settings → Pages → Source 选 `main` 分支、目录选 `/ (root)`
+3. 因为 `taolinwei.com` 已经绑在你的个人主页仓库上，本仓库会自动挂在
+   `https://www.taolinwei.com/Wedding-Invitation/`
+4. 仓库里的 `.nojekyll` 是为了让 GitHub 原样输出文件，不要删
+
+### 二、接口部署到 EdgeOne Pages
+
+保留现有的 EdgeOne 项目（它现在只负责跑 `functions/` 下的接口），并配置：
+
+| 类型 | 名称 | 说明 |
+| --- | --- | --- |
+| KV 命名空间绑定 | `RSVP_KV` | 存登记数据，名字必须一致 |
+| 环境变量 | `ADMIN_TOKEN` | 后台口令，自己定，别写进仓库 |
+| 环境变量 | `ALLOWED_ORIGIN` | 填 `https://www.taolinwei.com`，限制只允许你的站点调用接口。不填则允许任意来源 |
+
+配置完重新部署一次生效。
+
+> 接口跨域是这套结构的必然产物，函数里已经处理好了 CORS（含 `OPTIONS` 预检）。
+> 如果哪天整站都搬到 EdgeOne 上，把两个 HTML 里的 `API_BASE` 改成空字符串 `''`
+> 就会走同源请求，不再跨域。
+
+## 查看名单
+
+打开 `https://www.taolinwei.com/Wedding-Invitation/admin.html`，输入 `ADMIN_TOKEN`
+设的口令，可以看到：
+
+- 登记条数 / 出席家庭数 / 出席总人数 三个统计
+- 完整名单表格（姓名、是否出席、人数、城市、备注、登记时间）
+- 「导出 Excel（CSV）」按钮，文件带 UTF-8 BOM，Excel 打开中文不乱码
+
+口令只临时存在浏览器当前标签页，关掉即清空。页面加了 `noindex` 不会被搜索引擎收录，
+但**知道网址的人仍能看到登录框**——口令别设得太简单。
 
 ## 修改内容
 

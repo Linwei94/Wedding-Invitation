@@ -465,9 +465,19 @@
   </div>
 
 <script>
-  // Strip any filename off the path so this works whether the page is served
-  // at the site root, at /Wedding-Invitation/, or as /Wedding-Invitation/index.html
-  function apiBase(){ return location.pathname.replace(/[^/]*$/, ''); }
+  // 表单接口所在地址。
+  //
+  // 本页面托管在 GitHub Pages 上，而 GitHub Pages 只能放静态文件、跑不了后端函数，
+  // 所以 /api/* 这些接口单独部署在 EdgeOne 上，这里填 EdgeOne 项目的完整地址
+  // （结尾要带斜杠）。换了 EdgeOne 项目地址，改这一行即可。
+  //
+  // 如果哪天整站都搬到 EdgeOne 上，把这里改成空字符串 '' 就会走同源请求。
+  var API_BASE = 'https://weddinginvitation-dpcecgtcs5rh.edgeone.cool/';
+
+  // 同源模式下，按页面所在目录解析，兼容站点根目录与 /Wedding-Invitation/ 子路径
+  function apiUrl(p){
+    return (API_BASE || location.pathname.replace(/[^/]*$/, '')) + p;
+  }
 
   var form = document.getElementById('rsvpForm');
   var submitBtn = document.getElementById('submitBtn');
@@ -488,7 +498,7 @@
     successMsg.style.color = '';
     successMsg.style.display = 'none';
 
-    fetch(apiBase() + 'api/rsvp', {
+    fetch(apiUrl('api/rsvp'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)

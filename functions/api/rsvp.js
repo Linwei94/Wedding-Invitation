@@ -11,22 +11,23 @@ const MAX_NOTE = 500;
 
 export async function onRequestPost(context) {
   const { request, env } = context;
+  const cors = corsHeaders(env, request);
 
   const kv = env.RSVP_KV;
   if (!kv) {
-    return json({ ok: false, error: '服务端未绑定 KV 存储（RSVP_KV）' }, 500);
+    return json({ ok: false, error: '服务端未绑定 KV 存储（RSVP_KV）' }, 500, cors);
   }
 
   let body;
   try {
     body = await request.json();
   } catch {
-    return json({ ok: false, error: '请求格式错误' }, 400);
+    return json({ ok: false, error: '请求格式错误' }, 400, cors);
   }
 
   const name = str(body.name, MAX_NAME);
   if (!name) {
-    return json({ ok: false, error: '请填写姓名' }, 400);
+    return json({ ok: false, error: '请填写姓名' }, 400, cors);
   }
 
   const key = 'rsvp:' + name;
@@ -55,10 +56,10 @@ export async function onRequestPost(context) {
   try {
     await kv.put(key, JSON.stringify(record));
   } catch (err) {
-    return json({ ok: false, error: '保存失败：' + msg(err) }, 502);
+    return json({ ok: false, error: '保存失败：' + msg(err) }, 502, cors);
   }
 
-  return json({ ok: true, mode: previous ? 'updated' : 'created' });
+  return json({ ok: true, mode: previous ? 'updated' : 'created' }, 200, cors);
 }
 
 function str(value, max) {
@@ -75,12 +76,32 @@ function msg(err) {
   return String((err && err.message) || err);
 }
 
-function json(obj, status = 200) {
+function json(obj, status = 200, cors = {}) {
   return new Response(JSON.stringify(obj), {
     status,
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'no-store',
+      ...cors,
     },
   });
+}
+
+// The page is served from GitHub Pages while these functions run on EdgeOne,
+// so every response needs CORS headers. Set ALLOWED_ORIGIN to the site's
+// origin (e.g. https://www.taolinwei.com) to restrict it; unset means "any".
+function corsHeaders(env, request) {
+  const allowed = env.ALLOWED_ORIGIN || '';
+  const origin = request.headers.get('Origin') || '';
+  return {
+    'Access-Control-Allow-Origin': allowed ? (origin === allowed ? origin : allowed) : '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Max-Age': '86400',
+    'Vary': 'Origin',
+  };
+}
+
+export function onRequestOptions(context) {
+  return new Response(null, { status: 204, headers: corsHeaders(context.env, context.request) });
 }
