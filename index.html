@@ -173,21 +173,15 @@
     padding:6px 24px 34px;
     text-align:left;
   }
-  .rsvp-head{text-align:center;margin-bottom:22px;}
+  .rsvp-head{text-align:center;margin-bottom:20px;}
   .rsvp h2{
     font-family:var(--serif);
     font-size:20px;
     letter-spacing:6px;
     font-weight:700;
-    margin:0 0 10px;
+    margin:0;
     color:var(--red);
     text-indent:6px;
-  }
-  .rsvp .deadline{
-    font-size:12.5px;
-    line-height:1.9;
-    color:var(--ink-soft);
-    margin:0;
   }
   .field{margin-bottom:15px;}
   .field label{
@@ -418,7 +412,6 @@
     <div class="rsvp reveal d4">
       <div class="rsvp-head">
         <h2>出席登记</h2>
-        <p class="deadline">为方便统计与订房，请于 2026 年 8 月 30 日前完成登记<br>10 月 17 日当晚的住宿由我们统一安排，请放心前来</p>
       </div>
       <form id="rsvpForm">
         <div class="field">
@@ -443,10 +436,6 @@
               <option value="5">5</option>
             </select>
           </div>
-        </div>
-        <div class="field">
-          <label for="city">所在城市</label>
-          <input type="text" id="city" name="city" value="上海">
         </div>
         <div class="field">
           <label for="note">备注</label>
@@ -489,7 +478,6 @@
       name: document.getElementById('name').value.trim(),
       attend: document.getElementById('attend').value,
       count: document.getElementById('count').value,
-      city: document.getElementById('city').value.trim(),
       note: document.getElementById('note').value.trim()
     };
 

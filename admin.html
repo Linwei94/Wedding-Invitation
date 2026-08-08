@@ -41,7 +41,7 @@
   .stat b{display:block;font-size:24px;color:var(--red);font-weight:700;}
   .stat span{font-size:12px;color:var(--ink-soft);}
   .scroll{overflow-x:auto;}
-  table{border-collapse:collapse;width:100%;font-size:13px;min-width:640px;}
+  table{border-collapse:collapse;width:100%;font-size:13px;min-width:560px;}
   th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top;}
   th{color:var(--ink-soft);font-weight:400;white-space:nowrap;}
   td.no{color:var(--ink-soft);}
@@ -77,7 +77,7 @@
     <div class="scroll">
       <table>
         <thead>
-          <tr><th>#</th><th>姓名</th><th>是否出席</th><th>人数</th><th>所在城市</th><th>备注</th><th>登记时间</th></tr>
+          <tr><th>#</th><th>姓名</th><th>是否出席</th><th>人数</th><th>备注</th><th>登记时间</th></tr>
         </thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -145,7 +145,7 @@
     tbody.innerHTML = '';
     rows.forEach(function (r, i) {
       var tr = document.createElement('tr');
-      [i + 1, r.name, r.attend, r.count, r.city, r.note || '—', fmt(r.updatedAt)]
+      [i + 1, r.name, r.attend, r.count, r.note || '—', fmt(r.updatedAt)]
         .forEach(function (v, idx) {
           var td = document.createElement('td');
           if (idx === 0) td.className = 'no';
@@ -167,9 +167,9 @@
   }
 
   function exportCsv() {
-    var head = ['姓名', '是否出席', '人数', '所在城市', '备注', '登记时间'];
+    var head = ['姓名', '是否出席', '人数', '备注', '登记时间'];
     var lines = [head].concat(rows.map(function (r) {
-      return [r.name, r.attend, r.count, r.city, r.note || '', fmt(r.updatedAt)];
+      return [r.name, r.attend, r.count, r.note || '', fmt(r.updatedAt)];
     }));
     var csv = lines.map(function (cols) {
       return cols.map(function (c) {

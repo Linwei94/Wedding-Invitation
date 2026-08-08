@@ -6,7 +6,6 @@
 // Requires a KV namespace bound to this project under the name RSVP_KV.
 
 const MAX_NAME = 40;
-const MAX_CITY = 40;
 const MAX_NOTE = 500;
 
 export async function onRequestPost(context) {
@@ -47,7 +46,6 @@ export async function onRequestPost(context) {
     name,
     attend: body.attend === '不出席' ? '不出席' : '出席',
     count: count(body.count),
-    city: str(body.city, MAX_CITY) || '上海',
     note: str(body.note, MAX_NOTE),
     createdAt: (previous && previous.createdAt) || now,
     updatedAt: now,
