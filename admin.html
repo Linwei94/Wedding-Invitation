@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>出席名单 · 婚礼请柬后台</title>
+<style>
+  :root{
+    --page:#f2ece1; --card:#fff; --ink:#3a2e26; --ink-soft:#7a6a58;
+    --red:#7a1f1f; --line:#dccfb6; --field:#fbf8f2;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:24px 16px;
+    background:var(--page); color:var(--ink);
+    font-family:"Noto Serif SC","Songti SC",serif;
+  }
+  .wrap{max-width:900px;margin:0 auto;}
+  h1{font-size:20px;letter-spacing:3px;color:var(--red);margin:0 0 18px;}
+  .panel{
+    background:var(--card); border:1px solid var(--line);
+    border-radius:4px; padding:18px; margin-bottom:18px;
+  }
+  label{display:block;font-size:13px;color:var(--ink-soft);margin-bottom:6px;}
+  input[type=password]{
+    width:100%; padding:11px 12px; font-size:16px; font-family:inherit;
+    border:1px solid var(--line); background:var(--field);
+    color:var(--ink); border-radius:3px;
+  }
+  button{
+    padding:11px 20px; font-size:14px; font-family:inherit; letter-spacing:2px;
+    background:var(--red); color:#f7efe1; border:none; border-radius:3px;
+    cursor:pointer;
+  }
+  button.ghost{background:transparent;color:var(--red);border:1px solid var(--line);}
+  button:disabled{opacity:.55;cursor:default;}
+  .row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}
+  .row>div{flex:1;min-width:200px;}
+  .stats{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:14px;}
+  .stat b{display:block;font-size:24px;color:var(--red);font-weight:700;}
+  .stat span{font-size:12px;color:var(--ink-soft);}
+  .scroll{overflow-x:auto;}
+  table{border-collapse:collapse;width:100%;font-size:13px;min-width:640px;}
+  th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top;}
+  th{color:var(--ink-soft);font-weight:400;white-space:nowrap;}
+  td.no{color:var(--ink-soft);}
+  .msg{font-size:13px;color:#b23b3b;margin-top:10px;}
+  .empty{color:var(--ink-soft);font-size:13px;padding:16px 0;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>出席名单</h1>
+
+  <div class="panel" id="loginPanel">
+    <div class="row">
+      <div>
+        <label for="token">管理口令</label>
+        <input type="password" id="token" autocomplete="current-password">
+      </div>
+      <button id="loadBtn">查看名单</button>
+    </div>
+    <p class="msg" id="msg" style="display:none"></p>
+  </div>
+
+  <div class="panel" id="dataPanel" style="display:none">
+    <div class="stats">
+      <div class="stat"><b id="sEntries">0</b><span>登记条数</span></div>
+      <div class="stat"><b id="sAttending">0</b><span>出席家庭</span></div>
+      <div class="stat"><b id="sPeople">0</b><span>出席总人数</span></div>
+    </div>
+    <div class="row" style="margin-bottom:14px">
+      <button class="ghost" id="csvBtn">导出 Excel（CSV）</button>
+      <button class="ghost" id="refreshBtn">刷新</button>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>#</th><th>姓名</th><th>是否出席</th><th>人数</th><th>所在城市</th><th>备注</th><th>登记时间</th></tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <p class="empty" id="empty" style="display:none">还没有人登记。</p>
+  </div>
+</div>
+
+<script>
+  var tokenInput = document.getElementById('token');
+  var msgEl = document.getElementById('msg');
+  var loginPanel = document.getElementById('loginPanel');
+  var dataPanel = document.getElementById('dataPanel');
+  var loadBtn = document.getElementById('loadBtn');
+  var rows = [];
+
+  var saved = sessionStorage.getItem('rsvpAdminToken');
+  if (saved) { tokenInput.value = saved; load(); }
+
+  loadBtn.addEventListener('click', load);
+  tokenInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') load();
+  });
+  document.getElementById('refreshBtn').addEventListener('click', load);
+  document.getElementById('csvBtn').addEventListener('click', exportCsv);
+
+  function load() {
+    var token = tokenInput.value.trim();
+    if (!token) return;
+
+    loadBtn.disabled = true;
+    msgEl.style.display = 'none';
+
+    fetch('/api/list', { headers: { 'x-admin-token': token } })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (!data.ok) throw new Error(data.error || '读取失败');
+        sessionStorage.setItem('rsvpAdminToken', token);
+        rows = data.records || [];
+        render(data.summary || {});
+        loginPanel.style.display = 'none';
+        dataPanel.style.display = 'block';
+      })
+      .catch(function (err) {
+        sessionStorage.removeItem('rsvpAdminToken');
+        msgEl.textContent = err.message;
+        msgEl.style.display = 'block';
+      })
+      .finally(function () { loadBtn.disabled = false; });
+  }
+
+  function render(summary) {
+    document.getElementById('sEntries').textContent = summary.entries || 0;
+    document.getElementById('sAttending').textContent = summary.attendingEntries || 0;
+    document.getElementById('sPeople').textContent = summary.attendingPeople || 0;
+
+    var tbody = document.getElementById('tbody');
+    tbody.innerHTML = '';
+    rows.forEach(function (r, i) {
+      var tr = document.createElement('tr');
+      [i + 1, r.name, r.attend, r.count, r.city, r.note || '—', fmt(r.updatedAt)]
+        .forEach(function (v, idx) {
+          var td = document.createElement('td');
+          if (idx === 0) td.className = 'no';
+          td.textContent = v;
+          tr.appendChild(td);
+        });
+      tbody.appendChild(tr);
+    });
+    document.getElementById('empty').style.display = rows.length ? 'none' : 'block';
+  }
+
+  function fmt(iso) {
+    if (!iso) return '—';
+    var d = new Date(iso);
+    if (isNaN(d)) return iso;
+    var p = function (n) { return String(n).padStart(2, '0'); };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) +
+           ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+
+  function exportCsv() {
+    var head = ['姓名', '是否出席', '人数', '所在城市', '备注', '登记时间'];
+    var lines = [head].concat(rows.map(function (r) {
+      return [r.name, r.attend, r.count, r.city, r.note || '', fmt(r.updatedAt)];
+    }));
+    var csv = lines.map(function (cols) {
+      return cols.map(function (c) {
+        return '"' + String(c).replace(/"/g, '""') + '"';
+      }).join(',');
+    }).join('\r\n');
+
+    // The BOM makes Excel read the file as UTF-8 instead of mangling Chinese.
+    var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '出席名单.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+</script>
+</body>
+</html>
