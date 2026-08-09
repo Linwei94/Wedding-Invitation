@@ -436,7 +436,51 @@
       <img class="invitation-image" src="images/invitation.jpg" width="915" height="1400" fetchpriority="high" decoding="async" alt="陶林伟 & 肖佩韦 婚礼请柬，2026.10.17 星期六，松江广富林希尔顿酒店会议中心一楼大宴会厅">
     </button>
 
-    <div class="parade reveal d2" aria-hidden="true">
+    <div class="ornament reveal d2" aria-hidden="true">
+      <i></i>
+      <svg viewBox="0 0 36 12"><path d="M18,2 L22,6 L18,10 L14,6 Z"/><path d="M6,6 h5 M25,6 h5"/></svg>
+      <i></i>
+    </div>
+
+    <div class="rsvp reveal d2">
+      <div class="rsvp-head">
+        <h2>出席登记</h2>
+      </div>
+      <form id="rsvpForm">
+        <div class="field">
+          <label for="name">姓名</label>
+          <input type="text" id="name" name="name" required>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="attend">是否出席</label>
+            <select id="attend" name="attend">
+              <option value="出席">出席</option>
+              <option value="不出席">不出席</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="count">出席人数</label>
+            <select id="count" name="count">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="note">备注</label>
+          <textarea id="note" name="note" placeholder="如有饮食禁忌或其他需要告知的事项，请在此留言"></textarea>
+        </div>
+        <button type="submit" class="submit-btn" id="submitBtn">提交登记</button>
+      </form>
+      <p class="success-msg" id="successMsg"></p>
+      <p class="rsvp-note">登记信息将自动保存；如需修改，用同样的姓名重新提交一次即可覆盖之前的登记</p>
+    </div>
+
+    <div class="parade reveal d3" aria-hidden="true">
       <div class="ground"></div>
 
       <!-- 英短蓝白 -->
@@ -543,50 +587,6 @@
           <path d="M49.6,19.4 L57.4,17.6 M50,22.4 L58,23.4"/>
         </svg>
       </div>
-    </div>
-
-    <div class="rsvp reveal d2">
-      <div class="rsvp-head">
-        <h2>出席登记</h2>
-      </div>
-      <form id="rsvpForm">
-        <div class="field">
-          <label for="name">姓名</label>
-          <input type="text" id="name" name="name" required>
-        </div>
-        <div class="row2">
-          <div class="field">
-            <label for="attend">是否出席</label>
-            <select id="attend" name="attend">
-              <option value="出席">出席</option>
-              <option value="不出席">不出席</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="count">出席人数</label>
-            <select id="count" name="count">
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-            </select>
-          </div>
-        </div>
-        <div class="field">
-          <label for="note">备注</label>
-          <textarea id="note" name="note" placeholder="如有饮食禁忌或其他需要告知的事项，请在此留言"></textarea>
-        </div>
-        <button type="submit" class="submit-btn" id="submitBtn">提交登记</button>
-      </form>
-      <p class="success-msg" id="successMsg"></p>
-      <p class="rsvp-note">登记信息将自动保存；如需修改，用同样的姓名重新提交一次即可覆盖之前的登记</p>
-    </div>
-
-    <div class="ornament reveal d3" aria-hidden="true">
-      <i></i>
-      <svg viewBox="0 0 36 12"><path d="M18,2 L22,6 L18,10 L14,6 Z"/><path d="M6,6 h5 M25,6 h5"/></svg>
-      <i></i>
     </div>
 
     <div class="gallery reveal d4">
