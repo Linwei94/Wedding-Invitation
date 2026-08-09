@@ -766,15 +766,13 @@
     var audio = document.getElementById('bgm');
     var btn = document.getElementById('bgmBtn');
     var TARGET = 0.45;
-    var available = false;   // 音频文件确实能播
+    var started = false;     // 真正出声过
     var userPaused = false;  // 用户主动按了暂停，就别再自动接管
 
-    function play(){
-      if (!available || userPaused) return;
-      audio.volume = TARGET;   // 曲子起音本就很轻，不需要额外渐强
-      var p = audio.play();
-      if (p && p.catch) p.catch(function(){ /* 被浏览器拦下，等用户第一次操作 */ });
-    }
+    // iOS 在用户交互前不会缓冲音频，canplay 可能一直不触发，
+    // 所以按钮默认就显示，只有确认文件加载失败时才隐藏。
+    btn.classList.add('ready');
+    audio.addEventListener('error', function(){ btn.classList.remove('ready'); });
 
     function sync(){
       btn.classList.toggle('playing', !audio.paused);
@@ -782,44 +780,42 @@
     }
     audio.addEventListener('play', sync);
     audio.addEventListener('pause', sync);
-
-    audio.addEventListener('canplay', function(){
-      available = true;
-      btn.classList.add('ready');
-    });
-    audio.addEventListener('error', function(){
-      available = false;
-      btn.classList.remove('ready');
+    audio.addEventListener('playing', function(){
+      started = true;
+      sync();
+      document.removeEventListener('pointerdown', onGesture);
+      document.removeEventListener('touchstart', onGesture);
     });
 
-    // 缓冲到可以从头放完，再开始播，中途不会卡顿
-    audio.addEventListener('canplaythrough', function(){ play(); }, { once: true });
+    function attempt(){
+      if (userPaused) return;
+      audio.volume = TARGET;   // 曲子起音本就很轻，不需要额外渐强
+      var p = audio.play();
+      if (p && p.catch) p.catch(function(){ /* 被拦下，等下一次交互 */ });
+    }
+
+    // 允许自动播放的浏览器：缓冲到能一口气播完就开始
+    audio.addEventListener('canplaythrough', attempt, { once: true });
 
     // 页面主要内容加载完之后才下载音频，不和请柬图抢带宽
-    function fetchAudio(){
-      audio.preload = 'auto';
-      audio.load();
-    }
+    function fetchAudio(){ audio.preload = 'auto'; audio.load(); }
     if (document.readyState === 'complete') fetchAudio();
     else window.addEventListener('load', fetchAudio);
 
     btn.addEventListener('click', function(e){
       e.stopPropagation();
-      if (audio.paused) { userPaused = false; play(); }
+      if (audio.paused) { userPaused = false; attempt(); }
       else { userPaused = true; audio.pause(); }
     });
 
-    // 浏览器普遍禁止无交互自动播放，所以首次轻触时再尝试一次
-    function firstTouch(){
-      play();
-      document.removeEventListener('pointerdown', firstTouch);
-      document.removeEventListener('touchstart', firstTouch);
-    }
-    document.addEventListener('pointerdown', firstTouch);
-    document.addEventListener('touchstart', firstTouch);
+    // iOS Safari / 微信 iOS 一定会拦截自动播放，只能靠用户交互触发。
+    // 这里保持监听直到真的播出声为止 —— 第一次轻触时音频可能还没就绪。
+    function onGesture(){ if (!started) attempt(); }
+    document.addEventListener('pointerdown', onGesture);
+    document.addEventListener('touchstart', onGesture);
 
-    // 微信内置浏览器允许在 JSBridge 就绪后自动播放
-    document.addEventListener('WeixinJSBridgeReady', play, false);
+    // 微信安卓版允许在 JSBridge 就绪后自动播放
+    document.addEventListener('WeixinJSBridgeReady', attempt, false);
     sync();
   })();
 
