@@ -768,28 +768,12 @@
     var TARGET = 0.45;
     var available = false;   // 音频文件确实能播
     var userPaused = false;  // 用户主动按了暂停，就别再自动接管
-    var fadeTimer = null;
-
-    function fadeTo(target, ms){
-      clearInterval(fadeTimer);
-      var from = audio.volume, steps = 24, i = 0;
-      fadeTimer = setInterval(function(){
-        i++;
-        audio.volume = Math.max(0, Math.min(1, from + (target - from) * i / steps));
-        if (i >= steps) clearInterval(fadeTimer);
-      }, ms / steps);
-    }
 
     function play(){
       if (!available || userPaused) return;
-      audio.volume = 0;                  // 从静音起步，避免突然出声
+      audio.volume = TARGET;   // 曲子起音本就很轻，不需要额外渐强
       var p = audio.play();
-      if (p && p.then) {
-        p.then(function(){ fadeTo(TARGET, 2000); })
-         .catch(function(){ /* 被浏览器拦下，等用户第一次操作 */ });
-      } else {
-        fadeTo(TARGET, 2000);
-      }
+      if (p && p.catch) p.catch(function(){ /* 被浏览器拦下，等用户第一次操作 */ });
     }
 
     function sync(){
