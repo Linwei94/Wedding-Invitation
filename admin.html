@@ -5,53 +5,90 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <title>出席名单 · 婚礼请柬后台</title>
+<link rel="icon" href="favicon.ico?v=3" sizes="16x16 32x32 48x48">
+<meta name="theme-color" content="#7a1f1f">
 <style>
   :root{
     --page:#f2ece1; --card:#fff; --ink:#3a2e26; --ink-soft:#7a6a58;
-    --red:#7a1f1f; --line:#dccfb6; --field:#fbf8f2;
+    --red:#7a1f1f; --red-soft:#8f2a2a; --line:#dccfb6; --field:#fbf8f2;
+    --serif:"Noto Serif SC","Songti SC","STSong",serif;
   }
   *{box-sizing:border-box;}
   body{
-    margin:0; padding:24px 16px;
+    margin:0; padding:22px 16px 60px;
     background:var(--page); color:var(--ink);
-    font-family:"Noto Serif SC","Songti SC",serif;
+    font-family:var(--serif);
   }
-  .wrap{max-width:900px;margin:0 auto;}
-  h1{font-size:20px;letter-spacing:3px;color:var(--red);margin:0 0 18px;}
+  .wrap{max-width:960px;margin:0 auto;}
+  h1{font-size:21px;letter-spacing:4px;color:var(--red);margin:0 0 4px;font-weight:700;}
+  .sub{font-size:12.5px;color:var(--ink-soft);margin:0 0 20px;}
   .panel{
     background:var(--card); border:1px solid var(--line);
-    border-radius:4px; padding:18px; margin-bottom:18px;
+    border-radius:5px; padding:18px; margin-bottom:16px;
   }
   label{display:block;font-size:13px;color:var(--ink-soft);margin-bottom:6px;}
-  input[type=password]{
+  input[type=password],input[type=search]{
     width:100%; padding:11px 12px; font-size:16px; font-family:inherit;
     border:1px solid var(--line); background:var(--field);
     color:var(--ink); border-radius:3px;
   }
+  input:focus{outline:none;border-color:var(--red-soft);box-shadow:0 0 0 3px rgba(143,42,42,.09);}
   button{
     padding:11px 20px; font-size:14px; font-family:inherit; letter-spacing:2px;
     background:var(--red); color:#f7efe1; border:none; border-radius:3px;
-    cursor:pointer;
+    cursor:pointer; white-space:nowrap;
   }
   button.ghost{background:transparent;color:var(--red);border:1px solid var(--line);}
   button:disabled{opacity:.55;cursor:default;}
   .row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;}
   .row>div{flex:1;min-width:200px;}
-  .stats{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:14px;}
-  .stat b{display:block;font-size:24px;color:var(--red);font-weight:700;}
+
+  /* ---- 统计卡片 ---- */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:18px;}
+  .stat{background:var(--field);border:1px solid var(--line);border-radius:4px;padding:14px 16px;}
+  .stat b{display:block;font-size:28px;color:var(--red);font-weight:700;line-height:1.1;}
   .stat span{font-size:12px;color:var(--ink-soft);}
+
+  /* ---- 图表 ---- */
+  .charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:700px){ .charts{grid-template-columns:1fr;} }
+  .chart-title{font-size:13px;letter-spacing:2px;color:var(--red);margin:0 0 14px;font-weight:700;}
+
+  .bars{display:flex;flex-direction:column;gap:9px;}
+  .bar-row{display:grid;grid-template-columns:52px 1fr 42px;align-items:center;gap:10px;font-size:12.5px;}
+  .bar-track{background:var(--field);border-radius:3px;height:20px;overflow:hidden;border:1px solid var(--line);}
+  .bar-fill{height:100%;background:var(--red-soft);border-radius:2px 0 0 2px;transition:width .5s ease;}
+  .bar-num{text-align:right;color:var(--ink-soft);}
+
+  .spark{width:100%;height:130px;display:block;}
+  .spark .line{fill:none;stroke:var(--red-soft);stroke-width:2;stroke-linejoin:round;stroke-linecap:round;}
+  .spark .area{fill:rgba(143,42,42,.10);stroke:none;}
+  .spark .dot{fill:var(--red);}
+  .spark .axis{stroke:var(--line);stroke-width:1;}
+  .spark text{font-size:9px;fill:var(--ink-soft);font-family:var(--serif);}
+  .chart-empty{font-size:12.5px;color:var(--ink-soft);padding:26px 0;text-align:center;}
+
+  /* ---- 表格 ---- */
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+  .toolbar .grow{flex:1;min-width:180px;}
   .scroll{overflow-x:auto;}
   table{border-collapse:collapse;width:100%;font-size:13px;min-width:560px;}
-  th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top;}
-  th{color:var(--ink-soft);font-weight:400;white-space:nowrap;}
+  th,td{border-bottom:1px solid var(--line);padding:10px;text-align:left;vertical-align:top;}
+  th{color:var(--ink-soft);font-weight:400;white-space:nowrap;cursor:pointer;user-select:none;}
+  th:hover{color:var(--red);}
+  th .arrow{opacity:.45;font-size:10px;}
   td.no{color:var(--ink-soft);}
+  td.note{white-space:pre-wrap;word-break:break-word;max-width:280px;}
+  tr:hover td{background:var(--field);}
   .msg{font-size:13px;color:#b23b3b;margin-top:10px;}
-  .empty{color:var(--ink-soft);font-size:13px;padding:16px 0;}
+  .empty{color:var(--ink-soft);font-size:13px;padding:18px 0;text-align:center;}
+  .count-hint{font-size:12px;color:var(--ink-soft);margin:10px 0 0;}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>出席名单</h1>
+  <p class="sub">陶林伟 &amp; 肖佩韦 · 2026.10.17</p>
 
   <div class="panel" id="loginPanel">
     <div class="row">
@@ -64,56 +101,88 @@
     <p class="msg" id="msg" style="display:none"></p>
   </div>
 
-  <div class="panel" id="dataPanel" style="display:none">
-    <div class="stats">
-      <div class="stat"><b id="sEntries">0</b><span>登记条数</span></div>
-      <div class="stat"><b id="sPeople">0</b><span>出席总人数</span></div>
+  <div id="dataPanel" style="display:none">
+    <div class="panel">
+      <div class="stats">
+        <div class="stat"><b id="sEntries">0</b><span>登记条数</span></div>
+        <div class="stat"><b id="sPeople">0</b><span>出席总人数</span></div>
+        <div class="stat"><b id="sAvg">0</b><span>平均每条人数</span></div>
+        <div class="stat"><b id="sNotes">0</b><span>有备注</span></div>
+      </div>
+      <div class="charts">
+        <div>
+          <p class="chart-title">出席人数分布</p>
+          <div class="bars" id="bars"></div>
+        </div>
+        <div>
+          <p class="chart-title">每日登记趋势（累计）</p>
+          <div id="trendWrap"></div>
+        </div>
+      </div>
     </div>
-    <div class="row" style="margin-bottom:14px">
-      <button class="ghost" id="csvBtn">导出 Excel（CSV）</button>
-      <button class="ghost" id="refreshBtn">刷新</button>
+
+    <div class="panel">
+      <div class="toolbar">
+        <div class="grow"><input type="search" id="search" placeholder="搜索姓名或备注…"></div>
+        <button class="ghost" id="csvBtn">导出 Excel（CSV）</button>
+        <button class="ghost" id="refreshBtn">刷新</button>
+      </div>
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th data-sort="idx">#</th>
+              <th data-sort="name">姓名 <span class="arrow"></span></th>
+              <th data-sort="count">人数 <span class="arrow"></span></th>
+              <th data-sort="note">备注</th>
+              <th data-sort="updatedAt">登记时间 <span class="arrow"></span></th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <p class="empty" id="empty" style="display:none">还没有人登记。</p>
+      <p class="count-hint" id="countHint"></p>
     </div>
-    <div class="scroll">
-      <table>
-        <thead>
-          <tr><th>#</th><th>姓名</th><th>人数</th><th>备注</th><th>登记时间</th></tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
-    <p class="empty" id="empty" style="display:none">还没有人登记。</p>
   </div>
 </div>
 
 <script>
-  // 与 index.html 里的 API_BASE 保持一致（接口部署在 EdgeOne 上，结尾带斜杠）
-  var API_BASE = 'https://weddinginvitation-dpcecgtcs5rh.edgeone.cool/';
-
-  function apiUrl(p){
-    return (API_BASE || location.pathname.replace(/[^/]*$/, '')) + p;
-  }
+  // 与 index.html 里的 API_BASE 保持一致（接口部署在自己的服务器上，结尾带斜杠）
+  var API_BASE = 'https://tlwxpw.xyz/';
+  function apiUrl(p){ return (API_BASE || '/') + p; }
 
   var tokenInput = document.getElementById('token');
   var msgEl = document.getElementById('msg');
   var loginPanel = document.getElementById('loginPanel');
   var dataPanel = document.getElementById('dataPanel');
   var loadBtn = document.getElementById('loadBtn');
+  var searchEl = document.getElementById('search');
   var rows = [];
+  var sortKey = 'updatedAt';
+  var sortDir = -1;
 
   var saved = sessionStorage.getItem('rsvpAdminToken');
   if (saved) { tokenInput.value = saved; load(); }
 
   loadBtn.addEventListener('click', load);
-  tokenInput.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') load();
-  });
+  tokenInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') load(); });
   document.getElementById('refreshBtn').addEventListener('click', load);
   document.getElementById('csvBtn').addEventListener('click', exportCsv);
+  searchEl.addEventListener('input', renderTable);
+
+  [].forEach.call(document.querySelectorAll('th[data-sort]'), function (th) {
+    th.addEventListener('click', function () {
+      var key = th.getAttribute('data-sort');
+      if (key === 'idx' || key === 'note') return;
+      if (sortKey === key) sortDir = -sortDir; else { sortKey = key; sortDir = 1; }
+      renderTable();
+    });
+  });
 
   function load() {
     var token = tokenInput.value.trim();
     if (!token) return;
-
     loadBtn.disabled = true;
     msgEl.style.display = 'none';
 
@@ -123,7 +192,9 @@
         if (!data.ok) throw new Error(data.error || '读取失败');
         sessionStorage.setItem('rsvpAdminToken', token);
         rows = data.records || [];
-        render(data.summary || {});
+        renderStats(data.summary || {});
+        renderCharts();
+        renderTable();
         loginPanel.style.display = 'none';
         dataPanel.style.display = 'block';
       })
@@ -135,38 +206,151 @@
       .finally(function () { loadBtn.disabled = false; });
   }
 
-  function render(summary) {
-    document.getElementById('sEntries').textContent = summary.entries || 0;
-    document.getElementById('sPeople').textContent = summary.attendingPeople || 0;
+  function renderStats(summary) {
+    var entries = summary.entries || 0;
+    var people = summary.attendingPeople || 0;
+    document.getElementById('sEntries').textContent = entries;
+    document.getElementById('sPeople').textContent = people;
+    document.getElementById('sAvg').textContent = entries ? (people / entries).toFixed(1) : '0';
+    document.getElementById('sNotes').textContent = rows.filter(function (r) {
+      return r.note && r.note.trim();
+    }).length;
+  }
 
+  // 人数分布：1-5 人各有多少条登记
+  function renderCharts() {
+    var buckets = [0, 0, 0, 0, 0];
+    rows.forEach(function (r) {
+      var c = Math.min(Math.max(parseInt(r.count, 10) || 1, 1), 5);
+      buckets[c - 1]++;
+    });
+    var max = Math.max.apply(null, buckets.concat([1]));
+    var bars = document.getElementById('bars');
+    bars.innerHTML = '';
+    buckets.forEach(function (n, i) {
+      var row = document.createElement('div');
+      row.className = 'bar-row';
+      var label = document.createElement('span');
+      label.textContent = (i + 1) + ' 人';
+      var track = document.createElement('div');
+      track.className = 'bar-track';
+      var fill = document.createElement('div');
+      fill.className = 'bar-fill';
+      fill.style.width = (n / max * 100) + '%';
+      track.appendChild(fill);
+      var num = document.createElement('span');
+      num.className = 'bar-num';
+      num.textContent = n;
+      row.appendChild(label); row.appendChild(track); row.appendChild(num);
+      bars.appendChild(row);
+    });
+    renderTrend();
+  }
+
+  // 累计登记趋势：按天聚合后画折线
+  function renderTrend() {
+    var wrap = document.getElementById('trendWrap');
+    var byDay = {};
+    rows.forEach(function (r) {
+      var d = new Date(r.createdAt || r.updatedAt);
+      if (isNaN(d)) return;
+      var key = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+      byDay[key] = (byDay[key] || 0) + 1;
+    });
+    var days = Object.keys(byDay).sort();
+    if (days.length < 2) {
+      wrap.innerHTML = '<p class="chart-empty">登记满两天后显示趋势</p>';
+      return;
+    }
+
+    var cum = 0;
+    var pts = days.map(function (d) { cum += byDay[d]; return { d: d, v: cum }; });
+    var W = 320, H = 130, padL = 26, padR = 8, padT = 10, padB = 20;
+    var maxV = pts[pts.length - 1].v;
+    var x = function (i) { return padL + i * (W - padL - padR) / Math.max(pts.length - 1, 1); };
+    var y = function (v) { return padT + (1 - v / maxV) * (H - padT - padB); };
+
+    var line = pts.map(function (p, i) { return (i ? 'L' : 'M') + x(i).toFixed(1) + ',' + y(p.v).toFixed(1); }).join(' ');
+    var area = line + ' L' + x(pts.length - 1).toFixed(1) + ',' + (H - padB) + ' L' + x(0).toFixed(1) + ',' + (H - padB) + ' Z';
+    var dots = pts.map(function (p, i) {
+      return '<circle class="dot" cx="' + x(i).toFixed(1) + '" cy="' + y(p.v).toFixed(1) + '" r="2.5"/>';
+    }).join('');
+
+    wrap.innerHTML =
+      '<svg class="spark" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' +
+        '<path class="area" d="' + area + '"/>' +
+        '<path class="line" d="' + line + '"/>' + dots +
+        '<line class="axis" x1="' + padL + '" y1="' + (H - padB) + '" x2="' + (W - padR) + '" y2="' + (H - padB) + '"/>' +
+        '<text x="2" y="' + (padT + 4) + '">' + maxV + '</text>' +
+        '<text x="2" y="' + (H - padB) + '">0</text>' +
+        '<text x="' + padL + '" y="' + (H - 6) + '">' + short(days[0]) + '</text>' +
+        '<text x="' + (W - padR) + '" y="' + (H - 6) + '" text-anchor="end">' + short(days[days.length - 1]) + '</text>' +
+      '</svg>';
+  }
+
+  function short(d) { return d.slice(5).replace('-', '/'); }
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function visibleRows() {
+    var q = searchEl.value.trim().toLowerCase();
+    var list = rows.filter(function (r) {
+      if (!q) return true;
+      return (r.name || '').toLowerCase().indexOf(q) > -1 ||
+             (r.note || '').toLowerCase().indexOf(q) > -1;
+    });
+    list.sort(function (a, b) {
+      var av = a[sortKey], bv = b[sortKey];
+      if (sortKey === 'count') { av = Number(av) || 0; bv = Number(bv) || 0; }
+      else { av = String(av || ''); bv = String(bv || ''); }
+      if (av < bv) return -1 * sortDir;
+      if (av > bv) return 1 * sortDir;
+      return 0;
+    });
+    return list;
+  }
+
+  function renderTable() {
+    var list = visibleRows();
     var tbody = document.getElementById('tbody');
     tbody.innerHTML = '';
-    rows.forEach(function (r, i) {
+    list.forEach(function (r, i) {
       var tr = document.createElement('tr');
-      [i + 1, r.name, r.count, r.note || '—', fmt(r.updatedAt)]
-        .forEach(function (v, idx) {
-          var td = document.createElement('td');
-          if (idx === 0) td.className = 'no';
-          td.textContent = v;
-          tr.appendChild(td);
-        });
+      [i + 1, r.name, r.count, r.note || '—', fmt(r.updatedAt)].forEach(function (v, idx) {
+        var td = document.createElement('td');
+        if (idx === 0) td.className = 'no';
+        if (idx === 3) td.className = 'note';
+        td.textContent = v;
+        tr.appendChild(td);
+      });
       tbody.appendChild(tr);
     });
-    document.getElementById('empty').style.display = rows.length ? 'none' : 'block';
+    document.getElementById('empty').style.display = list.length ? 'none' : 'block';
+
+    var people = list.reduce(function (s, r) { return s + (Number(r.count) || 0); }, 0);
+    document.getElementById('countHint').textContent =
+      list.length === rows.length
+        ? '共 ' + rows.length + ' 条登记，' + people + ' 人'
+        : '筛选出 ' + list.length + ' / ' + rows.length + ' 条，' + people + ' 人';
+
+    [].forEach.call(document.querySelectorAll('th[data-sort]'), function (th) {
+      var a = th.querySelector('.arrow');
+      if (!a) return;
+      a.textContent = th.getAttribute('data-sort') === sortKey ? (sortDir > 0 ? '▲' : '▼') : '';
+    });
   }
 
   function fmt(iso) {
     if (!iso) return '—';
     var d = new Date(iso);
     if (isNaN(d)) return iso;
-    var p = function (n) { return String(n).padStart(2, '0'); };
-    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) +
-           ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) +
+           ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
   }
 
   function exportCsv() {
+    var list = visibleRows();
     var head = ['姓名', '人数', '备注', '登记时间'];
-    var lines = [head].concat(rows.map(function (r) {
+    var lines = [head].concat(list.map(function (r) {
       return [r.name, r.count, r.note || '', fmt(r.updatedAt)];
     }));
     var csv = lines.map(function (cols) {

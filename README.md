@@ -48,15 +48,15 @@
 ├── favicon.ico
 ├── images
 │   ├── invitation.jpg  # 请柬主视觉图片
-│   ├── logo.png        # 网站图标（新人脸部特写）
-│   ├── share.jpg       # 微信分享卡片缩略图（同一张脸部特写）
+│   ├── share.jpg       # 微信分享卡片缩略图（新人脸部特写）
+│   └── icons/          # 各尺寸网站图标（16/32/48/180/192/512）
 │   └── gallery/        # 图片展示区的照片（见下方"图片展示区"）
 ├── audio
 │   └── bgm.mp3         # 背景音乐（见"背景音乐"）
-├── functions
-│   └── api
-│       ├── rsvp.js     # 接收登记表单，写入 EdgeOne KV
-│       └── list.js     # 读取全部登记记录（需管理口令），供 admin.html 使用
+├── favicon.ico         # 真正的多尺寸 ICO（内含 16/32/48）
+├── site.webmanifest    # 安卓"添加到主屏"用
+├── CNAME               # GitHub Pages 自定义域名
+├── server/             # 登记接口服务（部署在自己的服务器上，另见 server/README.md）
 └── README.md
 ```
 
@@ -145,14 +145,12 @@
 可以按这个方法重新估算。
 新加照片时建议也先压到这个量级，否则手机流量打开会很慢。
 
-## 出席登记表单（存到 EdgeOne KV）
+## 出席登记表单
 
-访客填完表单点"提交登记"后，请求发到 `/api/rsvp` 边缘函数，函数把记录写进
-EdgeOne 自带的 KV 存储。**数据全程留在腾讯云内部**，不依赖任何第三方服务，
-国内访客提交不用走跨境网络。
+访客填完表单点"提交登记"后，请求发到自己服务器上的 `/api/rsvp`，记录存进
+`server/data/rsvp.json`（不是数据库——原因和可靠性说明见 `server/README.md`）。
 
-表单不再单独收集"是否出席"——提交表单本身就代表出席，`attend` 字段在后端
-固定写成"出席"（不再从前端传入），后台名单和 CSV 导出也去掉了这一列。
+表单不再单独收集"是否出席"——提交表单本身就代表出席。
 
 - **新增**：第一次用某个姓名提交，新建一条记录
 - **修改**：之后用同样的姓名再提交一次，会覆盖那条记录（不会产生重复），
@@ -162,8 +160,6 @@ EdgeOne 自带的 KV 存储。**数据全程留在腾讯云内部**，不依赖�
 > 用"姓名"作为唯一标识。万一两位宾客同名，后填的会覆盖先填的。
 > 如果担心重名，告诉我，可以改成"姓名 + 手机号"一起作为标识。
 
-具体怎么配置见下方「部署结构」。
-
 ## 本地预览
 
 直接用浏览器打开 `index.html` 可以看到页面样式和动画。登记表单需要后端函数，
@@ -171,52 +167,44 @@ EdgeOne 自带的 KV 存储。**数据全程留在腾讯云内部**，不依赖�
 
 ## 部署结构（重要）
 
-页面和接口**分开部署在两个地方**，因为 GitHub Pages 只能托管静态文件、跑不了后端函数：
+页面和接口**分开部署在两个地方**，因为 GitHub Pages 只能托管静态文件、跑不了后端：
 
 ```
-GitHub Pages                          EdgeOne Pages
-https://www.taolinwei.com/            https://<你的项目>.edgeone.cool/
-        Wedding-Invitation/                   └── api/rsvp   写入登记
-        ├── index.html                        └── api/list   读取名单
-        ├── admin.html          ── 跨域调用 ──▶
-        └── images/
+GitHub Pages                        你的腾讯云服务器 120.53.229.45
+https://wedding.taolinwei.com/      https://tlwxpw.xyz/
+├── index.html                      ├── api/rsvp   写入登记
+├── admin.html         ── 跨域调用 ──▶ └── api/list   读取名单
+├── images/ audio/                  （代码见仓库 server/ 目录）
+└── favicon / manifest
 ```
 
-两边的连接点是 `index.html` 和 `admin.html` 里的 `API_BASE` 常量，填 EdgeOne 项目
-的完整地址（结尾带斜杠）。**换了 EdgeOne 项目地址，这两个文件各改一行即可。**
+两边的连接点是 `index.html` 和 `admin.html` 里的 `API_BASE` 常量。
 
 ### 一、页面部署到 GitHub Pages
 
 1. 把分支合并到默认分支（`main`）
-2. 仓库 Settings → Pages → Source 选 `main` 分支、目录选 `/ (root)`
-3. 因为 `taolinwei.com` 已经绑在你的个人主页仓库上，本仓库会自动挂在
-   `https://www.taolinwei.com/Wedding-Invitation/`
-4. 仓库里的 `.nojekyll` 是为了让 GitHub 原样输出文件，不要删
+2. 仓库 Settings → Pages → Source 选 `main` 分支、目录 `/ (root)`
+3. 仓库根目录的 `CNAME` 文件内容是 `wedding.taolinwei.com`，GitHub 会据此绑定域名
+4. 在域名商给 `wedding.taolinwei.com` 加一条 **CNAME 记录**指向 `linwei94.github.io`
+5. Settings → Pages 里勾上 **Enforce HTTPS**
+6. `.nojekyll` 让 GitHub 原样输出文件，不要删
 
-### 二、接口部署到 EdgeOne Pages
+### 二、接口部署到自己的服务器
 
-保留现有的 EdgeOne 项目（它现在只负责跑 `functions/` 下的接口），并配置：
+完整步骤见 **[`server/README.md`](server/README.md)**，那里有可以直接复制粘贴的命令。
+概括来说：装 Node → 放代码 → systemd 起服务 → nginx 反代 → certbot 申请 HTTPS。
 
-| 类型 | 名称 | 说明 |
-| --- | --- | --- |
-| KV 命名空间绑定 | `RSVP_KV` | 存登记数据，名字必须一致 |
-| 环境变量 | `ADMIN_TOKEN` | 后台口令，自己定，别写进仓库 |
-| 环境变量 | `ALLOWED_ORIGIN` | 填 `https://www.taolinwei.com`，限制只允许你的站点调用接口。不填则允许任意来源 |
+> **接口必须是 HTTPS**：网页在 https 上，浏览器不允许它去调 http 接口。
 
-配置完重新部署一次生效。
+## 查看名单（数据管理后台）
 
-> 接口跨域是这套结构的必然产物，函数里已经处理好了 CORS（含 `OPTIONS` 预检）。
-> 如果哪天整站都搬到 EdgeOne 上，把两个 HTML 里的 `API_BASE` 改成空字符串 `''`
-> 就会走同源请求，不再跨域。
+打开 `https://wedding.taolinwei.com/admin.html`，输入 `ADMIN_TOKEN` 设的口令，可以看到：
 
-## 查看名单
-
-打开 `https://www.taolinwei.com/Wedding-Invitation/admin.html`，输入 `ADMIN_TOKEN`
-设的口令，可以看到：
-
-- 登记条数 / 出席家庭数 / 出席总人数 三个统计
-- 完整名单表格（姓名、是否出席、人数、备注、登记时间）
-- 「导出 Excel（CSV）」按钮，文件带 UTF-8 BOM，Excel 打开中文不乱码
+- **四个统计**：登记条数、出席总人数、平均每条人数、有备注条数
+- **出席人数分布**：1–5 人各有多少条登记的横向柱状图
+- **每日登记趋势**：按天聚合的累计折线图（登记满两天后才显示）
+- **可搜索、可排序的名单表格**：支持按姓名/备注搜索，点表头按人数或时间排序
+- **导出 CSV**：导出的是当前筛选结果，文件带 UTF-8 BOM，Excel 打开中文不乱码
 
 口令只临时存在浏览器当前标签页，关掉即清空。页面加了 `noindex` 不会被搜索引擎收录，
 但**知道网址的人仍能看到登录框**——口令别设得太简单。

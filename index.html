@@ -9,17 +9,21 @@
 <meta property="og:description" content="2026年10月17日 · 上海松江广富林希尔顿酒店，诚邀您的光临">
 <meta property="og:type" content="website">
 <!-- 微信/多数抓取程序只认绝对地址，换域名后这两行要一起改 -->
-<meta property="og:url" content="https://www.taolinwei.com/Wedding-Invitation/">
-<meta property="og:image" content="https://www.taolinwei.com/Wedding-Invitation/images/share.jpg?v=2">
+<meta property="og:url" content="https://wedding.taolinwei.com/">
+<meta property="og:image" content="https://wedding.taolinwei.com/images/share.jpg?v=2">
 <meta property="og:image:width" content="400">
 <meta property="og:image:height" content="400">
-<meta itemprop="image" content="https://www.taolinwei.com/Wedding-Invitation/images/share.jpg?v=2">
-<link rel="image_src" href="https://www.taolinwei.com/Wedding-Invitation/images/share.jpg?v=2">
+<meta itemprop="image" content="https://wedding.taolinwei.com/images/share.jpg?v=2">
+<link rel="image_src" href="https://wedding.taolinwei.com/images/share.jpg?v=2">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://www.taolinwei.com/Wedding-Invitation/images/share.jpg?v=2">
-<link rel="icon" type="image/png" href="images/logo.png?v=2">
-<link rel="shortcut icon" href="favicon.ico">
-<link rel="apple-touch-icon" href="images/logo.png?v=2">
+<meta name="twitter:image" content="https://wedding.taolinwei.com/images/share.jpg?v=2">
+<link rel="icon" href="favicon.ico?v=3" sizes="16x16 32x32 48x48">
+<link rel="icon" type="image/png" href="images/icons/icon-32.png?v=3" sizes="32x32">
+<link rel="icon" type="image/png" href="images/icons/icon-192.png?v=3" sizes="192x192">
+<link rel="apple-touch-icon" href="images/icons/icon-180.png?v=3">
+<link rel="manifest" href="site.webmanifest?v=3">
+<meta name="theme-color" content="#7a1f1f">
+<meta name="apple-mobile-web-app-title" content="婚礼请柬">
 <style>
   :root{
     --card:#ffffff;
@@ -106,6 +110,57 @@
   }
   .ornament i:last-child{background:linear-gradient(to left,transparent,var(--line));}
   .ornament svg{width:36px;height:12px;fill:none;stroke:var(--red);stroke-width:1;}
+
+
+  /* ---------- venue / map ---------- */
+  .venue{padding:26px 24px 6px;text-align:center;}
+  .venue h2{
+    font-family:var(--serif);
+    font-size:19px;letter-spacing:6px;font-weight:700;
+    margin:0 0 14px;color:var(--red);text-indent:6px;
+  }
+  .venue-card{
+    border:1px solid var(--line);
+    border-radius:4px;
+    background:var(--field);
+    overflow:hidden;
+  }
+  .venue-art{
+    display:block;width:100%;height:112px;
+    background:#f6f1e6;
+    border-bottom:1px solid var(--line);
+  }
+  .venue-art svg{width:100%;height:100%;display:block;}
+  .venue-body{padding:16px 16px 18px;}
+  .venue-name{font-size:15px;font-weight:700;margin:0 0 5px;line-height:1.5;}
+  .venue-addr{font-size:13px;color:var(--ink-soft);margin:0 0 4px;line-height:1.7;}
+  .venue-time{font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;}
+  .map-links{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:8px;
+  }
+  .map-links a{
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    padding:11px 8px;
+    font-size:13.5px;
+    font-family:inherit;
+    color:var(--red);
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:3px;
+    text-decoration:none;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .map-links a:active{background:var(--field);}
+  .copy-addr{
+    display:block;width:100%;margin-top:8px;
+    padding:11px 8px;font-size:13.5px;font-family:inherit;
+    color:var(--ink-soft);background:var(--card);
+    border:1px solid var(--line);border-radius:3px;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .copy-addr.done{color:var(--red);border-color:var(--red-soft);}
 
   /* ---------- walking parade ---------- */
   .parade{
@@ -439,6 +494,34 @@
       <img class="invitation-image" src="images/invitation.jpg?v=2" width="1111" height="1700" fetchpriority="high" decoding="async" alt="陶林伟 & 肖佩韦 婚礼请柬，2026.10.17 星期六，松江广富林希尔顿酒店会议中心一楼大宴会厅">
     </button>
 
+    <div class="venue reveal d2">
+      <h2>婚礼地址</h2>
+      <div class="venue-card">
+        <div class="venue-art" aria-hidden="true">
+          <svg viewBox="0 0 320 112" preserveAspectRatio="xMidYMid slice">
+            <rect width="320" height="112" fill="#f6f1e6"/>
+            <g stroke="#dccfb6" stroke-width="1" fill="none">
+              <path d="M0,26 H320 M0,58 H320 M0,90 H320"/>
+              <path d="M46,0 V112 M112,0 V112 M208,0 V112 M268,0 V112"/>
+            </g>
+            <path d="M112,58 H208 V90" stroke="#c9b998" stroke-width="3" fill="none"/>
+            <g transform="translate(160,44)">
+              <path d="M0,18 C-9,6 -13,0 -13,-6 A13,13 0 1 1 13,-6 C13,0 9,6 0,18 Z"
+                    fill="#7a1f1f"/>
+              <circle cx="0" cy="-6" r="4.6" fill="#f6f1e6"/>
+            </g>
+          </svg>
+        </div>
+        <div class="venue-body">
+          <p class="venue-name">松江广富林希尔顿酒店会议中心 · 一楼大宴会厅</p>
+          <p class="venue-addr">上海市松江区广轩路 1199 号</p>
+          <p class="venue-time">2026 年 10 月 17 日（周六）17:08 签到 · 18:08 晚宴</p>
+          <div class="map-links" id="mapLinks"></div>
+          <button type="button" class="copy-addr" id="copyAddr">复制地址</button>
+        </div>
+      </div>
+    </div>
+
     <div class="ornament reveal d2" aria-hidden="true">
       <i></i>
       <svg viewBox="0 0 36 12"><path d="M18,2 L22,6 L18,10 L14,6 Z"/><path d="M6,6 h5 M25,6 h5"/></svg>
@@ -634,18 +717,13 @@
   </div>
 
 <script>
-  // 表单接口所在地址。
-  //
-  // 本页面托管在 GitHub Pages 上，而 GitHub Pages 只能放静态文件、跑不了后端函数，
-  // 所以 /api/* 这些接口单独部署在 EdgeOne 上，这里填 EdgeOne 项目的完整地址
-  // （结尾要带斜杠）。换了 EdgeOne 项目地址，改这一行即可。
-  //
-  // 如果哪天整站都搬到 EdgeOne 上，把这里改成空字符串 '' 就会走同源请求。
-  var API_BASE = 'https://weddinginvitation-dpcecgtcs5rh.edgeone.cool/';
+  // 网页是静态的、托管在 GitHub Pages 上，跑不了后端；登记接口单独部署在
+  // 自己的服务器上（见仓库里的 server/），所以这里要填接口的完整地址（结尾带斜杠）。
+  // 换了接口地址，改这一行即可；留空字符串 '' 则改为同源请求。
+  var API_BASE = 'https://tlwxpw.xyz/';
 
-  // 同源模式下，按页面所在目录解析，兼容站点根目录与 /Wedding-Invitation/ 子路径
   function apiUrl(p){
-    return (API_BASE || location.pathname.replace(/[^/]*$/, '')) + p;
+    return (API_BASE || '/') + p;
   }
 
   var form = document.getElementById('rsvpForm');
@@ -858,6 +936,70 @@
       };
       img.src = src;
     }
+  })();
+
+  // ---- 婚礼地址：唤起宾客自己手机上的地图 App ----
+  // 不内嵌任何第三方地图：Google 在国内打不开，高德的内嵌图需要 API key，
+  // 而且一旦加载失败页面上就是个空白框。改成按地区排序的跳转按钮，
+  // 既不依赖外部脚本，又能直接进导航。
+  (function(){
+    var NAME = '松江广富林希尔顿酒店会议中心';
+    var ADDR = '上海市松江区广轩路1199号';
+    var q = encodeURIComponent(NAME + ' ' + ADDR);
+
+    // 用名称+地址检索，让地图自己定位，避免写死经纬度带来的偏差
+    var CN = [
+      ['高德地图', 'https://uri.amap.com/search?keyword=' + q],
+      ['百度地图', 'https://map.baidu.com/search/' + q]
+    ];
+    var INTL = [
+      ['Google Maps', 'https://www.google.com/maps/search/?api=1&query=' + q],
+      ['Apple 地图', 'https://maps.apple.com/?q=' + q]
+    ];
+
+    var lang = (navigator.language || '').toLowerCase();
+    var zh = lang.indexOf('zh') === 0;
+    var list = zh ? CN.concat(INTL) : INTL.concat(CN);
+
+    var wrap = document.getElementById('mapLinks');
+    list.forEach(function(item){
+      var a = document.createElement('a');
+      a.href = item[1];
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.textContent = item[0];
+      wrap.appendChild(a);
+    });
+
+    var btn = document.getElementById('copyAddr');
+    btn.addEventListener('click', function(){
+      var text = NAME + '\n' + ADDR;
+      function ok(){
+        btn.textContent = '地址已复制';
+        btn.classList.add('done');
+        setTimeout(function(){
+          btn.textContent = '复制地址';
+          btn.classList.remove('done');
+        }, 2000);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(ok, fallback);
+      } else {
+        fallback();
+      }
+      // 老版本浏览器 / 非 HTTPS 下 clipboard API 不可用，退回选中复制
+      function fallback(){
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); ok(); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+    });
   })();
 </script>
 </body>

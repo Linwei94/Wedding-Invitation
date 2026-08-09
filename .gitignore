@@ -1,0 +1,6 @@
+# 依赖包：部署时用 npm install 生成，不进仓库
+server/node_modules/
+
+# 宾客登记数据：属于线上真实数据，不该进仓库
+server/data/*.json
+server/data/*.tmp-*
