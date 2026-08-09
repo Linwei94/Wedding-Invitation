@@ -380,6 +380,35 @@
   .lb-prev{left:2px;}
   .lb-next{right:2px;}
 
+
+  /* ---------- background music ---------- */
+  .bgm-toggle{
+    position:fixed;
+    right:14px;
+    top:calc(14px + env(safe-area-inset-top,0px));
+    z-index:40;
+    width:38px;height:38px;
+    display:none;                 /* 找不到音频文件时保持隐藏 */
+    align-items:center;
+    justify-content:center;
+    padding:0;
+    border:1px solid var(--line);
+    border-radius:50%;
+    background:rgba(255,255,255,.86);
+    -webkit-backdrop-filter:blur(6px);
+    backdrop-filter:blur(6px);
+    box-shadow:0 2px 10px rgba(58,46,38,.16);
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .bgm-toggle.ready{display:flex;}
+  .bgm-toggle svg{width:18px;height:18px;fill:none;stroke:var(--red);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
+  .bgm-toggle.playing svg{animation:spin 4s linear infinite;}
+  .bgm-toggle.paused{opacity:.55;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @media (prefers-reduced-motion: reduce){
+    .bgm-toggle.playing svg{animation:none;}
+  }
   /* ---------- footer ---------- */
   .footer{
     padding:24px 24px 34px;
@@ -407,11 +436,11 @@
 <body>
   <!-- 微信抓取缩略图时常取 HTML 里的第一张图，这里放一张方形的备用图 -->
   <img src="images/share.jpg" alt="陶林伟 & 肖佩韦" width="400" height="400"
-       style="position:absolute;left:-99999px;top:0;">
+       loading="lazy" style="position:absolute;left:-99999px;top:0;">
 
   <div class="card">
     <button type="button" class="invitation-zoom reveal d1">
-      <img class="invitation-image" src="images/invitation.jpg" alt="陶林伟 & 肖佩韦 婚礼请柬，2026.10.17 星期六，松江广富林希尔顿酒店会议中心一楼大宴会厅">
+      <img class="invitation-image" src="images/invitation.jpg" width="915" height="1400" fetchpriority="high" decoding="async" alt="陶林伟 & 肖佩韦 婚礼请柬，2026.10.17 星期六，松江广富林希尔顿酒店会议中心一楼大宴会厅">
     </button>
     <p class="zoom-hint reveal d1">轻触请柬可放大查看，也可双指缩放</p>
 
@@ -572,51 +601,51 @@
       <div class="gsec">
         <div class="glabel"><i></i><span>婚 纱 照<em>Wedding</em></span><i></i></div>
         <div class="grid">
-          <button type="button" class="tile full r32"><img src="images/gallery/wedding-01.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-02.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-03.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/wedding-04.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-05.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-06.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/wedding-07.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-08.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-09.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/wedding-10.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-11.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-12.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile full r23"><img src="images/gallery/wedding-13.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-14.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-15.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/wedding-16.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-17.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-18.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/wedding-19.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-20.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-21.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/wedding-22.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-23.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-24.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/wedding-25.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-26.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-27.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-28.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-29.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-30.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-31.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile full r23"><img src="images/gallery/wedding-32.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/wedding-01.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-02.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-03.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/wedding-04.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-05.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-06.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/wedding-07.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-08.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-09.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/wedding-10.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-11.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-12.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r23"><img src="images/gallery/wedding-13.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-14.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-15.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/wedding-16.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-17.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-18.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/wedding-19.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-20.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-21.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/wedding-22.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-23.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-24.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/wedding-25.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-26.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-27.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-28.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-29.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-30.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-31.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r23"><img src="images/gallery/wedding-32.jpg" alt="婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
         </div>
       </div>
       <div class="gsec">
         <div class="glabel"><i></i><span>中 式 礼 服<em>Traditional</em></span><i></i></div>
         <div class="grid">
-          <button type="button" class="tile full r32"><img src="images/gallery/hanfu-01.jpg" alt="中式礼服" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/hanfu-02.jpg" alt="中式礼服" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/hanfu-03.jpg" alt="中式礼服" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/hanfu-04.jpg" alt="中式礼服" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/hanfu-05.jpg" alt="中式礼服" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile full r23"><img src="images/gallery/hanfu-06.jpg" alt="中式礼服" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/hanfu-07.jpg" alt="中式礼服" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/hanfu-08.jpg" alt="中式礼服" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/hanfu-01.jpg" alt="中式礼服" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/hanfu-02.jpg" alt="中式礼服" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/hanfu-03.jpg" alt="中式礼服" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/hanfu-04.jpg" alt="中式礼服" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/hanfu-05.jpg" alt="中式礼服" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r23"><img src="images/gallery/hanfu-06.jpg" alt="中式礼服" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/hanfu-07.jpg" alt="中式礼服" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/hanfu-08.jpg" alt="中式礼服" loading="lazy" decoding="async" fetchpriority="low"></button>
         </div>
       </div>
     </div>
@@ -626,6 +655,12 @@
       <p class="date">2026 . 10 . 17</p>
     </div>
   </div>
+
+  <!-- 背景音乐：把 mp3 放到 audio/bgm.mp3 即可启用；文件不存在时按钮保持隐藏 -->
+  <audio id="bgm" src="audio/bgm.mp3" loop preload="none"></audio>
+  <button type="button" class="bgm-toggle" id="bgmBtn" aria-label="背景音乐开关">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.2"/><path d="M12,3 a9,9 0 0 1 7.8,4.5"/></svg>
+  </button>
 
   <div class="lightbox" id="lightbox" hidden>
     <button class="lb-close" id="lbClose" aria-label="关闭">&times;</button>
@@ -737,6 +772,55 @@
       else if (e.key === 'ArrowLeft') show(at - 1);
       else if (e.key === 'ArrowRight') show(at + 1);
     });
+  })();
+
+  // ---- background music ----
+  (function(){
+    var audio = document.getElementById('bgm');
+    var btn = document.getElementById('bgmBtn');
+    var available = false;
+
+    // 只有确认音频可以播放才显示按钮，避免文件缺失时出现一个按不动的控件
+    audio.addEventListener('canplay', function(){
+      available = true;
+      btn.classList.add('ready');
+    });
+    audio.addEventListener('error', function(){
+      available = false;
+      btn.classList.remove('ready');
+    });
+    audio.volume = 0.45;
+    audio.load();
+
+    function play(){
+      if (!available) return;
+      var p = audio.play();
+      if (p && p.catch) p.catch(function(){ /* 仍被浏览器拦截，等下一次用户操作 */ });
+    }
+    function sync(){
+      btn.classList.toggle('playing', !audio.paused);
+      btn.classList.toggle('paused', audio.paused);
+    }
+    audio.addEventListener('play', sync);
+    audio.addEventListener('pause', sync);
+
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      if (audio.paused) play(); else audio.pause();
+    });
+
+    // 浏览器不允许无交互自动播放，所以首次轻触页面时再尝试一次
+    function firstTouch(){
+      play();
+      document.removeEventListener('pointerdown', firstTouch);
+      document.removeEventListener('touchstart', firstTouch);
+    }
+    document.addEventListener('pointerdown', firstTouch);
+    document.addEventListener('touchstart', firstTouch);
+
+    // 微信内置浏览器允许在 JSBridge 就绪后自动播放
+    document.addEventListener('WeixinJSBridgeReady', play, false);
+    sync();
   })();
 </script>
 </body>
