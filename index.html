@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>陶林伟 & 肖佩韦 · 婚礼请柬</title>
 <meta name="description" content="2026年10月17日 · 上海松江广富林希尔顿酒店，诚邀您的光临">
 <meta property="og:title" content="陶林伟 & 肖佩韦 · 婚礼请柬">
@@ -79,6 +79,23 @@
     margin:0;
   }
 
+
+  .invitation-zoom{
+    display:block;
+    position:relative;
+    width:100%;
+    padding:0;margin:0;border:none;
+    background:none;
+    cursor:zoom-in;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .zoom-hint{
+    font-size:11.5px;
+    letter-spacing:1px;
+    color:var(--ink-soft);
+    text-align:center;
+    margin:12px 0 0;
+  }
   /* ---------- ornament divider ---------- */
   .ornament{
     display:flex;
@@ -261,8 +278,8 @@
   }
 
   /* ---------- gallery ---------- */
-  .gallery{padding:4px 0 8px;}
-  .gsec{margin-bottom:26px;}
+  .gallery{padding:2px 0 8px;}
+  .gsec{margin-bottom:36px;}
   .gsec:last-child{margin-bottom:6px;}
   .glabel{
     display:flex;
@@ -393,53 +410,12 @@
        style="position:absolute;left:-99999px;top:0;">
 
   <div class="card">
-    <img class="invitation-image reveal d1" src="images/invitation.jpg" alt="陶林伟 & 肖佩韦 婚礼请柬，2026.10.17 星期六，松江广富林希尔顿酒店会议中心一楼大宴会厅">
+    <button type="button" class="invitation-zoom reveal d1">
+      <img class="invitation-image" src="images/invitation.jpg" alt="陶林伟 & 肖佩韦 婚礼请柬，2026.10.17 星期六，松江广富林希尔顿酒店会议中心一楼大宴会厅">
+    </button>
+    <p class="zoom-hint reveal d1">轻触请柬可放大查看，也可双指缩放</p>
 
-    <div class="ornament reveal d2" aria-hidden="true">
-      <i></i>
-      <svg viewBox="0 0 36 12"><path d="M18,2 L22,6 L18,10 L14,6 Z"/><path d="M6,6 h5 M25,6 h5"/></svg>
-      <i></i>
-    </div>
-
-    <div class="rsvp reveal d2">
-      <div class="rsvp-head">
-        <h2>出席登记</h2>
-      </div>
-      <form id="rsvpForm">
-        <div class="field">
-          <label for="name">姓名</label>
-          <input type="text" id="name" name="name" required>
-        </div>
-        <div class="row2">
-          <div class="field">
-            <label for="attend">是否出席</label>
-            <select id="attend" name="attend">
-              <option value="出席">出席</option>
-              <option value="不出席">不出席</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="count">出席人数</label>
-            <select id="count" name="count">
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-            </select>
-          </div>
-        </div>
-        <div class="field">
-          <label for="note">备注</label>
-          <textarea id="note" name="note" placeholder="如有饮食禁忌或其他需要告知的事项，请在此留言"></textarea>
-        </div>
-        <button type="submit" class="submit-btn" id="submitBtn">提交登记</button>
-      </form>
-      <p class="success-msg" id="successMsg"></p>
-      <p class="rsvp-note">登记信息将自动保存；如需修改，用同样的姓名重新提交一次即可覆盖之前的登记</p>
-    </div>
-
-    <div class="parade reveal d3" aria-hidden="true">
+    <div class="parade reveal d2" aria-hidden="true">
       <div class="ground"></div>
 
       <!-- 英短蓝白 -->
@@ -548,17 +524,99 @@
       </div>
     </div>
 
-    <div class="gallery reveal d3">
+    <div class="rsvp reveal d2">
+      <div class="rsvp-head">
+        <h2>出席登记</h2>
+      </div>
+      <form id="rsvpForm">
+        <div class="field">
+          <label for="name">姓名</label>
+          <input type="text" id="name" name="name" required>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="attend">是否出席</label>
+            <select id="attend" name="attend">
+              <option value="出席">出席</option>
+              <option value="不出席">不出席</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="count">出席人数</label>
+            <select id="count" name="count">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="note">备注</label>
+          <textarea id="note" name="note" placeholder="如有饮食禁忌或其他需要告知的事项，请在此留言"></textarea>
+        </div>
+        <button type="submit" class="submit-btn" id="submitBtn">提交登记</button>
+      </form>
+      <p class="success-msg" id="successMsg"></p>
+      <p class="rsvp-note">登记信息将自动保存；如需修改，用同样的姓名重新提交一次即可覆盖之前的登记</p>
+    </div>
+
+    <div class="ornament reveal d3" aria-hidden="true">
+      <i></i>
+      <svg viewBox="0 0 36 12"><path d="M18,2 L22,6 L18,10 L14,6 Z"/><path d="M6,6 h5 M25,6 h5"/></svg>
+      <i></i>
+    </div>
+
+    <div class="gallery reveal d4">
       <div class="gsec">
         <div class="glabel"><i></i><span>婚 纱 照<em>Wedding</em></span><i></i></div>
         <div class="grid">
-          <button type="button" class="tile full r32"><img src="images/gallery/wedding-1.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-6.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-2.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/wedding-4.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-5.jpg" alt="中式婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/wedding-3.jpg" alt="中式婚纱照" loading="lazy" decoding="async"></button>
-          <button type="button" class="tile full r23"><img src="images/gallery/wedding-7.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/wedding-01.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-02.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-03.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/wedding-04.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-05.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-06.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/wedding-07.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-08.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-09.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/wedding-10.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-11.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-12.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile full r23"><img src="images/gallery/wedding-13.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-14.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-15.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/wedding-16.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-17.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-18.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/wedding-19.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-20.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-21.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/wedding-22.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-23.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-24.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/wedding-25.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-26.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-27.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-28.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-29.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-30.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/wedding-31.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile full r23"><img src="images/gallery/wedding-32.jpg" alt="婚纱照" loading="lazy" decoding="async"></button>
+        </div>
+      </div>
+      <div class="gsec">
+        <div class="glabel"><i></i><span>中 式 礼 服<em>Traditional</em></span><i></i></div>
+        <div class="grid">
+          <button type="button" class="tile full r32"><img src="images/gallery/hanfu-01.jpg" alt="中式礼服" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/hanfu-02.jpg" alt="中式礼服" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile r23"><img src="images/gallery/hanfu-03.jpg" alt="中式礼服" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/hanfu-04.jpg" alt="中式礼服" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/hanfu-05.jpg" alt="中式礼服" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile full r23"><img src="images/gallery/hanfu-06.jpg" alt="中式礼服" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/hanfu-07.jpg" alt="中式礼服" loading="lazy" decoding="async"></button>
+          <button type="button" class="tile full r32"><img src="images/gallery/hanfu-08.jpg" alt="中式礼服" loading="lazy" decoding="async"></button>
         </div>
       </div>
     </div>
@@ -638,7 +696,7 @@
 
   // ---- gallery lightbox ----
   (function(){
-    var tiles = [].slice.call(document.querySelectorAll('.tile'));
+    var tiles = [].slice.call(document.querySelectorAll('.invitation-zoom, .tile'));
     if (!tiles.length) return;
     var box = document.getElementById('lightbox');
     var img = document.getElementById('lbImg');
