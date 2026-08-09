@@ -10,16 +10,16 @@
 <meta property="og:type" content="website">
 <!-- 微信/多数抓取程序只认绝对地址，换域名后这两行要一起改 -->
 <meta property="og:url" content="https://www.taolinwei.com/Wedding-Invitation/">
-<meta property="og:image" content="https://www.taolinwei.com/Wedding-Invitation/images/share.jpg">
+<meta property="og:image" content="https://www.taolinwei.com/Wedding-Invitation/images/share.jpg?v=2">
 <meta property="og:image:width" content="400">
 <meta property="og:image:height" content="400">
-<meta itemprop="image" content="https://www.taolinwei.com/Wedding-Invitation/images/share.jpg">
-<link rel="image_src" href="https://www.taolinwei.com/Wedding-Invitation/images/share.jpg">
+<meta itemprop="image" content="https://www.taolinwei.com/Wedding-Invitation/images/share.jpg?v=2">
+<link rel="image_src" href="https://www.taolinwei.com/Wedding-Invitation/images/share.jpg?v=2">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://www.taolinwei.com/Wedding-Invitation/images/share.jpg">
-<link rel="icon" type="image/png" href="images/logo.png">
+<meta name="twitter:image" content="https://www.taolinwei.com/Wedding-Invitation/images/share.jpg?v=2">
+<link rel="icon" type="image/png" href="images/logo.png?v=2">
 <link rel="shortcut icon" href="favicon.ico">
-<link rel="apple-touch-icon" href="images/logo.png">
+<link rel="apple-touch-icon" href="images/logo.png?v=2">
 <style>
   :root{
     --card:#ffffff;
@@ -330,6 +330,9 @@
     display:block;
     transition:transform .5s cubic-bezier(.22,.7,.3,1);
   }
+  /* 未加载完的图占位为浅色，加载完淡入 */
+  .tile img{opacity:0;transition:opacity .35s ease;}
+  .tile img.loaded{opacity:1;}
   /* keep faces in frame when a portrait shot is cropped square */
   .tile.r11 img{object-position:center 32%;}
   @media (hover:hover){
@@ -428,12 +431,12 @@
 </head>
 <body>
   <!-- 微信抓取缩略图时常取 HTML 里的第一张图，这里放一张方形的备用图 -->
-  <img src="images/share.jpg" alt="陶林伟 & 肖佩韦" width="400" height="400"
+  <img src="images/share.jpg?v=2" alt="陶林伟 & 肖佩韦" width="400" height="400"
        loading="lazy" style="position:absolute;left:-99999px;top:0;">
 
   <div class="card">
     <button type="button" class="invitation-zoom reveal d1">
-      <img class="invitation-image" src="images/invitation.jpg" width="1111" height="1700" fetchpriority="high" decoding="async" alt="陶林伟 & 肖佩韦 婚礼请柬，2026.10.17 星期六，松江广富林希尔顿酒店会议中心一楼大宴会厅">
+      <img class="invitation-image" src="images/invitation.jpg?v=2" width="1111" height="1700" fetchpriority="high" decoding="async" alt="陶林伟 & 肖佩韦 婚礼请柬，2026.10.17 星期六，松江广富林希尔顿酒店会议中心一楼大宴会厅">
     </button>
 
     <div class="ornament reveal d2" aria-hidden="true">
@@ -593,46 +596,46 @@
       <div class="gsec">
         <div class="glabel"><i></i><span>婚 纱 照<em>Wedding</em></span><i></i></div>
         <div class="grid">
-          <button type="button" class="tile full r32"><img src="images/gallery/p01.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p02.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p03.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/p04.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p05.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p06.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/p07.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p08.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p09.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/p10.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p11.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p12.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/p13.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p14.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p15.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r23"><img src="images/gallery/p16.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p17.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p18.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/p19.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p20.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p21.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/p22.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p23.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p24.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/p25.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p26.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p27.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/p28.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p29.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p30.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/p31.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p32.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p33.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r23"><img src="images/gallery/p34.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p35.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img src="images/gallery/p36.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/p37.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/p38.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r32"><img src="images/gallery/p39.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r23"><img src="images/gallery/p40.jpg" alt="陶林伟 & 肖佩韦 婚纱照" loading="lazy" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img data-src="images/gallery/p01.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p02.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p03.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img data-src="images/gallery/p04.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p05.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p06.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img data-src="images/gallery/p07.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p08.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p09.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img data-src="images/gallery/p10.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p11.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p12.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img data-src="images/gallery/p13.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p14.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p15.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r23"><img data-src="images/gallery/p16.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p17.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p18.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img data-src="images/gallery/p19.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p20.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p21.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img data-src="images/gallery/p22.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p23.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p24.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img data-src="images/gallery/p25.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p26.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p27.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img data-src="images/gallery/p28.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p29.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p30.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img data-src="images/gallery/p31.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p32.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p33.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r23"><img data-src="images/gallery/p34.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p35.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="images/gallery/p36.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img data-src="images/gallery/p37.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img data-src="images/gallery/p38.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img data-src="images/gallery/p39.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r23"><img data-src="images/gallery/p40.jpg?v=2" alt="陶林伟 & 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
         </div>
       </div>
     </div>
@@ -727,7 +730,7 @@
     function show(i){
       at = (i + tiles.length) % tiles.length;
       var src = tiles[at].querySelector('img');
-      img.src = src.src;
+      img.src = src.currentSrc || src.getAttribute('src') || src.getAttribute('data-src');
       img.alt = src.alt;
     }
     function open(i){
@@ -819,19 +822,69 @@
     sync();
   })();
 
-  // ---- 相册图片加载失败时自动重试（移动网络下并发请求容易零星失败）----
+  // ---- 相册图片：一张一张按从上到下的顺序加载 ----
+  // 浏览器原生 loading="lazy" 会一次并发抓好几张，这里改为自己排队，
+  // 同一时刻只下载一张，且始终挑文档顺序最靠前的那张。
   (function(){
-    var MAX_TRIES = 3;
-    [].forEach.call(document.querySelectorAll('.grid img'), function(img){
-      var tries = 0;
-      img.addEventListener('error', function(){
-        if (tries >= MAX_TRIES) return;
-        tries++;
-        var base = img.src.split('?')[0];
-        // 退避后重试，并加参数绕开失败响应的缓存
-        setTimeout(function(){ img.src = base + '?retry=' + tries; }, 500 * tries);
+    var imgs = [].slice.call(document.querySelectorAll('.grid img[data-src]'));
+    if (!imgs.length) return;
+
+    // 不支持 IntersectionObserver 的老浏览器：直接全部加载，别让相册空着
+    if (!('IntersectionObserver' in window)) {
+      imgs.forEach(function(img){
+        img.src = img.getAttribute('data-src');
+        img.classList.add('loaded');
       });
-    });
+      return;
+    }
+
+    var busy = false;
+
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) { e.target.__wanted = true; io.unobserve(e.target); }
+      });
+      pump();
+    }, { rootMargin: '800px 0px' });   // 提前一屏多开始排队，滚动时不至于等太久
+
+    imgs.forEach(function(img){ io.observe(img); });
+
+    function pump(){
+      if (busy) return;
+      var next = null;
+      for (var i = 0; i < imgs.length; i++) {
+        var im = imgs[i];
+        if (im.__wanted && !im.__done) { next = im; break; }
+      }
+      if (!next) return;
+      busy = true;
+      load(next, function(){ busy = false; pump(); });
+    }
+
+    function load(img, done){
+      var src = img.getAttribute('data-src');
+      var tries = 0;
+      img.onload = function(){
+        img.onload = img.onerror = null;
+        img.classList.add('loaded');
+        img.__done = true;
+        done();
+      };
+      img.onerror = function(){
+        // 加载失败的图不会自动重来，必须自己退避重试，否则永远是破图
+        if (tries < 3) {
+          tries++;
+          setTimeout(function(){
+            img.src = src + (src.indexOf('?') > -1 ? '&' : '?') + 'retry=' + tries;
+          }, 500 * tries);
+        } else {
+          img.onload = img.onerror = null;
+          img.__done = true;   // 放弃这张，继续下一张，不要卡住整个队列
+          done();
+        }
+      };
+      img.src = src;
+    }
   })();
 </script>
 </body>
