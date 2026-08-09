@@ -765,9 +765,40 @@
   (function(){
     var audio = document.getElementById('bgm');
     var btn = document.getElementById('bgmBtn');
-    var available = false;
+    var TARGET = 0.45;
+    var available = false;   // 音频文件确实能播
+    var userPaused = false;  // 用户主动按了暂停，就别再自动接管
+    var fadeTimer = null;
 
-    // 只有确认音频可以播放才显示按钮，避免文件缺失时出现一个按不动的控件
+    function fadeTo(target, ms){
+      clearInterval(fadeTimer);
+      var from = audio.volume, steps = 24, i = 0;
+      fadeTimer = setInterval(function(){
+        i++;
+        audio.volume = Math.max(0, Math.min(1, from + (target - from) * i / steps));
+        if (i >= steps) clearInterval(fadeTimer);
+      }, ms / steps);
+    }
+
+    function play(){
+      if (!available || userPaused) return;
+      audio.volume = 0;                  // 从静音起步，避免突然出声
+      var p = audio.play();
+      if (p && p.then) {
+        p.then(function(){ fadeTo(TARGET, 2000); })
+         .catch(function(){ /* 被浏览器拦下，等用户第一次操作 */ });
+      } else {
+        fadeTo(TARGET, 2000);
+      }
+    }
+
+    function sync(){
+      btn.classList.toggle('playing', !audio.paused);
+      btn.classList.toggle('paused', audio.paused);
+    }
+    audio.addEventListener('play', sync);
+    audio.addEventListener('pause', sync);
+
     audio.addEventListener('canplay', function(){
       available = true;
       btn.classList.add('ready');
@@ -776,27 +807,25 @@
       available = false;
       btn.classList.remove('ready');
     });
-    audio.volume = 0.45;
-    audio.load();
 
-    function play(){
-      if (!available) return;
-      var p = audio.play();
-      if (p && p.catch) p.catch(function(){ /* 仍被浏览器拦截，等下一次用户操作 */ });
+    // 缓冲到可以从头放完，再开始播，中途不会卡顿
+    audio.addEventListener('canplaythrough', function(){ play(); }, { once: true });
+
+    // 页面主要内容加载完之后才下载音频，不和请柬图抢带宽
+    function fetchAudio(){
+      audio.preload = 'auto';
+      audio.load();
     }
-    function sync(){
-      btn.classList.toggle('playing', !audio.paused);
-      btn.classList.toggle('paused', audio.paused);
-    }
-    audio.addEventListener('play', sync);
-    audio.addEventListener('pause', sync);
+    if (document.readyState === 'complete') fetchAudio();
+    else window.addEventListener('load', fetchAudio);
 
     btn.addEventListener('click', function(e){
       e.stopPropagation();
-      if (audio.paused) play(); else audio.pause();
+      if (audio.paused) { userPaused = false; play(); }
+      else { userPaused = true; audio.pause(); }
     });
 
-    // 浏览器不允许无交互自动播放，所以首次轻触页面时再尝试一次
+    // 浏览器普遍禁止无交互自动播放，所以首次轻触时再尝试一次
     function firstTouch(){
       play();
       document.removeEventListener('pointerdown', firstTouch);
