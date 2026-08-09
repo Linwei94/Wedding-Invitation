@@ -720,7 +720,7 @@
   // 网页是静态的、托管在 GitHub Pages 上，跑不了后端；登记接口单独部署在
   // 自己的服务器上（见仓库里的 server/），所以这里要填接口的完整地址（结尾带斜杠）。
   // 换了接口地址，改这一行即可；留空字符串 '' 则改为同源请求。
-  var API_BASE = 'https://tlwxpw.xyz/';
+  var API_BASE = '';   // 网页与接口同源（都在 wedding.taolinwei.com），留空即可
 
   function apiUrl(p){
     return (API_BASE || '/') + p;

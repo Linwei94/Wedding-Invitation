@@ -149,7 +149,7 @@
 
 <script>
   // 与 index.html 里的 API_BASE 保持一致（接口部署在自己的服务器上，结尾带斜杠）
-  var API_BASE = 'https://tlwxpw.xyz/';
+  var API_BASE = '';   // 网页与接口同源（都在 wedding.taolinwei.com），留空即可
   function apiUrl(p){ return (API_BASE || '/') + p; }
 
   var tokenInput = document.getElementById('token');

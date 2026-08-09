@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/var/www/wedding-api
+WorkingDirectory=/var/www/wedding/server
 ExecStart=/usr/bin/node server.js
 Restart=always
 RestartSec=3
@@ -19,7 +19,7 @@ Environment=ADMIN_TOKEN=CHANGE_ME
 Environment=ALLOWED_ORIGIN=https://wedding.taolinwei.com
 
 # 数据文件所在目录必须可写，其余部分只读
-ReadWritePaths=/var/www/wedding-api/data
+ReadWritePaths=/var/www/wedding/server/data
 ProtectSystem=full
 NoNewPrivileges=true
 PrivateTmp=true
