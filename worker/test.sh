@@ -2,7 +2,8 @@
 # 对着本地 dev worker 跑一遍登记接口。用法：bash worker/test.sh [端口]
 B="http://127.0.0.1:${1:-8813}"
 TOK=test-token-1234567890
-ORG='https://linwei94.github.io'
+ORG='https://taolinwei.com'
+ORG2='https://linwei94.github.io'
 pass=0; fail=0
 ck(){ if [[ "$3" == *"$2"* ]]; then echo "  PASS  $1"; pass=$((pass+1));
       else echo "  FAIL  $1"; echo "        期望包含: $2"; echo "        实际: $3"; fail=$((fail+1)); fi; }
@@ -61,6 +62,8 @@ ck "写入接口对任意来源放开" 'Access-Control-Allow-Origin: *' \
    "$(curl -s -m 10 -i -X POST "$B/api/rsvp" -H 'Content-Type: text/plain;charset=UTF-8' -H 'Origin: https://somewhere.example' -d '{"name":"跨域测试","count":"1"}' | tr -d '\r')"
 ck "读取接口只认自己的页面" "Access-Control-Allow-Origin: $ORG" \
    "$(curl -s -m 10 -i "$B/api/list" -H "x-admin-token: $TOK" -H "Origin: $ORG" | tr -d '\r')"
+ck "名单里第二个来源也放行" "Access-Control-Allow-Origin: $ORG2" \
+   "$(curl -s -m 10 -i "$B/api/list" -H "x-admin-token: $TOK" -H "Origin: $ORG2" | tr -d '\r')"
 ck "读取接口不回显陌生来源" "Access-Control-Allow-Origin: $ORG" \
    "$(curl -s -m 10 -i "$B/api/list" -H "x-admin-token: $TOK" -H 'Origin: https://evil.example' | tr -d '\r')"
 ck "出错也带 CORS 头" 'Access-Control-Allow-Origin' \

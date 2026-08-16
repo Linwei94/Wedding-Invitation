@@ -191,6 +191,9 @@
   // 例：'https://rsvp.taolinwei.com'
   var RSVP_ENDPOINT = '';
 
+  // 结尾带斜杠也没关系，去掉，免得拼出 //api/list 这种匹配不上的路径。
+  RSVP_ENDPOINT = String(RSVP_ENDPOINT).replace(/\/+$/, '');
+
   var tokenInput = document.getElementById('token');
   var msgEl = document.getElementById('msg');
   var loginPanel = document.getElementById('loginPanel');
