@@ -84,7 +84,7 @@
   .count-hint{font-size:12px;color:var(--ink-soft);margin:10px 0 0;}
   .count-hint.warn{color:#b23b3b;font-weight:700;}
 
-  /* ---- 从备用通道导入 ---- */
+  /* ---- 手工补录 ---- */
   textarea{
     width:100%; padding:11px 12px; font-size:14px; font-family:inherit; line-height:1.7;
     border:1px solid var(--line); background:var(--field);
@@ -166,13 +166,13 @@
     </div>
 
     <div class="panel">
-      <p class="chart-title">从备用通道导入</p>
+      <p class="chart-title">手工补录</p>
       <p class="count-hint" style="margin:0 0 12px">
-        宾客走了备用通道（微信发来的「【出席登记】…」整行，或国内备用表单导出的 CSV）时，
-        把内容粘到这里。一行一条，两种格式可以混着放。解析后先让你确认，再写进服务器——
-        这样名单永远只有一份，不会在这里和别处各存一半。
+        有宾客是打电话、或者当面告诉你的，可以在这里补录：一行一位，
+        写成「姓名,人数」即可（制表符分隔、Excel 直接粘过来也行）。
+        解析后会先让你确认，再写进服务器——这样名单永远只有一份。
       </p>
-      <textarea id="importText" rows="5" placeholder="【出席登记】姓名：张三｜人数：2
+      <textarea id="importText" rows="5" placeholder="张三,2
 李四,3"></textarea>
       <div class="toolbar" style="margin-top:10px">
         <input type="file" id="importFile" accept=".csv,.txt">
@@ -450,10 +450,10 @@
     el.textContent = '最近一条登记：' + (days <= 0 ? '今天' : days + ' 天前');
     el.className = 'count-hint' + (days >= 7 ? ' warn' : '');
   }
-  // ---- 从备用通道导入 ----
+  // ---- 手工补录 ----
   //
-  // 目的只有一个：让备用通道收到的登记最终也进到同一张表里。
-  // 否则名单会被切成两半，一半在服务器、一半在某个微信聊天记录里，
+  // 目的只有一个：线下收到的登记也要进同一张表。
+  // 否则名单会被切成两半，一半在服务器、一半在你自己的备忘录里，
   // 而给酒店报人数的时候只会看到其中一半。
 
   var pending = [];
@@ -518,7 +518,7 @@
     return out;
   }
 
-  // 【出席登记】姓名：张三｜人数：2
+  // 也认「【出席登记】姓名：张三｜人数：2」这种整行文本
   // 全角｜：和半角|: 都要认——中文输入法、手工重打、各家客户端都可能产出半角那版，
   // 只认全角的正则在真实数据上会直接返回 null。
   function parseReceipt(line) {

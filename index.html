@@ -40,9 +40,9 @@
   }
   *{box-sizing:border-box;}
   /* hidden 属性必须真的能隐藏元素。浏览器自带的 [hidden]{display:none} 属于 UA 样式，
-     优先级低于任何作者样式，所以下面 .fb-btn / .fb-qr 上的 display:block 会把它顶掉，
-     元素照样显示出来（这个坑本文件早先在 .lightbox[hidden] 上已经踩过一次）。
-     加一条 !important 的兜底，JS 里 el.hidden = false 会移除属性，规则自然失效。 */
+     优先级低于任何作者样式，所以一旦某个类上写了 display:block，hidden 就失效、
+     元素照样显示出来（这个坑本文件在 .lightbox 上踩过一次，在备用通道上又踩过一次）。
+     留一条 !important 的兜底；JS 里 el.hidden = false 会移除属性，规则自然失效。 */
   [hidden]{display:none !important;}
   html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
   html,body{margin:0;padding:0;}
@@ -316,79 +316,6 @@
      因为有些脚本会跳过不可见的字段。 */
   .hp-field{position:absolute;left:-99999px;width:1px;height:1px;overflow:hidden;}
 
-  /* ---------- 备用登记通道（主接口连不上时自动出现） ---------- */
-  .rsvp-fallback{
-    margin-top:16px;
-    padding:16px 14px 14px;
-    background:var(--field);
-    border:1px solid var(--line);
-    border-radius:3px;
-  }
-  .fb-title{
-    font-size:13.5px;
-    font-weight:700;
-    color:var(--red);
-    text-align:center;
-    letter-spacing:2px;
-    margin:0 0 8px;
-  }
-  .fb-lead{
-    font-size:12.5px;
-    color:var(--ink-soft);
-    text-align:center;
-    line-height:1.8;
-    margin:0 0 14px;
-  }
-  .fb-btn{
-    display:block;
-    width:100%;
-    padding:12px;
-    background:var(--red);
-    color:#f7efe1;
-    border:none;
-    border-radius:3px;
-    font-family:var(--serif);
-    font-size:14px;
-    font-weight:700;
-    letter-spacing:3px;
-    text-indent:3px;
-    text-align:center;
-    text-decoration:none;
-    cursor:pointer;
-  }
-  .fb-btn.ghost{background:transparent;color:var(--red);border:1px solid var(--red-soft);}
-  .fb-or{text-align:center;font-size:11.5px;color:var(--ink-soft);margin:10px 0;}
-  .fb-box{
-    display:none;
-    margin-top:10px;
-    padding:10px 12px;
-    background:var(--card);
-    border:1px dashed var(--line);
-    border-radius:3px;
-    font-size:12.5px;
-    line-height:1.8;
-    word-break:break-all;
-    /* 复制被浏览器拒绝时，宾客还能长按选中这段文字 */
-    -webkit-user-select:all;
-    user-select:all;
-  }
-  .fb-hint{
-    font-size:11.5px;
-    color:var(--ink-soft);
-    text-align:center;
-    line-height:1.8;
-    margin:12px 0 0;
-  }
-  .fb-qr{
-    display:block;
-    width:132px;
-    margin:10px auto 0;
-    padding:5px;
-    background:#fff;
-    border:1px solid var(--line);
-    border-radius:3px;
-  }
-
   /* ---------- gallery ---------- */
   .gallery{padding:2px 0 8px;}
   .gsec{margin-bottom:36px;}
@@ -621,18 +548,6 @@
       <p class="success-msg" id="successMsg"></p>
       <p class="rsvp-note">登记信息将自动保存；如需修改，用同样的姓名重新提交一次即可覆盖之前的登记</p>
 
-      <!-- 主接口连不上时由 JS 自动展开，平时不显示 -->
-      <div class="rsvp-fallback" id="rsvpFallback" hidden>
-        <p class="fb-title">备用登记通道</p>
-        <p class="fb-lead">刚才没能连上服务器，登记还没提交成功。<br>用下面任意一种方式都算登记，我们一定收到。</p>
-        <a class="fb-btn" id="fbFormLink" target="_blank" rel="noopener" hidden>打开国内备用登记表</a>
-        <div class="fb-or" id="fbOr" hidden>或者</div>
-        <button type="button" class="fb-btn ghost" id="fbCopyBtn">复制登记信息，发给新人</button>
-        <div class="fb-box" id="fbText"></div>
-        <p class="fb-hint">把上面这行字发给新人即可。<strong>只转发网页不算登记。</strong></p>
-        <p class="fb-hint" id="fbContact" hidden></p>
-        <img class="fb-qr" id="fbQr" src="images/wechat-qr.png" alt="新人微信二维码" hidden>
-      </div>
     </div>
 
     <div class="parade reveal d3" aria-hidden="true">
@@ -793,18 +708,12 @@
   </div>
 
 <script>
-  // ================= 登记接口配置（改这三行就够） =================
+  // ================= 登记接口配置（只有这一行要改） =================
   //
   // RSVP_ENDPOINT  登记接口地址，结尾不要带斜杠，例：'https://rsvp.taolinwei.com'
-  //                留空 = 不去连任何服务器，宾客点提交后直接看到「备用登记通道」。
-  //                这个默认值是刻意的：宁可让宾客走备用通道，也不要对着一个
-  //                不存在的接口白转圈，最后什么都没登记上。
-  // FALLBACK_FORM_URL  国内备用表单（金数据等）的地址，留空则不显示这一层。
-  // CONTACT_LINE   备用通道里显示的联系方式文字，留空则不显示。
-  //                另外把新人微信二维码放成 images/wechat-qr.png 就会自动显示。
-  var RSVP_ENDPOINT     = '';
-  var FALLBACK_FORM_URL = '';
-  var CONTACT_LINE      = '';
+  //                没填的话，宾客点提交会看到「稍后再试」的提示——
+  //                所以发请柬之前一定要把这一行填上并验证过。
+  var RSVP_ENDPOINT = '';
   // ==============================================================
 
   // 容错：地址结尾带了斜杠也没关系。不处理的话会拼出 //api/rsvp 这种路径，
@@ -814,7 +723,6 @@
   var form = document.getElementById('rsvpForm');
   var submitBtn = document.getElementById('submitBtn');
   var successMsg = document.getElementById('successMsg');
-  var fallbackBox = document.getElementById('rsvpFallback');
 
   // 页面一打开就先打一发 /health，把 DNS + TCP + TLS 这几个往返在宾客读请柬的时候
   // 提前付掉。等真正点提交时就只剩一个往返——国际链路上这能省掉一秒多的「转圈」，
@@ -847,14 +755,14 @@
     setBusy(true);
     successMsg.style.display = 'none';
 
-    // 两次尝试：10 秒，再 8 秒。整体最多约 18 秒后转备用通道。
+    // 两次尝试：10 秒，再 8 秒。整体最多约 18 秒后提示宾客稍后重试。
     send(payload, 10000, function(r1){
       if (r1.ok) return succeed(r1.data);
       if (r1.userError) return showError(r1.userError);
       send(payload, 8000, function(r2){
         if (r2.ok) return succeed(r2.data);
         if (r2.userError) return showError(r2.userError);
-        giveUp(payload);
+        giveUp();
       });
     });
   });
@@ -885,7 +793,7 @@
           return finish({ ok: true, data: data });
         }
         // 400 是「宾客填的内容有问题」、429 是「提交太频繁」，服务端返回的都是
-        // 我们自己写的中文提示，直接展示就好；这两种情况重试和转备用通道都没有意义。
+        // 我们自己写的中文提示，直接展示就好；这两种情况重试没有意义。
         if ((xhr.status === 400 || xhr.status === 429) && data && data.error) {
           return finish({ ok: false, userError: data.error });
         }
@@ -902,7 +810,6 @@
 
   function succeed(data){
     setBusy(false);
-    fallbackBox.hidden = true;
     successMsg.style.color = '';
     successMsg.textContent = data && data.mode === 'updated'
       ? '已更新您的登记信息，感谢回复！'
@@ -917,14 +824,14 @@
     successMsg.style.display = 'block';
   }
 
-  function giveUp(payload){
+  function giveUp(){
     setBusy(false);
     successMsg.style.color = '#b23b3b';
     // 固定文案，绝不把 err.message 拼进来——原来那版会让长辈看到
     // 「提交失败：Failed to fetch」，既看不懂也不知道该怎么办。
-    successMsg.textContent = '网络不太稳定，登记没有提交成功。请用下面任意一种方式登记。';
+    // 按钮已经放开，宾客可以直接再点一次。
+    successMsg.textContent = '网络不太稳定，登记没有提交成功，请稍后再点一次「提交登记」。';
     successMsg.style.display = 'block';
-    openFallback(payload);
   }
 
   // 按钮状态集中在一处，保证任何一条失败路径都会把它放开。
@@ -932,58 +839,6 @@
     submitBtn.disabled = busy;
     submitBtn.textContent = busy ? '提交中…' : '提交登记';
   }
-
-  function openFallback(payload){
-    document.getElementById('fbText').textContent = composeLine(payload);
-
-    if (FALLBACK_FORM_URL) {
-      // 预填姓名和人数，宾客到那边直接提交就行，不用重新打一遍。
-      var link = document.getElementById('fbFormLink');
-      link.href = FALLBACK_FORM_URL
-        + (FALLBACK_FORM_URL.indexOf('?') >= 0 ? '&' : '?')
-        + 'name=' + encodeURIComponent(payload.name)
-        + '&count=' + encodeURIComponent(payload.count);
-      link.hidden = false;
-      document.getElementById('fbOr').hidden = false;
-    }
-
-    if (CONTACT_LINE) {
-      var contact = document.getElementById('fbContact');
-      contact.textContent = CONTACT_LINE;
-      contact.hidden = false;
-    }
-
-    // 二维码放了才显示，没放就不显示——免得出现一个破图。
-    var qr = document.getElementById('fbQr');
-    var probe = new Image();
-    probe.onload = function(){ qr.hidden = false; };
-    probe.src = qr.getAttribute('src');
-
-    fallbackBox.hidden = false;
-    if (fallbackBox.scrollIntoView) {
-      try { fallbackBox.scrollIntoView(); } catch (e) {}
-    }
-  }
-
-  // 拼成一行，方便宾客整条转发给新人。
-  // ｜和【】是这行字的分隔符，姓名里出现就换成空格，免得那边读串行。
-  function composeLine(payload){
-    return '【出席登记】姓名：' + clean(payload.name, 40)
-      + '｜人数：' + clean(payload.count, 2);
-  }
-  function clean(s, max){
-    return String(s == null ? '' : s).replace(/[｜|【】\r\n]/g, ' ').trim().slice(0, max);
-  }
-
-  document.getElementById('fbCopyBtn').addEventListener('click', function(){
-    var btn = this;
-    var box = document.getElementById('fbText');
-    box.style.display = 'block';    // 复制被拒时，至少能长按选中这段字
-    copyToClipboard(box.textContent, function(ok){
-      btn.textContent = ok ? '已复制，粘贴发给新人即可' : '请长按下面的文字复制';
-      setTimeout(function(){ btn.textContent = '复制登记信息，发给新人'; }, 2600);
-    });
-  });
 
   // 复制到剪贴板，回调收到 true / false。
   // 注意 document.execCommand('copy') 失败时是**返回 false**，不是抛异常——
