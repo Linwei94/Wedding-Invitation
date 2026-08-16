@@ -55,8 +55,7 @@
 │   └── bgm.mp3         # 背景音乐（见"背景音乐"）
 ├── favicon.ico         # 真正的多尺寸 ICO（内含 16/32/48）
 ├── site.webmanifest    # 安卓"添加到主屏"用
-├── functions/api/      # 登记接口，部署在 EdgeOne Pages Functions 上（见下方"部署结构"）
-├── server/             # 备用方案：整站搬到自建服务器（当前未使用，见 server/README.md）
+├── worker/             # 登记接口（Cloudflare Worker + D1），见下方"登记接口"
 └── README.md
 ```
 
@@ -147,8 +146,8 @@
 
 ## 出席登记表单
 
-访客填完表单点"提交登记"后，请求发到 EdgeOne Pages Functions 的 `/api/rsvp`，
-记录存进 EdgeOne 的 KV 存储（键值对数据库，不用自己管服务器）。
+访客填完表单点"提交登记"后，请求发到 Cloudflare Worker 的 `/api/rsvp`，
+记录存进 Cloudflare D1（一个免运维的 SQLite 数据库）。
 
 表单不再单独收集"是否出席"——提交表单本身就代表出席。
 
@@ -158,67 +157,137 @@
 - 人数超出 1–5 会被自动收进范围，姓名为空会被拒绝
 
 > 用"姓名"作为唯一标识。万一两位宾客同名，后填的会覆盖先填的。
-> 如果担心重名，告诉我，可以改成"姓名 + 手机号"一起作为标识。
+> 后台导入时遇到同名会明确标出"疑似重名"并且默认不勾选，由人来确认。
+
+### 连不上服务器时会怎样（最关键的一块）
+
+国内访问境外接口本来就不稳，所以这条路必须有兜底：
+
+1. 提交会自动重试两次（10 秒 + 8 秒）
+2. 两次都失败，页面**自动展开「备用登记通道」**：
+   - 国内备用表单的链接（`FALLBACK_FORM_URL`，会预填姓名和人数）
+   - 「复制登记信息」按钮，复制出 `【出席登记】姓名：…｜人数：…｜备注：…`，
+     宾客直接微信发给新人
+   - 新人微信二维码（放成 `images/wechat-qr.png` 就显示，没放就不显示，不会留破图）
+3. 宾客看到的永远是固定中文文案，不会出现 `Failed to fetch` 这类看不懂的东西
+
+备用通道收到的登记，在后台「从备用通道导入」里粘进去，会**写回同一个服务器**，
+所以名单始终只有一份，不会一半在这、一半在微信聊天记录里。
+
+备注那一栏问的是饮食禁忌，属于健康信息，所以**故意不**预填进备用表单的 URL——
+免得留在第三方的访问日志和微信的链接扫描里。
+
+### 三个配置项
+
+`index.html` 顶部 `<script>` 里：
+
+```js
+var RSVP_ENDPOINT     = '';   // Worker 地址，结尾不要带斜杠
+var FALLBACK_FORM_URL = '';   // 国内备用表单地址，留空则不显示这一层
+var CONTACT_LINE      = '';   // 备用通道里显示的联系方式，留空则不显示
+```
+
+`admin.html` 顶部还有一个 `RSVP_ENDPOINT`，填成同一个地址。
+
+> `RSVP_ENDPOINT` 留空是刻意的默认值：这时页面不去连任何服务器，宾客点提交后
+> 直接看到备用通道。宁可这样，也不要对着一个不存在的接口白转圈、最后什么都没登记上。
 
 ## 本地预览
 
-直接用浏览器打开 `index.html` 可以看到页面样式和动画。登记表单需要后端函数，
-本地静态打开会提交失败，属正常现象。
+直接用浏览器打开 `index.html` 能看页面样式和动画。想把登记链路**整条**跑起来
+（不用部署、不花钱）：
 
-## 部署结构（重要）
+```bash
+node worker/dev.mjs "$PWD" 8813   # 用 node:sqlite 模拟 D1，同时把静态页面伺服起来
+bash worker/test.sh 8813          # 26 项接口测试
+```
 
-页面和接口**分开部署在两个地方**，因为 GitHub Pages 只能托管静态文件、跑不了后端：
+浏览器打开 http://127.0.0.1:8813/ ，后台在 `/admin.html`，本地口令
+`test-token-1234567890`。
+
+## 部署结构
+
+页面和接口分开部署，因为 GitHub Pages 只能托管静态文件、跑不了后端：
 
 ```
-GitHub Pages                              EdgeOne Pages（腾讯云，国内可直接访问）
-https://linwei94.github.io/               https://weddinginvitation-xxxxx.edgeone.cool/
+GitHub Pages                        Cloudflare Worker + D1
+https://linwei94.github.io/         https://rsvp.taolinwei.com/
 Wedding-Invitation/
-├── index.html                            ├── functions/api/rsvp.js   写入登记
-├── admin.html            ── 跨域调用 ──▶ └── functions/api/list.js   读取名单
-├── images/ audio/                             （数据存在 EdgeOne KV 里，免运维）
-└── favicon / manifest
+├── index.html        ── 调用 ──▶   ├── POST /api/rsvp   写入登记（公开）
+├── admin.html                      ├── GET  /api/list   读取名单（要口令）
+├── images/ audio/                  └── GET  /health     存活探测 + 连接预热
+└── favicon / manifest                   （数据在 D1，每天备份到私有仓库）
 ```
-
-两边的连接点是 `index.html` 和 `admin.html` 里的 `API_BASE` 常量。
-选这个组合是因为**两边都不用自己管服务器**：GitHub Pages 和 EdgeOne Pages 都是托管平台，
-不需要买 VM、装系统、开 SSH，出问题也不用登服务器排查——这是当前最简单、
-同时国内访客能直接打开（不用翻墙）的组合。
-
-> 仓库里还留着 `server/`（把网页和接口都搬到自建腾讯云服务器的方案），
-> 这条路线**暂不使用**，先不用管它。
 
 ### 一、页面部署到 GitHub Pages
 
-1. 把这个分支合并到默认分支（`main`）
-2. 仓库 Settings → Pages → Source 选 `main` 分支、目录 `/ (root)`
-3. 不用配自定义域名的话到这步就好了，几分钟后能在
-   `https://linwei94.github.io/Wedding-Invitation/` 打开
-4. `.nojekyll` 让 GitHub 原样输出文件，不要删
-5. 如果之后想换成自己的域名（比如 `wedding.taolinwei.com`），
-   加一个内容为该域名的 `CNAME` 文件到仓库根目录，域名商那边加一条 CNAME 记录指向
-   `linwei94.github.io`，再在 Settings → Pages 勾 **Enforce HTTPS**——同时要记得把
-   `index.html` 里 `og:url`/`og:image` 等几行换成新域名
+1. 代码推到 `main` 分支即自动发布
+2. 仓库 Settings → Pages → Source 选 `main`、目录 `/ (root)`
+3. `.nojekyll` 让 GitHub 原样输出文件，不要删
+4. 几分钟后能在 `https://linwei94.github.io/Wedding-Invitation/` 打开
 
-### 二、接口部署到 EdgeOne Pages Functions
+### 二、先做国内实测，再建接口
 
-1. 登录腾讯云 EdgeOne 控制台 → Pages → 新建项目，关联这个 GitHub 仓库
-   （如果之前建过项目 `weddinginvitation-dpcecgtcs5rh`，确认它还在，直接复用即可）
-2. 项目的构建产物目录留空/根目录即可——真正会被识别为接口的是 `functions/api/` 下的文件，
-   EdgeOne 会自动把它们发布成 `/api/rsvp`、`/api/list` 两个接口，不需要额外构建步骤
-3. 项目设置里绑定一个 **KV 命名空间**，变量名必须是 `RSVP_KV`（代码里写死的名字）
-4. 项目设置里加两个环境变量：
-   - `ADMIN_TOKEN`：后台登录口令，自己设一个复杂的
-   - `ALLOWED_ORIGIN`：填 GitHub Pages 的地址，`https://linwei94.github.io`
-     （限制只有自己的页面能调接口；不设的话谁都能调，仅供临时测试用）
-5. 部署完成后，控制台会给一个形如 `https://xxxxx.edgeone.cool/` 的项目地址，
-   把它填进 `index.html` 和 `admin.html` 里的 `API_BASE`（当前文件里先占位填的是
-   `https://weddinginvitation-dpcecgtcs5rh.edgeone.cool/`，如果这个项目还在用就不用改，
-   不在了就换成新地址）
-6. 验证：`curl https://你的地址/api/list`，没带口令应该返回
-   `{"ok":false,"error":"口令不正确"}`，说明接口和 KV 绑定都正常
+我**没有网络，没有验证过任何一条国内可达性**。Cloudflare 在国内大致是
+"通常能连上、有时很慢"，必须你用国内手机实测。手机流量、关 WiFi、关 VPN：
 
-> **接口必须是 HTTPS**：网页在 https 上，浏览器不允许它去调 http 接口。
-> EdgeOne Pages 的项目地址默认就是 HTTPS，不用额外配证书。
+| # | 测什么 | 怎么测 | 判断 |
+| --- | --- | --- | --- |
+| 1 | 走哪个机房 | 打开 `https://rsvp.taolinwei.com/cdn-cgi/trace` 看 `colo=` | HKG/NRT 好；LAX/SJC/SEA 说明绕到了美西，每次提交多跨一次太平洋 |
+| 2 | 能不能解析 | 用 `114.114.114.114` 解析这个域名 | 拿到真实 Cloudflare IP 说明没被污染。这一步区分"被墙"和"只是慢" |
+| 3 | 普通浏览器 | 打开 `/health` | 返回 JSON 就是通的 |
+| 4 | **微信里** | 把 `/health` 发给"文件传输助手"，**在微信里点开** | 测的是微信 X5 内核；出现"已停止访问该网页"说明域名被微信拦了 |
+| 5 | 真提交一次 | 微信里打开正式页面，填表提交，**掐表** | 2 秒内好；反复超过 5 秒宾客会放弃 |
+| 6 | 最坏情况 | 晚上 21:00–22:30 再测一遍第 5 项，最好三家运营商都试 | 只有白天能用的站，婚礼当周会出事 |
+
+还要测**页面本身**：把 `https://linwei94.github.io/Wedding-Invitation/` 发到微信里打开，
+看能不能打开、请柬图几秒出来。这条是任何后端方案都救不了的；如果 github.io 在国内
+打不开，备用表单就得当"最后一道防线"，所以它的表单说明里要写上日期、地点、详细地址。
+
+**第 1/2/4 项就挂了的话别硬上**——告诉我，我们把国内表单服务改成主通道。
+
+### 三、部署接口到 Cloudflare
+
+```bash
+npm i -g wrangler
+wrangler login
+
+cd worker
+wrangler d1 create rsvp --location apac     # --location apac 不能省，否则库可能落在美东
+# 把输出里的 database_id 填进 wrangler.toml
+
+wrangler d1 execute rsvp --remote --file=./schema.sql
+
+wrangler secret put ADMIN_TOKEN             # 32 位以上随机串，别用平时的密码
+wrangler secret put IP_SALT                 # 随便一串随机字符，用来哈希 IP
+wrangler secret put BACKUP_TOKEN            # 只对私有备份仓库有权限的 PAT（不备份可跳过）
+
+wrangler deploy
+```
+
+再去 Cloudflare 控制台把 `rsvp.taolinwei.com` 作为 Custom Domain 绑给这个 Worker，
+然后把这个地址填进 `index.html` 和 `admin.html` 的 `RSVP_ENDPOINT`。
+
+验证：`curl https://rsvp.taolinwei.com/api/list` 不带口令应该返回
+`{"ok":false,"error":"口令不正确"}`。
+
+> **为什么必须用自己的域名**：`*.workers.dev` 在国内被 DNS 污染的报告很多，
+> 而污染是按域名匹配的，用自己的域名正好绕开这一条；以后想换后端也只改一行。
+> 别用 `.xyz`/`.top` 这类便宜后缀，在国内更容易被微信的域名管控拦下来。
+
+### 四、每天自动备份名单
+
+名单是这个项目里唯一不可再生的东西，所以 `worker/src/backup.js` 每天把它
+提交到一个**私有**仓库（`wrangler.toml` 里的 cron 触发）：
+
+1. 新建一个**私有** GitHub 仓库，确认真的是 private——里面有宾客姓名和饮食禁忌
+2. 建一个只对这个仓库有 Contents 读写权限的 fine-grained PAT，
+   用 `wrangler secret put BACKUP_TOKEN` 存进去
+3. `wrangler.toml` 里把 `BACKUP_REPO` 填成 `用户名/仓库名`
+4. 可选：`HEALTHCHECK_URL` 填一个 healthchecks.io 的地址，
+   备份成功才会 ping，这样"密钥被吊销"会变成一条告警而不是静悄悄地什么都没发生
+
+条数比上次少 2 条以上时会**拒绝**备份，避免用一份异常的数据覆盖掉好的备份。
 
 ## 查看名单（数据管理后台）
 
@@ -229,9 +298,15 @@ Wedding-Invitation/
 - **每日登记趋势**：按天聚合的累计折线图（登记满两天后才显示）
 - **可搜索、可排序的名单表格**：支持按姓名/备注搜索，点表头按人数或时间排序
 - **导出 CSV**：导出的是当前筛选结果，文件带 UTF-8 BOM，Excel 打开中文不乱码
+- **「最近一条登记：X 天前」**：超过 7 天标红。每一种静默故障（接口挂了、额度用光、
+  备用表单被暂停）在名单上长得都一样——没有新登记，所以要把这个显式显示出来
+- **从备用通道导入**：把微信收到的「【出席登记】…」整行，或备用表单导出的 CSV
+  粘进去，解析后确认再写回服务器。同名会标"疑似重名"且默认不勾选；
+  没认出来的行会原样列出来告诉你，**不会悄悄丢掉**
 
 口令只临时存在浏览器当前标签页，关掉即清空。页面加了 `noindex` 不会被搜索引擎收录，
-但**知道网址的人仍能看到登录框**——口令别设得太简单。
+但**知道网址的人仍能看到登录框**——口令用 32 位以上随机串，别用平时的密码，
+它是保护两百来位宾客姓名的唯一一道门。
 
 ## 修改内容
 

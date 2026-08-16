@@ -1,0 +1,41 @@
+name = "wedding-rsvp"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+# 页面在 GitHub Pages 上，这个 Worker 只提供 /api/rsvp、/api/list、/health 三个接口。
+# 必须绑到自己的域名上：*.workers.dev 在国内被 DNS 污染的报告很多，而 GFW 的
+# DNS 污染是按域名匹配的，用自己的域名正好能绕开这一条。
+routes = [
+  { pattern = "rsvp.taolinwei.com", custom_domain = true }
+]
+
+# 建库时务必指定 APAC，否则库可能落在美东，每次写入要多跨一次太平洋：
+#   wrangler d1 create rsvp --location apac
+# 建完把下面的 database_id 换成命令输出里的那个 UUID。
+[[d1_databases]]
+binding = "DB"
+database_name = "rsvp"
+database_id = "在这里填 wrangler d1 create 输出的 database_id"
+
+[vars]
+# 只有这个来源能读名单（/api/list）。写入接口(/api/rsvp)故意不限来源，见 src/index.js 里的说明。
+ALLOWED_ORIGIN = "https://linwei94.github.io"
+
+# 每个 IP 在 RATE_WINDOW_MIN 分钟内最多写入多少次。给得很宽松是故意的：
+# 国内运营商大量使用 NAT，一桌亲戚可能共用一个出口 IP，卡太严会把真宾客挡在外面。
+RATE_LIMIT = "60"
+RATE_WINDOW_MIN = "10"
+
+# 备份用的私有仓库（见 src/backup.js）。不用备份就把 cron 那段删掉。
+BACKUP_REPO = ""
+BACKUP_PATH = "guests"
+HEALTHCHECK_URL = ""
+
+# 每天备份一次；婚礼前两周建议改成 "0 */12 * * *"
+[triggers]
+crons = ["17 19 * * *"]
+
+# 以下用 `wrangler secret put <名字>` 设置，不要写进这个文件：
+#   ADMIN_TOKEN     后台口令，32 位以上随机串，不要用自己平时的密码
+#   IP_SALT         给 IP 做哈希的盐，随便一串随机字符
+#   BACKUP_TOKEN    只对那个私有备份仓库有 Contents:R/W 权限的 fine-grained PAT

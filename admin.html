@@ -83,6 +83,28 @@
   .msg{font-size:13px;color:#b23b3b;margin-top:10px;}
   .empty{color:var(--ink-soft);font-size:13px;padding:18px 0;text-align:center;}
   .count-hint{font-size:12px;color:var(--ink-soft);margin:10px 0 0;}
+  .count-hint.warn{color:#b23b3b;font-weight:700;}
+
+  /* ---- 从备用通道导入 ---- */
+  textarea{
+    width:100%; padding:11px 12px; font-size:14px; font-family:inherit; line-height:1.7;
+    border:1px solid var(--line); background:var(--field);
+    color:var(--ink); border-radius:3px; resize:vertical;
+  }
+  .imp-list{margin:14px 0 0;border:1px solid var(--line);border-radius:3px;overflow:hidden;}
+  .imp-row{
+    display:flex; gap:10px; align-items:flex-start;
+    padding:9px 12px; font-size:13px; border-top:1px solid var(--line);
+  }
+  .imp-row:first-child{border-top:none;}
+  .imp-row.dup{background:#fdf4f2;}
+  .imp-row label{margin:0;font-size:13px;color:var(--ink);flex:1;cursor:pointer;}
+  .imp-flag{color:#b23b3b;font-size:11.5px;display:block;margin-top:2px;}
+  .imp-bad{
+    margin:12px 0 0; padding:10px 12px; font-size:12.5px; line-height:1.8;
+    background:#fdf4f2; border:1px solid #e8cdc6; border-radius:3px; color:#b23b3b;
+    white-space:pre-wrap; word-break:break-all;
+  }
 </style>
 </head>
 <body>
@@ -93,8 +115,8 @@
   <div class="panel" id="loginPanel">
     <div class="row">
       <div>
-        <label for="token">管理口令</label>
-        <input type="password" id="token" autocomplete="current-password">
+        <label for="token">管理口令（32 位以上随机串，不要用平时的密码）</label>
+        <input type="password" id="token" autocomplete="off">
       </div>
       <button id="loadBtn">查看名单</button>
     </div>
@@ -143,14 +165,31 @@
       </div>
       <p class="empty" id="empty" style="display:none">还没有人登记。</p>
       <p class="count-hint" id="countHint"></p>
+      <p class="count-hint" id="liveness"></p>
+    </div>
+
+    <div class="panel">
+      <p class="chart-title">从备用通道导入</p>
+      <p class="count-hint" style="margin:0 0 12px">
+        宾客走了备用通道（微信发来的「【出席登记】…」整行，或国内备用表单导出的 CSV）时，
+        把内容粘到这里。一行一条，两种格式可以混着放。解析后先让你确认，再写进服务器——
+        这样名单永远只有一份，不会在这里和别处各存一半。
+      </p>
+      <textarea id="importText" rows="5" placeholder="【出席登记】姓名：张三｜人数：2｜备注：忌辛辣
+李四,3,不吃海鲜"></textarea>
+      <div class="toolbar" style="margin-top:10px">
+        <input type="file" id="importFile" accept=".csv,.txt">
+        <button class="ghost" id="parseBtn">解析</button>
+      </div>
+      <div id="importReport"></div>
     </div>
   </div>
 </div>
 
 <script>
-  // 与 index.html 里的 API_BASE 保持一致（接口部署在 EdgeOne Pages Functions 上，结尾带斜杠）
-  var API_BASE = 'https://weddinginvitation-dpcecgtcs5rh.edgeone.cool/';
-  function apiUrl(p){ return (API_BASE || location.pathname.replace(/[^/]*$/, '')) + p; }
+  // 和 index.html 里的 RSVP_ENDPOINT 填同一个地址，结尾不要带斜杠。
+  // 例：'https://rsvp.taolinwei.com'
+  var RSVP_ENDPOINT = '';
 
   var tokenInput = document.getElementById('token');
   var msgEl = document.getElementById('msg');
@@ -183,27 +222,38 @@
   function load() {
     var token = tokenInput.value.trim();
     if (!token) return;
+    if (!RSVP_ENDPOINT) {
+      msgEl.textContent = '还没配置 RSVP_ENDPOINT——把 Worker 地址填进这个文件顶部那一行。';
+      msgEl.style.display = 'block';
+      return;
+    }
     loadBtn.disabled = true;
     msgEl.style.display = 'none';
 
-    fetch(apiUrl('api/list'), { headers: { 'x-admin-token': token } })
+    // 不用 .finally()：它是 ES2017，在老浏览器里没有，一旦缺失会直接抛异常，
+    // 把「查看名单」按钮永久禁用掉。放开按钮的动作写进两个分支里。
+    fetch(RSVP_ENDPOINT + '/api/list', { headers: { 'x-admin-token': token } })
       .then(function (res) { return res.json(); })
       .then(function (data) {
         if (!data.ok) throw new Error(data.error || '读取失败');
         sessionStorage.setItem('rsvpAdminToken', token);
         rows = data.records || [];
+        pending = [];
+        document.getElementById('importReport').innerHTML = '';
         renderStats(data.summary || {});
         renderCharts();
         renderTable();
+        renderLiveness();
         loginPanel.style.display = 'none';
         dataPanel.style.display = 'block';
+        loadBtn.disabled = false;
       })
       .catch(function (err) {
         sessionStorage.removeItem('rsvpAdminToken');
         msgEl.textContent = err.message;
         msgEl.style.display = 'block';
-      })
-      .finally(function () { loadBtn.disabled = false; });
+        loadBtn.disabled = false;
+      });
   }
 
   function renderStats(summary) {
@@ -289,7 +339,8 @@
   }
 
   function short(d) { return d.slice(5).replace('-', '/'); }
-  function pad(n) { return String(n).padStart(2, '0'); }
+  // 不用 String#padStart（ES2017），保持和 index.html 一样的 ES5 底线
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
 
   function visibleRows() {
     var q = searchEl.value.trim().toLowerCase();
@@ -354,9 +405,7 @@
       return [r.name, r.count, r.note || '', fmt(r.updatedAt)];
     }));
     var csv = lines.map(function (cols) {
-      return cols.map(function (c) {
-        return '"' + String(c).replace(/"/g, '""') + '"';
-      }).join(',');
+      return cols.map(cell).join(',');
     }).join('\r\n');
 
     // The BOM makes Excel read the file as UTF-8 instead of mangling Chinese.
@@ -366,6 +415,238 @@
     a.download = '出席名单.csv';
     a.click();
     URL.revokeObjectURL(a.href);
+  }
+
+  // 除了转义引号，还要掐掉 Excel 的公式注入：宾客要是在备注里写
+  // =HYPERLINK("http://坏地址")，双击打开 CSV 时 Excel 会把它当活公式执行。
+  // 前面加个单引号就只当文本了。
+  function cell(value) {
+    var s = String(value == null ? '' : value);
+    if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+
+  // ---- 状态指示：发现「静悄悄没人提交了」 ----
+  //
+  // 每一种静默故障（接口挂了、额度用光、备用表单被暂停）看起来都一样：没有新登记。
+  // 而「这周没人登记」和「提交按钮已经坏了三周」在名单上长得完全一样，
+  // 所以把「最近一条登记是多久前」显示出来，超过阈值标红。
+  function renderLiveness() {
+    var el = document.getElementById('liveness');
+    if (!el) return;
+    if (!rows.length) {
+      el.textContent = '还没有任何登记。';
+      el.className = 'count-hint warn';
+      return;
+    }
+    var newest = 0;
+    rows.forEach(function (r) {
+      var t = new Date(r.updatedAt).getTime();
+      if (t && t > newest) newest = t;
+    });
+    var days = Math.floor((Date.now() - newest) / 86400000);
+    el.textContent = '最近一条登记：' + (days <= 0 ? '今天' : days + ' 天前');
+    el.className = 'count-hint' + (days >= 7 ? ' warn' : '');
+  }
+  // ---- 从备用通道导入 ----
+  //
+  // 目的只有一个：让备用通道收到的登记最终也进到同一张表里。
+  // 否则名单会被切成两半，一半在服务器、一半在某个微信聊天记录里，
+  // 而给酒店报人数的时候只会看到其中一半。
+
+  var pending = [];
+
+  document.getElementById('parseBtn').addEventListener('click', function () {
+    doParse(document.getElementById('importText').value);
+  });
+
+  document.getElementById('importFile').addEventListener('change', function (e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      var text = String(reader.result || '').replace(/^﻿/, '');   // 去掉 Excel 的 BOM
+      document.getElementById('importText').value = text;
+      doParse(text);
+    };
+    reader.readAsText(file, 'utf-8');
+  });
+
+  function doParse(text) {
+    var parsed = parseLines(text);
+    pending = parsed.rows;
+    renderImportReport(parsed);
+  }
+
+  function parseLines(text) {
+    var out = { rows: [], bad: [] };
+    String(text || '').split(/\r?\n/).forEach(function (raw) {
+      var line = raw.trim();
+      if (!line) return;
+      var rec = parseReceipt(line) || parseDelimited(line);
+      if (rec && rec.name) out.rows.push(rec);
+      else out.bad.push(raw);       // 认不出来的原样报出去，绝不悄悄丢掉
+    });
+    return out;
+  }
+
+  // 【出席登记】姓名：张三｜人数：2｜备注：忌辛辣
+  // 全角｜：和半角|: 都要认——中文输入法、手工重打、各家客户端都可能产出半角那版，
+  // 只认全角的正则在真实数据上会直接返回 null。
+  function parseReceipt(line) {
+    if (line.indexOf('姓名') < 0) return null;
+    var s = line.replace(/｜/g, '|').replace(/：/g, ':');
+    var name = grab(s, /姓名\s*:\s*([^|]*)/);
+    if (!name) return null;
+    var note = grab(s, /备注\s*:\s*([^|]*)/);
+    return {
+      name: name,
+      count: grab(s, /人数\s*:\s*([^|]*)/),
+      note: note === '无' ? '' : note
+    };
+  }
+
+  function grab(s, re) { var m = s.match(re); return m ? m[1].trim() : ''; }
+
+  // CSV 或制表符分隔：姓名,人数,备注
+  function parseDelimited(line) {
+    var cols = line.indexOf('\t') > -1 ? line.split('\t') : splitCsv(line);
+    var name = String(cols[0] || '').trim().replace(/^["']|["']$/g, '');
+    if (!name || name === '姓名') return null;    // 跳过表头
+    return {
+      name: name,
+      count: String(cols[1] == null ? '' : cols[1]).trim(),
+      note: String(cols[2] == null ? '' : cols[2]).trim()
+    };
+  }
+
+  function splitCsv(line) {
+    var out = [], cur = '', inQ = false;
+    for (var i = 0; i < line.length; i++) {
+      var ch = line.charAt(i);
+      if (inQ) {
+        if (ch === '"') {
+          if (line.charAt(i + 1) === '"') { cur += '"'; i++; } else { inQ = false; }
+        } else { cur += ch; }
+      } else if (ch === '"') { inQ = true; }
+      else if (ch === ',') { out.push(cur); cur = ''; }
+      else { cur += ch; }
+    }
+    out.push(cur);
+    return out;
+  }
+
+  // 必须和服务端 clampCount 的解析方式一致，否则预览显示的人数会和真正写进去的不一样。
+  // 先按 parseInt 原样解析（这样 '-3' 是 -3，会被收成 1；'2人' 也能直接得到 2），
+  // 只有完全解析不出来时才退回「把非数字都去掉」。
+  function normCount(v) {
+    var s = String(v == null ? '' : v).trim();
+    var n = parseInt(s, 10);
+    if (!isFinite(n)) n = parseInt(s.replace(/[^0-9]/g, ''), 10);
+    if (!isFinite(n) || !n) return 1;
+    return Math.min(Math.max(n, 1), 5);
+  }
+
+  function renderImportReport(parsed) {
+    var box = document.getElementById('importReport');
+    box.innerHTML = '';
+    if (!parsed.rows.length && !parsed.bad.length) return;
+
+    var existing = {};
+    rows.forEach(function (r) { existing[r.name] = true; });
+
+    if (parsed.rows.length) {
+      var list = document.createElement('div');
+      list.className = 'imp-list';
+      parsed.rows.forEach(function (r, i) {
+        var dup = !!existing[r.name];
+        var row = document.createElement('div');
+        row.className = 'imp-row' + (dup ? ' dup' : '');
+
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.id = 'imp' + i;
+        // 同名的默认不勾。写入是按姓名覆盖的，一个婚礼上「张伟」很可能真是两个人，
+        // 自动合并会把先登记那位的人数和备注直接抹掉，所以这里必须让人来定。
+        cb.checked = !dup;
+        cb.setAttribute('data-i', String(i));
+
+        var label = document.createElement('label');
+        label.setAttribute('for', cb.id);
+        label.textContent = r.name + '　' + normCount(r.count) + ' 人'
+          + (r.note ? '　' + r.note : '');
+        if (dup) {
+          var flag = document.createElement('span');
+          flag.className = 'imp-flag';
+          flag.textContent = '疑似重名：名单里已经有「' + r.name
+            + '」了。勾上会覆盖那一条，确认是同一个人再勾。';
+          label.appendChild(flag);
+        }
+
+        row.appendChild(cb);
+        row.appendChild(label);
+        list.appendChild(row);
+      });
+      box.appendChild(list);
+
+      var writeBtn = document.createElement('button');
+      writeBtn.style.marginTop = '12px';
+      writeBtn.textContent = '写入服务器';
+      writeBtn.addEventListener('click', function () { writePending(writeBtn); });
+      box.appendChild(writeBtn);
+    }
+
+    if (parsed.bad.length) {
+      var bad = document.createElement('div');
+      bad.className = 'imp-bad';
+      bad.textContent = '有 ' + parsed.bad.length + ' 行没认出来，没有被导入。'
+        + '请检查或手工改成「姓名,人数,备注」再试：\n\n' + parsed.bad.join('\n');
+      box.appendChild(bad);
+    }
+  }
+
+  // 逐条走正常的登记接口写进去，所以导入的记录和网站上提交的记录完全一样，
+  // 一并进备份，也一并出现在导出的 CSV 里。
+  function writePending(btn) {
+    var picked = [];
+    [].forEach.call(document.querySelectorAll('#importReport input[type=checkbox]'), function (cb) {
+      if (cb.checked) picked.push(pending[Number(cb.getAttribute('data-i'))]);
+    });
+    if (!picked.length) return;
+
+    btn.disabled = true;
+    var okCount = 0, failed = [];
+
+    function next(i) {
+      if (i >= picked.length) {
+        var report = document.createElement('div');
+        report.className = failed.length ? 'imp-bad' : 'count-hint';
+        report.textContent = '写入成功 ' + okCount + ' 条'
+          + (failed.length ? '，失败 ' + failed.length + ' 条：' + failed.join('、') : '。')
+          + (failed.length ? '' : ' 正在刷新名单…');
+        document.getElementById('importReport').appendChild(report);
+        btn.disabled = false;
+        if (!failed.length) {
+          document.getElementById('importText').value = '';
+          setTimeout(load, 700);
+        }
+        return;
+      }
+      var r = picked[i];
+      btn.textContent = '写入中… (' + (i + 1) + '/' + picked.length + ')';
+      fetch(RSVP_ENDPOINT + '/api/rsvp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body: JSON.stringify({ name: r.name, count: normCount(r.count), note: r.note || '' })
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data && data.ok) okCount++; else failed.push(r.name);
+        })
+        .catch(function () { failed.push(r.name); })
+        .then(function () { next(i + 1); });
+    }
+    next(0);
   }
 </script>
 </body>

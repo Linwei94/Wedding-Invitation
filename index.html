@@ -307,6 +307,83 @@
     border-radius:3px;
   }
 
+  /* 蜜罐输入框：真人看不见也 tab 不到，脚本会填。移到屏幕外而不是 display:none，
+     因为有些脚本会跳过不可见的字段。 */
+  .hp-field{position:absolute;left:-99999px;width:1px;height:1px;overflow:hidden;}
+
+  /* ---------- 备用登记通道（主接口连不上时自动出现） ---------- */
+  .rsvp-fallback{
+    margin-top:16px;
+    padding:16px 14px 14px;
+    background:var(--field);
+    border:1px solid var(--line);
+    border-radius:3px;
+  }
+  .fb-title{
+    font-size:13.5px;
+    font-weight:700;
+    color:var(--red);
+    text-align:center;
+    letter-spacing:2px;
+    margin:0 0 8px;
+  }
+  .fb-lead{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    text-align:center;
+    line-height:1.8;
+    margin:0 0 14px;
+  }
+  .fb-btn{
+    display:block;
+    width:100%;
+    padding:12px;
+    background:var(--red);
+    color:#f7efe1;
+    border:none;
+    border-radius:3px;
+    font-family:var(--serif);
+    font-size:14px;
+    font-weight:700;
+    letter-spacing:3px;
+    text-indent:3px;
+    text-align:center;
+    text-decoration:none;
+    cursor:pointer;
+  }
+  .fb-btn.ghost{background:transparent;color:var(--red);border:1px solid var(--red-soft);}
+  .fb-or{text-align:center;font-size:11.5px;color:var(--ink-soft);margin:10px 0;}
+  .fb-box{
+    display:none;
+    margin-top:10px;
+    padding:10px 12px;
+    background:var(--card);
+    border:1px dashed var(--line);
+    border-radius:3px;
+    font-size:12.5px;
+    line-height:1.8;
+    word-break:break-all;
+    /* 复制被浏览器拒绝时，宾客还能长按选中这段文字 */
+    -webkit-user-select:all;
+    user-select:all;
+  }
+  .fb-hint{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    text-align:center;
+    line-height:1.8;
+    margin:12px 0 0;
+  }
+  .fb-qr{
+    display:block;
+    width:132px;
+    margin:10px auto 0;
+    padding:5px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:3px;
+  }
+
   /* ---------- gallery ---------- */
   .gallery{padding:2px 0 8px;}
   .gsec{margin-bottom:36px;}
@@ -534,10 +611,27 @@
           <label for="note">备注</label>
           <textarea id="note" name="note" placeholder="如有饮食禁忌或其他需要告知的事项，请在此留言"></textarea>
         </div>
+        <div class="hp-field" aria-hidden="true">
+          <label for="website_url">网址</label>
+          <input type="text" id="website_url" name="website_url" tabindex="-1" autocomplete="off">
+        </div>
         <button type="submit" class="submit-btn" id="submitBtn">提交登记</button>
       </form>
       <p class="success-msg" id="successMsg"></p>
       <p class="rsvp-note">登记信息将自动保存；如需修改，用同样的姓名重新提交一次即可覆盖之前的登记</p>
+
+      <!-- 主接口连不上时由 JS 自动展开，平时不显示 -->
+      <div class="rsvp-fallback" id="rsvpFallback" hidden>
+        <p class="fb-title">备用登记通道</p>
+        <p class="fb-lead">刚才没能连上服务器，登记还没提交成功。<br>用下面任意一种方式都算登记，我们一定收到。</p>
+        <a class="fb-btn" id="fbFormLink" href="#" target="_blank" rel="noopener" hidden>打开国内备用登记表</a>
+        <div class="fb-or" id="fbOr" hidden>或者</div>
+        <button type="button" class="fb-btn ghost" id="fbCopyBtn">复制登记信息，发给新人</button>
+        <div class="fb-box" id="fbText"></div>
+        <p class="fb-hint">把上面这行字发给新人即可。<strong>只转发网页不算登记。</strong></p>
+        <p class="fb-hint" id="fbContact" hidden></p>
+        <img class="fb-qr" id="fbQr" src="images/wechat-qr.png" alt="新人微信二维码" hidden>
+      </div>
     </div>
 
     <div class="parade reveal d3" aria-hidden="true">
@@ -698,58 +792,223 @@
   </div>
 
 <script>
-  // 网页是静态的、托管在 GitHub Pages 上，跑不了后端；登记接口部署在 EdgeOne Pages
-  // Functions 上（见仓库里的 functions/），所以这里要填 EdgeOne 项目的完整地址
-  // （结尾带斜杠）。EdgeOne Pages 控制台里能看到这个地址，换了项目/域名，改这一行即可。
-  var API_BASE = 'https://weddinginvitation-dpcecgtcs5rh.edgeone.cool/';
-
-  function apiUrl(p){
-    return (API_BASE || location.pathname.replace(/[^/]*$/, '')) + p;
-  }
+  // ================= 登记接口配置（改这三行就够） =================
+  //
+  // RSVP_ENDPOINT  登记接口地址，结尾不要带斜杠，例：'https://rsvp.taolinwei.com'
+  //                留空 = 不去连任何服务器，宾客点提交后直接看到「备用登记通道」。
+  //                这个默认值是刻意的：宁可让宾客走备用通道，也不要对着一个
+  //                不存在的接口白转圈，最后什么都没登记上。
+  // FALLBACK_FORM_URL  国内备用表单（金数据等）的地址，留空则不显示这一层。
+  // CONTACT_LINE   备用通道里显示的联系方式文字，留空则不显示。
+  //                另外把新人微信二维码放成 images/wechat-qr.png 就会自动显示。
+  var RSVP_ENDPOINT     = '';
+  var FALLBACK_FORM_URL = '';
+  var CONTACT_LINE      = '';
+  // ==============================================================
 
   var form = document.getElementById('rsvpForm');
   var submitBtn = document.getElementById('submitBtn');
   var successMsg = document.getElementById('successMsg');
+  var fallbackBox = document.getElementById('rsvpFallback');
+
+  // 页面一打开就先打一发 /health，把 DNS + TCP + TLS 这几个往返在宾客读请柬的时候
+  // 提前付掉。等真正点提交时就只剩一个往返——国际链路上这能省掉一秒多的「转圈」，
+  // 而「按钮一直转、宾客以为失败、连点好几次」正是最常见的抱怨。
+  if (RSVP_ENDPOINT) {
+    try {
+      var warm = new XMLHttpRequest();
+      warm.open('GET', RSVP_ENDPOINT + '/health', true);
+      warm.timeout = 8000;
+      warm.send();
+    } catch (e) {}
+  }
 
   form.addEventListener('submit', function(e){
     e.preventDefault();
+
     var payload = {
       name: document.getElementById('name').value.trim(),
       count: document.getElementById('count').value,
-      note: document.getElementById('note').value.trim()
+      note: document.getElementById('note').value.trim(),
+      website_url: document.getElementById('website_url').value
     };
+    if (!payload.name) return;
 
-    submitBtn.disabled = true;
-    submitBtn.textContent = '提交中…';
-    successMsg.style.color = '';
+    setBusy(true);
     successMsg.style.display = 'none';
 
-    fetch(apiUrl('api/rsvp'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-      .then(function(res){ return res.json(); })
-      .then(function(data){
-        if (data.ok) {
-          successMsg.textContent = data.mode === 'updated'
-            ? '已更新您的登记信息，感谢回复！'
-            : '登记成功，感谢回复！';
-          successMsg.style.display = 'block';
-        } else {
-          throw new Error(data.error || '提交失败');
-        }
-      })
-      .catch(function(err){
-        successMsg.style.color = '#b23b3b';
-        successMsg.textContent = '提交失败：' + err.message + '，请稍后重试或直接联系新人';
-        successMsg.style.display = 'block';
-      })
-      .finally(function(){
-        submitBtn.disabled = false;
-        submitBtn.textContent = '提交登记';
+    // 两次尝试：10 秒，再 8 秒。整体最多约 18 秒后转备用通道。
+    send(payload, 10000, function(r1){
+      if (r1.ok) return succeed(r1.data);
+      if (r1.userError) return showError(r1.userError);
+      send(payload, 8000, function(r2){
+        if (r2.ok) return succeed(r2.data);
+        if (r2.userError) return showError(r2.userError);
+        giveUp(payload);
       });
+    });
   });
+
+  // 用 XMLHttpRequest 而不是 fetch，是因为微信内置浏览器（X5 内核）老版本里没有
+  // Promise.prototype.finally——原来那段 .finally() 在这些手机上会直接抛异常，
+  // 把按钮永久卡在「提交中…」，宾客再也没法重试。XHR 自带 timeout，也顺便
+  // 省掉了 AbortController 的兼容判断。
+  function send(payload, timeout, cb){
+    var settled = false;
+    function finish(r){ if (!settled) { settled = true; cb(r); } }
+
+    if (!RSVP_ENDPOINT) return finish({ ok: false });
+
+    var xhr;
+    try { xhr = new XMLHttpRequest(); } catch (e) { return finish({ ok: false }); }
+
+    try {
+      xhr.open('POST', RSVP_ENDPOINT + '/api/rsvp', true);
+      // text/plain 属于 CORS 的「简单请求」，不会触发 OPTIONS 预检，省一个往返。
+      // 服务端相应地用 JSON.parse(await request.text()) 自己解析。
+      xhr.setRequestHeader('Content-Type', 'text/plain;charset=UTF-8');
+      xhr.timeout = timeout;
+      xhr.onload = function(){
+        var data = null;
+        try { data = JSON.parse(xhr.responseText); } catch (e) {}
+        if (xhr.status >= 200 && xhr.status < 300 && data && data.ok === true) {
+          return finish({ ok: true, data: data });
+        }
+        // 400 是「宾客填的内容有问题」、429 是「提交太频繁」，服务端返回的都是
+        // 我们自己写的中文提示，直接展示就好；这两种情况重试和转备用通道都没有意义。
+        if ((xhr.status === 400 || xhr.status === 429) && data && data.error) {
+          return finish({ ok: false, userError: data.error });
+        }
+        finish({ ok: false });
+      };
+      xhr.onerror = function(){ finish({ ok: false }); };
+      xhr.ontimeout = function(){ finish({ ok: false }); };
+      xhr.onabort = function(){ finish({ ok: false }); };
+      xhr.send(JSON.stringify(payload));
+    } catch (e) {
+      finish({ ok: false });
+    }
+  }
+
+  function succeed(data){
+    setBusy(false);
+    fallbackBox.hidden = true;
+    successMsg.style.color = '';
+    successMsg.textContent = data && data.mode === 'updated'
+      ? '已更新您的登记信息，感谢回复！'
+      : '登记成功，感谢回复！';
+    successMsg.style.display = 'block';
+  }
+
+  function showError(text){
+    setBusy(false);
+    successMsg.style.color = '#b23b3b';
+    successMsg.textContent = text;
+    successMsg.style.display = 'block';
+  }
+
+  function giveUp(payload){
+    setBusy(false);
+    successMsg.style.color = '#b23b3b';
+    // 固定文案，绝不把 err.message 拼进来——原来那版会让长辈看到
+    // 「提交失败：Failed to fetch」，既看不懂也不知道该怎么办。
+    successMsg.textContent = '网络不太稳定，登记没有提交成功。请用下面任意一种方式登记。';
+    successMsg.style.display = 'block';
+    openFallback(payload);
+  }
+
+  // 按钮状态集中在一处，保证任何一条失败路径都会把它放开。
+  function setBusy(busy){
+    submitBtn.disabled = busy;
+    submitBtn.textContent = busy ? '提交中…' : '提交登记';
+  }
+
+  function openFallback(payload){
+    document.getElementById('fbText').textContent = composeLine(payload);
+
+    if (FALLBACK_FORM_URL) {
+      // 只预填姓名和人数。备注那一栏问的是饮食禁忌，属于健康信息，放进 URL 会留在
+      // 第三方的访问日志、微信的历史记录和它的链接安全扫描里，所以让宾客在那边自己填。
+      var link = document.getElementById('fbFormLink');
+      link.href = FALLBACK_FORM_URL
+        + (FALLBACK_FORM_URL.indexOf('?') >= 0 ? '&' : '?')
+        + 'name=' + encodeURIComponent(payload.name)
+        + '&count=' + encodeURIComponent(payload.count);
+      link.hidden = false;
+      document.getElementById('fbOr').hidden = false;
+    }
+
+    if (CONTACT_LINE) {
+      var contact = document.getElementById('fbContact');
+      contact.textContent = CONTACT_LINE;
+      contact.hidden = false;
+    }
+
+    // 二维码放了才显示，没放就不显示——免得出现一个破图。
+    var qr = document.getElementById('fbQr');
+    var probe = new Image();
+    probe.onload = function(){ qr.hidden = false; };
+    probe.src = qr.getAttribute('src');
+
+    fallbackBox.hidden = false;
+    if (fallbackBox.scrollIntoView) {
+      try { fallbackBox.scrollIntoView(); } catch (e) {}
+    }
+  }
+
+  // 拼成一行，方便宾客整条转发给新人。
+  // ｜和【】是这行字的分隔符，姓名/备注里出现就换成空格，免得那边读串行。
+  function composeLine(payload){
+    return '【出席登记】姓名：' + clean(payload.name, 40)
+      + '｜人数：' + clean(payload.count, 2)
+      + '｜备注：' + (clean(payload.note, 100) || '无');
+  }
+  function clean(s, max){
+    return String(s == null ? '' : s).replace(/[｜|【】\r\n]/g, ' ').trim().slice(0, max);
+  }
+
+  document.getElementById('fbCopyBtn').addEventListener('click', function(){
+    var btn = this;
+    var box = document.getElementById('fbText');
+    box.style.display = 'block';    // 复制被拒时，至少能长按选中这段字
+    copyToClipboard(box.textContent, function(ok){
+      btn.textContent = ok ? '已复制，粘贴发给新人即可' : '请长按下面的文字复制';
+      setTimeout(function(){ btn.textContent = '复制登记信息，发给新人'; }, 2600);
+    });
+  });
+
+  // 复制到剪贴板，回调收到 true / false。
+  // 注意 document.execCommand('copy') 失败时是**返回 false**，不是抛异常——
+  // 只用 try/catch 判断会在复制失败时照样告诉宾客「已复制」，而剪贴板是空的。
+  function copyToClipboard(text, cb){
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function(){ cb(true); },
+        function(){ cb(legacyCopy(text)); }
+      );
+    } else {
+      cb(legacyCopy(text));
+    }
+  }
+
+  function legacyCopy(text){
+    var ok = false;
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      if (ta.setSelectionRange) ta.setSelectionRange(0, ta.value.length);  // iOS 要显式设选区
+      ok = document.execCommand('copy') === true;
+      document.body.removeChild(ta);
+    } catch (e) {
+      ok = false;
+    }
+    return ok;
+  }
 
   // ---- gallery lightbox ----
   (function(){
@@ -927,31 +1186,16 @@
     var btn = document.getElementById('copyAddr');
     btn.addEventListener('click', function(){
       var text = NAME + '\n' + ADDR;
-      function ok(){
-        btn.textContent = '地址已复制';
+      // 复用登记那边的 copyToClipboard，它会真的检查 execCommand 的返回值，
+      // 不会在复制失败时谎报「已复制」。
+      copyToClipboard(text, function(ok){
+        btn.textContent = ok ? '地址已复制' : '复制失败，请长按选中';
         btn.classList.add('done');
         setTimeout(function(){
           btn.textContent = '复制地址';
           btn.classList.remove('done');
         }, 2000);
-      }
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(ok, fallback);
-      } else {
-        fallback();
-      }
-      // 老版本浏览器 / 非 HTTPS 下 clipboard API 不可用，退回选中复制
-      function fallback(){
-        var ta = document.createElement('textarea');
-        ta.value = text;
-        ta.setAttribute('readonly', '');
-        ta.style.position = 'fixed';
-        ta.style.left = '-9999px';
-        document.body.appendChild(ta);
-        ta.select();
-        try { document.execCommand('copy'); ok(); } catch (e) {}
-        document.body.removeChild(ta);
-      }
+      });
     });
   })();
 </script>
