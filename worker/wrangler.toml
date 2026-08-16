@@ -2,12 +2,20 @@ name = "wedding-rsvp"
 main = "src/index.js"
 compatibility_date = "2025-01-01"
 
-# 页面在 GitHub Pages 上，这个 Worker 只提供 /api/rsvp、/api/list、/health 三个接口。
-# 必须绑到自己的域名上：*.workers.dev 在国内被 DNS 污染的报告很多，而 GFW 的
-# DNS 污染是按域名匹配的，用自己的域名正好能绕开这一条。
-routes = [
-  { pattern = "rsvp.taolinwei.com", custom_domain = true }
-]
+# 第一步：先用 Cloudflare 送的 *.workers.dev 地址跑通，不用改任何 DNS。
+# 部署完 wrangler 会打印出形如
+#   https://wedding-rsvp.<你的子域>.workers.dev
+# 把它填进 index.html 和 admin.html 的 RSVP_ENDPOINT，登记就能用了。
+workers_dev = true
+
+# 第二步（为了国内访问，等域名迁到 Cloudflare 之后再打开）：
+# *.workers.dev 在国内有大量被 DNS 污染的报告，所以国内要靠自己的域名。
+# 但 custom_domain 要求这个域名的 DNS 托管在 Cloudflare——taolinwei.com 现在的
+# NS 是 GoDaddy（ns67/ns68.domaincontrol.com），所以必须先把 NS 换成 Cloudflare 的，
+# 那一步会连 www 指向 GitHub Pages 的记录一起接管，动之前先确认。迁好之后再取消注释：
+# routes = [
+#   { pattern = "rsvp.taolinwei.com", custom_domain = true }
+# ]
 
 # 建库时务必指定 APAC，否则库可能落在美东，每次写入要多跨一次太平洋：
 #   wrangler d1 create rsvp --location apac

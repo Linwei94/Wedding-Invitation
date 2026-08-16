@@ -265,34 +265,80 @@ Wedding-Invitation/
 
 **第 1/2/4 项就挂了的话别硬上**——告诉我，我们把国内表单服务改成主通道。
 
-### 三、部署接口到 Cloudflare
+### 三、部署接口（分两步，先跑通再管国内）
+
+**第 1 步：部署到 workers.dev，先让登记真的能用。** 不用改任何 DNS。
 
 ```bash
 npm i -g wrangler
-wrangler login
+wrangler login                              # 会开浏览器登录 Cloudflare
 
 cd worker
-wrangler d1 create rsvp --location apac     # --location apac 不能省，否则库可能落在美东
-# 把输出里的 database_id 填进 wrangler.toml
+wrangler d1 create rsvp --location apac      # --location apac 不能省，否则库可能落在美东，
+                                             # 每次写入要多跨一次太平洋
+# 把输出里的 database_id 填进 wrangler.toml 的 [[d1_databases]]
 
-wrangler d1 execute rsvp --remote --file=./schema.sql
+wrangler d1 execute rsvp --remote --file=./schema.sql    # 建表，--remote 别漏
 
-wrangler secret put ADMIN_TOKEN             # 32 位以上随机串，别用平时的密码
-wrangler secret put IP_SALT                 # 随便一串随机字符，用来哈希 IP
-wrangler secret put BACKUP_TOKEN            # 只对私有备份仓库有权限的 PAT（不备份可跳过）
+wrangler secret put ADMIN_TOKEN              # 后台口令，32 位以上随机串，别用平时的密码
+wrangler secret put IP_SALT                  # 随便一串随机字符，用来哈希 IP
+wrangler secret put BACKUP_TOKEN             # 备份用的 PAT，暂时不做备份可以跳过
 
 wrangler deploy
 ```
 
-再去 Cloudflare 控制台把 `rsvp.taolinwei.com` 作为 Custom Domain 绑给这个 Worker，
-然后把这个地址填进 `index.html` 和 `admin.html` 的 `RSVP_ENDPOINT`。
+`wrangler deploy` 会打印出这个 Worker 的地址，形如：
 
-验证：`curl https://rsvp.taolinwei.com/api/list` 不带口令应该返回
-`{"ok":false,"error":"口令不正确"}`。
+```
+https://wedding-rsvp.<你的子域>.workers.dev
+```
 
-> **为什么必须用自己的域名**：`*.workers.dev` 在国内被 DNS 污染的报告很多，
-> 而污染是按域名匹配的，用自己的域名正好绕开这一条；以后想换后端也只改一行。
-> 别用 `.xyz`/`.top` 这类便宜后缀，在国内更容易被微信的域名管控拦下来。
+把它填进 **`index.html`** 和 **`admin.html`** 顶部的 `RSVP_ENDPOINT`（结尾不要带斜杠），
+提交推到 `main`。到这一步登记就能用了，后台也能看到名单。
+
+先自己验一遍：
+
+```bash
+# 不带口令，应该返回 {"ok":false,"error":"口令不正确"}
+curl https://wedding-rsvp.<你的子域>.workers.dev/api/list
+
+# 应该返回 {"ok":true,"entries":0,...}
+curl https://wedding-rsvp.<你的子域>.workers.dev/health
+
+# 真写一条，应该返回 {"ok":true,"mode":"created"}
+curl -X POST https://wedding-rsvp.<你的子域>.workers.dev/api/rsvp \
+  -H 'Content-Type: text/plain;charset=UTF-8' -d '{"name":"测试","count":"2"}'
+```
+
+然后打开 `admin.html`，用 `ADMIN_TOKEN` 登录，应该能看到那条「测试」。**记得发请柬前把测试数据删掉。**
+
+**第 2 步：换成自己的域名（为了国内访问）。** 这一步才是国内能不能用的关键，
+但它有个前提，动手前先想清楚：
+
+`*.workers.dev` 在国内被 DNS 污染的报告很多（污染是按域名匹配的），所以国内要靠自己的域名。
+可是 Cloudflare 的 Custom Domain **要求这个域名的 DNS 托管在 Cloudflare**，而
+`taolinwei.com` 现在的 NS 是 GoDaddy：
+
+```
+taolinwei.com  NS  ns67.domaincontrol.com / ns68.domaincontrol.com     ← GoDaddy
+```
+
+也就是说必须先把 NS 换成 Cloudflare 的。要注意的是，这一换是**整个域名**交给 Cloudflare 托管，
+包括现在指向 GitHub Pages 的那条 `www` 记录——迁移时务必把已有记录都照抄过去，
+否则网站本身会先挂掉。步骤：
+
+1. Cloudflare 控制台 → Add a site → 填 `taolinwei.com`，它会自动扫描现有 DNS 记录
+2. **逐条核对**扫出来的记录，特别是 `www`（应该指向 `linwei94.github.io`）
+3. 去 GoDaddy 把 NS 改成 Cloudflare 给的两个，等生效（通常几分钟到几小时）
+4. 生效后，把 `worker/wrangler.toml` 里 `routes` 那几行取消注释、`workers_dev` 可以留着
+5. `wrangler deploy`，然后把 `RSVP_ENDPOINT` 换成 `https://rsvp.taolinwei.com`
+6. 回到上面「二、先做国内实测」，用国内手机把 6 项重新测一遍
+
+> 不想动 DNS 也是一种选择：那就一直用 `workers.dev` 的地址。海外宾客没问题，
+> 国内宾客能不能提交要实测——如果不行，再回来做第 2 步。
+> 页面上已经没有备用通道了，所以国内提交失败就是真的没登记上。
+
+> 别用 `.xyz`/`.top` 这类便宜后缀做接口域名，在国内更容易被微信的域名管控拦下来。
 
 ### 四、每天自动备份名单
 
