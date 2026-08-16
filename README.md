@@ -208,7 +208,7 @@ bash worker/test.sh 8813          # 27 项接口测试
 
 ```
 GitHub Pages（绑 taolinwei.com）        Cloudflare Worker + D1
-https://taolinwei.com/                  https://rsvp.taolinwei.com/
+https://www.taolinwei.com/                  https://rsvp.taolinwei.com/
 Wedding-Invitation/
 ├── index.html        ── 调用 ──▶       ├── POST /api/rsvp   写入登记（公开）
 ├── admin.html                          ├── GET  /api/list   读取名单（要口令）
@@ -217,20 +217,38 @@ Wedding-Invitation/
 ```
 
 > **域名怎么绑（这一步很容易搞反）**：正式地址是
-> `https://taolinwei.com/Wedding-Invitation/`，末尾带 `/Wedding-Invitation` 这一段。
-> 这个路径前缀只有在**把 `taolinwei.com` 绑给 `Linwei94.github.io` 那个用户主页仓库**
-> 时才成立——绑好之后，你名下所有项目仓库都会挂在 `taolinwei.com/<仓库名>/` 下面。
+> `https://www.taolinwei.com/Wedding-Invitation/`，注意是 **www**，末尾带
+> `/Wedding-Invitation` 这一段。
 >
-> **不要**在本仓库放 `CNAME` 文件。在项目仓库里放 `CNAME=taolinwei.com` 的效果是
-> 把这个项目挂到 `taolinwei.com/` 根目录，`/Wedding-Invitation` 这段路径就没了，
-> 而且会和用户主页仓库抢同一个域名。所以本仓库的 Pages 保持默认设置即可。
+> 这个路径前缀只有在**把域名绑给 `Linwei94.github.io` 那个用户主页仓库**时才成立——
+> 绑好之后，你名下所有项目仓库都会挂在 `域名/<仓库名>/` 下面。
+>
+> **不要**在本仓库放 `CNAME` 文件。在项目仓库里放 `CNAME` 的效果是把这个项目挂到
+> 域名根目录，`/Wedding-Invitation` 这段路径就没了，而且会和用户主页仓库抢同一个域名。
+> 所以本仓库的 Pages 保持默认设置即可。
+>
+> **为什么用 www 而不是裸域**（2026-08-16 实测 DNS）：
+>
+> ```
+> www.taolinwei.com  -> 2606:50c0:8000::153 等四个   = GitHub Pages（和 linwei94.github.io 完全一致）
+> taolinwei.com      -> 3.33.130.190, 15.197.148.33  = AWS 上的域名停放/跳转，不是 Pages
+> ```
+>
+> 也就是说只有 `www` 真正指向 GitHub Pages。这一点很要紧：`og:image` 必须是
+> **能直接抓到的绝对地址**，微信的爬虫不执行 JS、也不保证跟随跳转，所以把 og 指到裸域
+> 会导致分享卡片抓不到缩略图。
+>
+> 想改成裸域也可以，但要自己去 DNS 那边：删掉现在的停放记录，给 `taolinwei.com`
+> 加 GitHub Pages 的 A 记录 `185.199.108.153` / `185.199.109.153` /
+> `185.199.110.153` / `185.199.111.153`（外加对应的 AAAA），然后把上面这些
+> 绝对地址里的 `www.` 去掉。裸域生效之前不要改，否则分享卡片会一直是坏的。
 
 ### 一、页面部署到 GitHub Pages
 
 1. 代码推到 `main` 分支即自动发布
 2. 仓库 Settings → Pages → Source 选 `main`、目录 `/ (root)`
 3. `.nojekyll` 让 GitHub 原样输出文件，不要删
-4. 几分钟后能在 `https://taolinwei.com/Wedding-Invitation/` 打开
+4. 几分钟后能在 `https://www.taolinwei.com/Wedding-Invitation/` 打开
 
 ### 二、先做国内实测，再建接口
 
@@ -246,7 +264,7 @@ Wedding-Invitation/
 | 5 | 真提交一次 | 微信里打开正式页面，填表提交，**掐表** | 2 秒内好；反复超过 5 秒宾客会放弃 |
 | 6 | 最坏情况 | 晚上 21:00–22:30 再测一遍第 5 项，最好三家运营商都试 | 只有白天能用的站，婚礼当周会出事 |
 
-还要测**页面本身**：把 `https://taolinwei.com/Wedding-Invitation/` 发到微信里打开，
+还要测**页面本身**：把 `https://www.taolinwei.com/Wedding-Invitation/` 发到微信里打开，
 看能不能打开、请柬图几秒出来。这条是任何后端方案都救不了的；如果页面本身在国内
 打不开，备用表单就得当"最后一道防线"，所以它的表单说明里要写上日期、地点、详细地址。
 
@@ -301,7 +319,7 @@ wrangler deploy
 
 ## 查看名单（数据管理后台）
 
-打开 `https://taolinwei.com/Wedding-Invitation/admin.html`，输入 `ADMIN_TOKEN` 设的口令，可以看到：
+打开 `https://www.taolinwei.com/Wedding-Invitation/admin.html`，输入 `ADMIN_TOKEN` 设的口令，可以看到：
 
 - **三个统计**：登记条数、出席总人数、平均每条人数
 - **出席人数分布**：1–5 人各有多少条登记的横向柱状图

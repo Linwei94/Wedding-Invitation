@@ -33,7 +33,7 @@ const D1 = {
 const env = {
   DB: D1,
   ADMIN_TOKEN: process.env.ADMIN_TOKEN || 'test-token-1234567890',
-  ALLOWED_ORIGIN: process.env.ALLOWED_ORIGIN ?? 'https://taolinwei.com,https://linwei94.github.io',
+  ALLOWED_ORIGIN: process.env.ALLOWED_ORIGIN ?? 'https://www.taolinwei.com,https://linwei94.github.io',
   IP_SALT: 'dev-salt',
   RATE_LIMIT: process.env.RATE_LIMIT || '60',
   RATE_WINDOW_MIN: process.env.RATE_WINDOW_MIN || '10',

@@ -2,7 +2,7 @@
 # 对着本地 dev worker 跑一遍登记接口。用法：bash worker/test.sh [端口]
 B="http://127.0.0.1:${1:-8813}"
 TOK=test-token-1234567890
-ORG='https://taolinwei.com'
+ORG='https://www.taolinwei.com'
 ORG2='https://linwei94.github.io'
 pass=0; fail=0
 ck(){ if [[ "$3" == *"$2"* ]]; then echo "  PASS  $1"; pass=$((pass+1));

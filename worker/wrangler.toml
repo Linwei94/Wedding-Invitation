@@ -20,9 +20,9 @@ database_id = "在这里填 wrangler d1 create 输出的 database_id"
 [vars]
 # 只有这些来源能读名单（/api/list），英文逗号分隔。
 # 写入接口(/api/rsvp)故意不限来源，原因见 src/index.js 里的说明。
-# 正式地址是 https://taolinwei.com/Wedding-Invitation/ ——来源只算协议+域名，不含路径。
+# 正式地址是 https://www.taolinwei.com/Wedding-Invitation/ ——来源只算协议+域名，不含路径。
 # github.io 那个一起留着，方便你在换域名前后都能打开后台。
-ALLOWED_ORIGIN = "https://taolinwei.com,https://linwei94.github.io"
+ALLOWED_ORIGIN = "https://www.taolinwei.com,https://linwei94.github.io"
 
 # 每个 IP 在 RATE_WINDOW_MIN 分钟内最多写入多少次。给得很宽松是故意的：
 # 国内运营商大量使用 NAT，一桌亲戚可能共用一个出口 IP，卡太严会把真宾客挡在外面。
