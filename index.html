@@ -135,24 +135,6 @@
   .venue-name{font-size:15px;font-weight:700;margin:0 0 5px;line-height:1.5;}
   .venue-addr{font-size:13px;color:var(--ink-soft);margin:0 0 4px;line-height:1.7;}
   .venue-time{font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;}
-  .map-links{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:8px;
-  }
-  .map-links a{
-    display:flex;align-items:center;justify-content:center;gap:6px;
-    padding:11px 8px;
-    font-size:13.5px;
-    font-family:inherit;
-    color:var(--red);
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:3px;
-    text-decoration:none;
-    -webkit-tap-highlight-color:transparent;
-  }
-  .map-links a:active{background:var(--field);}
   .copy-addr{
     display:block;width:100%;margin-top:8px;
     padding:11px 8px;font-size:13.5px;font-family:inherit;
@@ -516,7 +498,6 @@
           <p class="venue-name">松江广富林希尔顿酒店会议中心 · 一楼大宴会厅</p>
           <p class="venue-addr">上海市松江区广轩路 1199 号</p>
           <p class="venue-time">2026 年 10 月 17 日（周六）17:08 签到 · 18:08 晚宴</p>
-          <div class="map-links" id="mapLinks"></div>
           <button type="button" class="copy-addr" id="copyAddr">复制地址</button>
         </div>
       </div>
@@ -938,38 +919,10 @@
     }
   })();
 
-  // ---- 婚礼地址：唤起宾客自己手机上的地图 App ----
-  // 不内嵌任何第三方地图：Google 在国内打不开，高德的内嵌图需要 API key，
-  // 而且一旦加载失败页面上就是个空白框。改成按地区排序的跳转按钮，
-  // 既不依赖外部脚本，又能直接进导航。
+  // ---- 婚礼地址：复制地址 ----
   (function(){
     var NAME = '松江广富林希尔顿酒店会议中心';
     var ADDR = '上海市松江区广轩路1199号';
-    var q = encodeURIComponent(NAME + ' ' + ADDR);
-
-    // 用名称+地址检索，让地图自己定位，避免写死经纬度带来的偏差
-    var CN = [
-      ['高德地图', 'https://uri.amap.com/search?keyword=' + q],
-      ['百度地图', 'https://map.baidu.com/search/' + q]
-    ];
-    var INTL = [
-      ['Google Maps', 'https://www.google.com/maps/search/?api=1&query=' + q],
-      ['Apple 地图', 'https://maps.apple.com/?q=' + q]
-    ];
-
-    var lang = (navigator.language || '').toLowerCase();
-    var zh = lang.indexOf('zh') === 0;
-    var list = zh ? CN.concat(INTL) : INTL.concat(CN);
-
-    var wrap = document.getElementById('mapLinks');
-    list.forEach(function(item){
-      var a = document.createElement('a');
-      a.href = item[1];
-      a.target = '_blank';
-      a.rel = 'noopener';
-      a.textContent = item[0];
-      wrap.appendChild(a);
-    });
 
     var btn = document.getElementById('copyAddr');
     btn.addEventListener('click', function(){
