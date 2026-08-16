@@ -47,9 +47,19 @@ ck "张三只有一条"      "1"    "$DUP"
 ck "首次登记时间保留"  "$C1"  "$C2"
 ck "最后修改时间刷新"  "true" "$([[ "$U2" > "$C1" ]] && echo true || echo false)"
 
-echo "== 蜜罐 =="
-ck "填了蜜罐也返回成功（不给脚本反馈）" '"ok":true' "$(post '{"name":"机器人","count":"1","website_url":"http://spam"}')"
-ck "但不写进名单" "false" "$(printf '%s' "$(list $TOK)" | python3 -c 'import json,sys;d=json.load(sys.stdin);print(str(any(x["name"]=="机器人" for x in d["records"])).lower())')"
+echo "== 蜜罐（只做标记，不拒写）=="
+ck "填了蜜罐也返回成功" '"ok":true' "$(post '{"name":"蜜罐命中","count":"1","website_url":"http://spam"}')"
+ck "而且照样写进名单（宁可留垃圾也不能丢真宾客）" "true" "$(printf '%s' "$(list $TOK)" | python3 -c 'import json,sys;d=json.load(sys.stdin);print(str(any(x["name"]=="蜜罐命中" for x in d["records"])).lower())')"
+
+echo "== 带口令的写入不受限流（后台手工补录用）=="
+# 把限流压到 2 次，然后用口令连写 5 条，应该全部成功
+for i in 1 2 3 4 5; do
+  R=$(curl -s -m 10 -X POST "$B/api/rsvp" -H 'Content-Type: text/plain;charset=UTF-8' \
+      -H "x-admin-token: $TOK" -H "Origin: $ORG" -d "{\"name\":\"补录$i\",\"count\":\"2\"}")
+  [[ "$R" == *'"ok":true'* ]] || BULKFAIL=1
+done
+ck "口令写入 5 条全部成功" "" "${BULKFAIL:+失败}"
+ck "补录的人确实在名单里" "true" "$(printf '%s' "$(list $TOK)" | python3 -c 'import json,sys;d=json.load(sys.stdin);print(str(sum(1 for x in d["records"] if x["name"].startswith("补录"))==5).lower())')"
 
 echo "== /health =="
 H=$(curl -s -m 10 "$B/health")

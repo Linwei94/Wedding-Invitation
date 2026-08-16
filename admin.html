@@ -664,14 +664,22 @@
       btn.textContent = '写入中… (' + (i + 1) + '/' + picked.length + ')';
       fetch(RSVP_ENDPOINT + '/api/rsvp', {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        headers: {
+          'Content-Type': 'text/plain;charset=UTF-8',
+          // 带上口令，服务端就不对这批写入限流。补录几十上百条时，
+          // 公开接口的「60 次/10 分钟」会从第 61 条开始全部 429。
+          'x-admin-token': tokenInput.value.trim()
+        },
         body: JSON.stringify({ name: r.name, count: normCount(r.count) })
       })
         .then(function (res) { return res.json(); })
         .then(function (data) {
-          if (data && data.ok) okCount++; else failed.push(r.name);
+          if (data && data.ok) { okCount++; return; }
+          // 把服务端给的原因一起显示出来。只报名字的话，看到「失败 40 条」
+          // 根本猜不到是限流、是姓名为空还是网络问题。
+          failed.push(r.name + (data && data.error ? '（' + data.error + '）' : ''));
         })
-        .catch(function () { failed.push(r.name); })
+        .catch(function () { failed.push(r.name + '（网络错误）'); })
         .then(function () { next(i + 1); });
     }
     next(0);

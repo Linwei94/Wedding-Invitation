@@ -164,8 +164,13 @@
 `index.html` 和 `admin.html` 顶部各有一个 `RSVP_ENDPOINT`，填成同一个地址：
 
 ```js
-var RSVP_ENDPOINT = 'https://rsvp.taolinwei.com';   // 结尾不要带斜杠
+// 第 1 步（workers.dev，不用动 DNS）：
+var RSVP_ENDPOINT = 'https://wedding-rsvp.<你的子域>.workers.dev';
+// 第 2 步（迁完域名之后，为了国内访问）：
+// var RSVP_ENDPOINT = 'https://rsvp.taolinwei.com';
 ```
+
+具体怎么拿到这个地址见下面「部署结构」的第二节。结尾不要带斜杠——带了也会自动去掉。
 
 ### 提交失败时会怎样
 
@@ -177,7 +182,7 @@ var RSVP_ENDPOINT = 'https://rsvp.taolinwei.com';   // 结尾不要带斜杠
 在微信老内核上会把按钮永久卡在「提交中…」。
 
 > **这里没有备用通道，所以接口必须真的通。** 宾客提交失败就只能等网络好转再试，
-> 没有第二条路可走。这也是为什么下面「先做国内实测」那一节不能跳过——
+> 没有第二条路可走。这也是为什么部署完之后「四、国内实测」那一节不能跳过——
 > 发请柬之前一定要确认接口在国内手机上、微信里能稳定提交。
 
 ## 本地预览
@@ -199,7 +204,8 @@ bash worker/test.sh 8813          # 27 项接口测试
 
 ```
 GitHub Pages（绑 taolinwei.com）        Cloudflare Worker + D1
-https://www.taolinwei.com/                  https://rsvp.taolinwei.com/
+https://www.taolinwei.com/              第1步 wedding-rsvp.*.workers.dev
+                                        第2步 rsvp.taolinwei.com（需迁 DNS）
 Wedding-Invitation/
 ├── index.html        ── 调用 ──▶       ├── POST /api/rsvp   写入登记（公开）
 ├── admin.html                          ├── GET  /api/list   读取名单（要口令）
@@ -241,33 +247,9 @@ Wedding-Invitation/
 3. `.nojekyll` 让 GitHub 原样输出文件，不要删
 4. 几分钟后能在 `https://www.taolinwei.com/Wedding-Invitation/` 打开
 
-### 二、先做国内实测，再建接口
+### 二、部署接口 · 第 1 步：workers.dev（今天就能用）
 
-我**没有网络，没有验证过任何一条国内可达性**。Cloudflare 在国内大致是
-"通常能连上、有时很慢"，必须你用国内手机实测。手机流量、关 WiFi、关 VPN：
-
-| # | 测什么 | 怎么测 | 判断 |
-| --- | --- | --- | --- |
-| 1 | 走哪个机房 | 打开 `https://rsvp.taolinwei.com/cdn-cgi/trace` 看 `colo=` | HKG/NRT 好；LAX/SJC/SEA 说明绕到了美西，每次提交多跨一次太平洋 |
-| 2 | 能不能解析 | 用 `114.114.114.114` 解析这个域名 | 拿到真实 Cloudflare IP 说明没被污染。这一步区分"被墙"和"只是慢" |
-| 3 | 普通浏览器 | 打开 `/health` | 返回 JSON 就是通的 |
-| 4 | **微信里** | 把 `/health` 发给"文件传输助手"，**在微信里点开** | 测的是微信 X5 内核；出现"已停止访问该网页"说明域名被微信拦了 |
-| 5 | 真提交一次 | 微信里打开正式页面，填表提交，**掐表** | 2 秒内好；反复超过 5 秒宾客会放弃 |
-| 6 | 最坏情况 | 晚上 21:00–22:30 再测一遍第 5 项，最好三家运营商都试 | 只有白天能用的站，婚礼当周会出事 |
-
-还要测**页面本身**：把 `https://www.taolinwei.com/Wedding-Invitation/` 发到微信里打开，
-看能不能打开、请柬图几秒出来。这条是任何后端方案都救不了的——页面打不开，
-宾客连表单都看不见。
-
-> 顺带一个好处：绑了自己的域名之后，宾客拿到的链接里不再有 `github.io`。
-> GFW 的 DNS 污染是按域名匹配的，`github.io` 正是那个容易被污染的名字，
-> 换成 `taolinwei.com` 至少绕开了这一条（GitHub Pages 服务器本身的快慢仍然要实测）。
-
-**第 1/2/4 项就挂了的话别硬上**——告诉我，我们把国内表单服务改成主通道。
-
-### 三、部署接口（分两步，先跑通再管国内）
-
-**第 1 步：部署到 workers.dev，先让登记真的能用。** 不用改任何 DNS。
+这一步不动任何 DNS，做完登记就通了。
 
 ```bash
 npm i -g wrangler
@@ -276,13 +258,16 @@ wrangler login                              # 会开浏览器登录 Cloudflare
 cd worker
 wrangler d1 create rsvp --location apac      # --location apac 不能省，否则库可能落在美东，
                                              # 每次写入要多跨一次太平洋
-# 把输出里的 database_id 填进 wrangler.toml 的 [[d1_databases]]
+```
 
+把上面输出里的 `database_id` 填进 `wrangler.toml` 的 `[[d1_databases]]`，**再继续**
+（占位符没换掉后面会失败）：
+
+```bash
 wrangler d1 execute rsvp --remote --file=./schema.sql    # 建表，--remote 别漏
 
 wrangler secret put ADMIN_TOKEN              # 后台口令，32 位以上随机串，别用平时的密码
 wrangler secret put IP_SALT                  # 随便一串随机字符，用来哈希 IP
-wrangler secret put BACKUP_TOKEN             # 备份用的 PAT，暂时不做备份可以跳过
 
 wrangler deploy
 ```
@@ -294,63 +279,105 @@ https://wedding-rsvp.<你的子域>.workers.dev
 ```
 
 把它填进 **`index.html`** 和 **`admin.html`** 顶部的 `RSVP_ENDPOINT`（结尾不要带斜杠），
-提交推到 `main`。到这一步登记就能用了，后台也能看到名单。
+提交推到 `main`。
 
-先自己验一遍：
+自己验一遍（把 `<你的子域>` 换成真的）：
 
 ```bash
-# 不带口令，应该返回 {"ok":false,"error":"口令不正确"}
-curl https://wedding-rsvp.<你的子域>.workers.dev/api/list
+B=https://wedding-rsvp.<你的子域>.workers.dev
 
-# 应该返回 {"ok":true,"entries":0,...}
-curl https://wedding-rsvp.<你的子域>.workers.dev/health
-
-# 真写一条，应该返回 {"ok":true,"mode":"created"}
-curl -X POST https://wedding-rsvp.<你的子域>.workers.dev/api/rsvp \
-  -H 'Content-Type: text/plain;charset=UTF-8' -d '{"name":"测试","count":"2"}'
+curl $B/health                    # 期望 {"ok":true,"entries":0,...}
+curl $B/api/list                  # 期望 {"ok":false,"error":"口令不正确"}
+curl -X POST $B/api/rsvp -H 'Content-Type: text/plain;charset=UTF-8' \
+     -d '{"name":"__测试__","count":"2"}'      # 期望 {"ok":true,"mode":"created"}
 ```
 
-然后打开 `admin.html`，用 `ADMIN_TOKEN` 登录，应该能看到那条「测试」。**记得发请柬前把测试数据删掉。**
+然后打开 `admin.html`，用 `ADMIN_TOKEN` 登录，应该能看到 `__测试__` 那一条。
 
-**第 2 步：换成自己的域名（为了国内访问）。** 这一步才是国内能不能用的关键，
-但它有个前提，动手前先想清楚：
+**发请柬前把测试数据删掉。** 系统里没有删除接口（故意的，公开接口不该能删数据），
+所以用命令删：
+
+```bash
+wrangler d1 execute rsvp --remote \
+  --command "DELETE FROM rsvp WHERE name LIKE '__测试__%'; DELETE FROM rsvp_log WHERE name LIKE '__测试__%';"
+```
+
+> `--command` 这个参数名请用 `wrangler d1 execute --help` 复核一下——我没有网络，
+> 没法确认当前版本 wrangler 的确切拼写。
+
+到这一步：**海外宾客已经可以正常登记了**。国内能不能用是下一步的事。
+
+### 三、部署接口 · 第 2 步：换成自己的域名（为了国内访问）
 
 `*.workers.dev` 在国内被 DNS 污染的报告很多（污染是按域名匹配的），所以国内要靠自己的域名。
-可是 Cloudflare 的 Custom Domain **要求这个域名的 DNS 托管在 Cloudflare**，而
-`taolinwei.com` 现在的 NS 是 GoDaddy：
+但 Cloudflare 的 Custom Domain **要求该域名的 DNS 托管在 Cloudflare**，而 `taolinwei.com`
+现在的 NS 是 GoDaddy：
 
 ```
 taolinwei.com  NS  ns67.domaincontrol.com / ns68.domaincontrol.com     ← GoDaddy
 ```
 
-也就是说必须先把 NS 换成 Cloudflare 的。要注意的是，这一换是**整个域名**交给 Cloudflare 托管，
-包括现在指向 GitHub Pages 的那条 `www` 记录——迁移时务必把已有记录都照抄过去，
-否则网站本身会先挂掉。步骤：
+所以必须先迁 NS。要留意的是，这一迁是**整个域名**交给 Cloudflare 托管，包括现在指向
+GitHub Pages 的那条 `www` 记录——**迁移时务必把已有记录逐条照抄过去，否则网站本身会先挂掉。**
 
 1. Cloudflare 控制台 → Add a site → 填 `taolinwei.com`，它会自动扫描现有 DNS 记录
 2. **逐条核对**扫出来的记录，特别是 `www`（应该指向 `linwei94.github.io`）
 3. 去 GoDaddy 把 NS 改成 Cloudflare 给的两个，等生效（通常几分钟到几小时）
-4. 生效后，把 `worker/wrangler.toml` 里 `routes` 那几行取消注释、`workers_dev` 可以留着
-5. `wrangler deploy`，然后把 `RSVP_ENDPOINT` 换成 `https://rsvp.taolinwei.com`
-6. 回到上面「二、先做国内实测」，用国内手机把 6 项重新测一遍
+4. 生效后先确认 `https://www.taolinwei.com/Wedding-Invitation/` 还能正常打开
+5. 把 `worker/wrangler.toml` 里 `routes` 那几行取消注释，`wrangler deploy`
+6. 把两个文件里的 `RSVP_ENDPOINT` 换成 `https://rsvp.taolinwei.com`，推到 `main`
+7. 做下面第四节的国内实测
 
 > 不想动 DNS 也是一种选择：那就一直用 `workers.dev` 的地址。海外宾客没问题，
-> 国内宾客能不能提交要实测——如果不行，再回来做第 2 步。
-> 页面上已经没有备用通道了，所以国内提交失败就是真的没登记上。
-
+> 国内宾客能不能提交要实测（见下一节）。页面上已经没有备用通道了，
+> 所以国内提交失败就是真的没登记上。
+>
 > 别用 `.xyz`/`.top` 这类便宜后缀做接口域名，在国内更容易被微信的域名管控拦下来。
 
-### 四、每天自动备份名单
+### 四、国内实测（接口部署完之后做）
+
+我**没有网络，没有验证过任何一条国内可达性**。Cloudflare 在国内大致是"通常能连上、
+有时很慢"，必须你用国内手机实测。手机流量、关 WiFi、关 VPN。
+
+下面把接口地址记作 `$B`：第 2 步做完就用 `https://rsvp.taolinwei.com`，
+还没迁域名就用 `https://wedding-rsvp.<你的子域>.workers.dev`。
+
+| # | 测什么 | 怎么测 | 判断 |
+| --- | --- | --- | --- |
+| 1 | 能不能解析 | 用 `114.114.114.114` 解析 `$B` 的域名 | 拿到真实 Cloudflare IP = 没被污染。这一步区分"被墙"和"只是慢" |
+| 2 | 走哪个机房 | 打开 `$B/cdn-cgi/trace` 看 `colo=` | HKG/NRT 好；LAX/SJC/SEA 说明绕到了美西，每次提交多跨一次太平洋 |
+| 3 | 接口通不通 | 打开 `$B/health` | 返回 JSON 就是通的 |
+| 4 | **微信里** | 把 `$B/health` 发给"文件传输助手"，**在微信里点开** | 测的是微信 X5 内核；出现"已停止访问该网页"说明域名被微信拦了 |
+| 5 | 真提交一次 | 微信里打开正式页面，填表提交，**掐表** | 2 秒内好；反复超过 5 秒宾客会放弃 |
+| 6 | 最坏情况 | 晚上 21:00–22:30 再测一遍第 5 项，最好三家运营商都试 | 只有白天能用的站，婚礼当周会出事 |
+
+> 第 2 项如果返回的是 `{"ok":false,"error":"接口不存在"}`，那说明 `/cdn-cgi/trace`
+> 这个路径落到了我们的 Worker 上而不是 Cloudflare 自己处理——**这不是"不通"的证据**，
+> 跳过这一项即可，看第 1、3、4 项。
+
+还要单独测**页面本身**：把 `https://www.taolinwei.com/Wedding-Invitation/` 发到微信里打开，
+看能不能打开、请柬图几秒出来。这条是任何后端方案都救不了的——页面打不开，
+宾客连表单都看不见。
+
+**用自己域名测下来第 1/4 项就挂了的话别硬上**——告诉我，我们把国内表单服务改成主通道。
+（注意：这条判断只对第 2 步的自有域名有效。用 `workers.dev` 测失败只说明
+"workers.dev 在国内不可用"，那本来就是预期，不代表 Cloudflare 这条路不通。）
+
+### 五、每天自动备份名单
 
 名单是这个项目里唯一不可再生的东西，所以 `worker/src/backup.js` 每天把它
 提交到一个**私有**仓库（`wrangler.toml` 里的 cron 触发）：
 
-1. 新建一个**私有** GitHub 仓库，确认真的是 private——里面有宾客姓名和饮食禁忌
+1. 新建一个**私有** GitHub 仓库，确认真的是 private——里面有宾客的真实姓名
 2. 建一个只对这个仓库有 Contents 读写权限的 fine-grained PAT，
    用 `wrangler secret put BACKUP_TOKEN` 存进去
 3. `wrangler.toml` 里把 `BACKUP_REPO` 填成 `用户名/仓库名`
 4. 可选：`HEALTHCHECK_URL` 填一个 healthchecks.io 的地址，
    备份成功才会 ping，这样"密钥被吊销"会变成一条告警而不是静悄悄地什么都没发生
+5. **`wrangler deploy` 再跑一次。** `BACKUP_REPO` 是 `[vars]` 里的值，只有部署才会带上去；
+   不重新部署的话线上那份仍然是空的，`backup.js` 第一行就直接返回，备份永远不会发生
+6. 验一下：等一个 cron 周期（或把 cron 临时改到几分钟后再部署），确认私有仓库里
+   真的出现了 `guests.json` 和 `guests.csv`
 
 条数比上次少 2 条以上时会**拒绝**备份，避免用一份异常的数据覆盖掉好的备份。
 

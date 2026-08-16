@@ -64,35 +64,31 @@ async function submit(request, env, cors) {
   }
   const count = clampCount(body.count);
 
-  // 蜜罐：真人看不到那个输入框，填了的基本都是脚本。
-  // 不直接拒绝，而是记下来照常返回成功——脚本不会重试，我们也不会误伤
-  // 某个把表单当成地址栏填满的真宾客（他的记录仍然写进去了）。
+  // 蜜罐：真人看不到那个输入框（挪到屏幕外 + tabindex=-1 + autocomplete=off），
+  // 填了的基本都是脚本。但**命中也照样把人写进名单**——万一某个密码管理器或
+  // 读屏工具替真宾客填了这一栏，拒写就等于「他看到登记成功、名单里却没有他」，
+  // 那是这个项目里最不能出现的故障。防刷交给限流和长度上限，蜜罐只当一个标记，
+  // 记在流水表里事后可查：
+  //   wrangler d1 execute rsvp --remote --command "SELECT * FROM rsvp_log WHERE honeypot=1"
   const honeypot = str(body.website_url, 100) ? 1 : 0;
 
   const ipHash = await hashIp(request.headers.get('CF-Connecting-IP') || '', env.IP_SALT || '');
   const now = new Date().toISOString();
-  const limited = await tooManyWrites(env, ipHash);
 
-  if (limited && !honeypot) {
+  // 后台的「手工补录」也是走这个公开接口写入的，但那是新人自己在用，不该被限流挡住：
+  // 一次粘几十上百位电话确认的宾客进去，第 61 条就会 429。带对口令就跳过限流。
+  const isAdmin = !!env.ADMIN_TOKEN &&
+    safeEqual(request.headers.get('x-admin-token') || '', env.ADMIN_TOKEN);
+
+  if (!isAdmin && (await tooManyWrites(env, ipHash))) {
     return json({ ok: false, error: '提交太频繁了，请过几分钟再试' }, 429, cors);
-  }
-
-  // 蜜罐命中：照常返回成功，不让脚本知道被识破了（它就不会换个方式再来）。
-  // 但只在没触发限流时留一条流水——否则一个脚本可以无限往流水表里灌数据。
-  if (honeypot) {
-    if (!limited) {
-      await env.DB.prepare(
-        'INSERT INTO rsvp_log (name, count, ip_hash, honeypot, at) VALUES (?, ?, ?, 1, ?)'
-      ).bind(name, count, ipHash, now).run();
-    }
-    return json({ ok: true, mode: 'created' }, 200, cors);
   }
 
   // 流水先写，名单后写。顺序是故意的：万一 upsert 失败，流水里仍留有这次提交，
   // 名单可以事后从流水还原；反过来就真丢了。
   await env.DB.prepare(
-    'INSERT INTO rsvp_log (name, count, ip_hash, honeypot, at) VALUES (?, ?, ?, 0, ?)'
-  ).bind(name, count, ipHash, now).run();
+    'INSERT INTO rsvp_log (name, count, ip_hash, honeypot, at) VALUES (?, ?, ?, ?, ?)'
+  ).bind(name, count, ipHash, honeypot, now).run();
 
   // 一条语句完成「有则更新、无则新增」，避免先读后写的竞态，
   // 并且用 excluded.* 保住首次登记时间 created_at。
