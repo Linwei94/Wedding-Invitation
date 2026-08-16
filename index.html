@@ -39,6 +39,11 @@
     --serif-en:Georgia,"Times New Roman",serif;
   }
   *{box-sizing:border-box;}
+  /* hidden 属性必须真的能隐藏元素。浏览器自带的 [hidden]{display:none} 属于 UA 样式，
+     优先级低于任何作者样式，所以下面 .fb-btn / .fb-qr 上的 display:block 会把它顶掉，
+     元素照样显示出来（这个坑本文件早先在 .lightbox[hidden] 上已经踩过一次）。
+     加一条 !important 的兜底，JS 里 el.hidden = false 会移除属性，规则自然失效。 */
+  [hidden]{display:none !important;}
   html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
   html,body{margin:0;padding:0;}
   body{
@@ -620,7 +625,7 @@
       <div class="rsvp-fallback" id="rsvpFallback" hidden>
         <p class="fb-title">备用登记通道</p>
         <p class="fb-lead">刚才没能连上服务器，登记还没提交成功。<br>用下面任意一种方式都算登记，我们一定收到。</p>
-        <a class="fb-btn" id="fbFormLink" href="#" target="_blank" rel="noopener" hidden>打开国内备用登记表</a>
+        <a class="fb-btn" id="fbFormLink" target="_blank" rel="noopener" hidden>打开国内备用登记表</a>
         <div class="fb-or" id="fbOr" hidden>或者</div>
         <button type="button" class="fb-btn ghost" id="fbCopyBtn">复制登记信息，发给新人</button>
         <div class="fb-box" id="fbText"></div>
@@ -831,7 +836,13 @@
       count: document.getElementById('count').value,
       website_url: document.getElementById('website_url').value
     };
-    if (!payload.name) return;
+    // 只填空格也算没填。<input required> 挡不住空格，而这里如果直接 return，
+    // 宾客会看到点了提交完全没反应——没提示、没转圈、什么都没有。
+    if (!payload.name) {
+      showError('请填写姓名');
+      try { document.getElementById('name').focus(); } catch (e) {}
+      return;
+    }
 
     setBusy(true);
     successMsg.style.display = 'none';

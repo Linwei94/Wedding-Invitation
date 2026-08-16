@@ -249,7 +249,14 @@
         loadBtn.disabled = false;
       })
       .catch(function (err) {
-        sessionStorage.removeItem('rsvpAdminToken');
+        // 只有口令确实不对才清掉存着的口令。网络抖一下或者服务端 5xx 也清的话，
+        // 刷新失败一次就得重新敲一遍 32 位随机串。
+        if (String(err.message).indexOf('口令不正确') > -1) {
+          sessionStorage.removeItem('rsvpAdminToken');
+        }
+        // 登录成功之后 msgEl 在已经 display:none 的 loginPanel 里，
+        // 只写 textContent 是看不见的——「刷新失败」会变成完全静默。
+        loginPanel.style.display = 'block';
         msgEl.textContent = err.message;
         msgEl.style.display = 'block';
         loadBtn.disabled = false;
@@ -475,13 +482,39 @@
 
   function parseLines(text) {
     var out = { rows: [], bad: [] };
-    String(text || '').split(/\r?\n/).forEach(function (raw) {
-      var line = raw.trim();
+    splitRecords(text).forEach(function (rec) {
+      var line = rec.text.trim();
       if (!line) return;
-      var rec = parseReceipt(line) || parseDelimited(line);
-      if (rec && rec.name) out.rows.push(rec);
-      else out.bad.push(raw);       // 认不出来的原样报出去，绝不悄悄丢掉
+      // 引号没闭合就到了结尾：这条是残缺的，报出来让人看，不要当成一位宾客
+      if (rec.broken) { out.bad.push(rec.text); return; }
+      var r = parseReceipt(line) || parseDelimited(line);
+      if (r && r.name) out.rows.push(r);
+      else out.bad.push(rec.text);       // 认不出来的原样报出去，绝不悄悄丢掉
     });
+    return out;
+  }
+
+  // 按「引号外面的换行」切记录，不能直接 split(/\r?\n/)。
+  // Excel 导出带换行的单元格是用引号包住、里面真的有换行的，先按行切会把一条记录
+  // 劈成「被截断的一条」+「凭空多出来的一位宾客」——多出来的那位最难发现。
+  function splitRecords(text) {
+    var s = String(text == null ? '' : text);
+    var out = [], cur = '', inQ = false;
+    for (var i = 0; i < s.length; i++) {
+      var ch = s.charAt(i);
+      if (ch === '"') {
+        if (inQ && s.charAt(i + 1) === '"') { cur += '""'; i++; continue; }
+        inQ = !inQ; cur += ch; continue;
+      }
+      if (!inQ && (ch === '\n' || ch === '\r')) {
+        if (ch === '\r' && s.charAt(i + 1) === '\n') i++;
+        out.push({ text: cur, broken: false });
+        cur = '';
+        continue;
+      }
+      cur += ch;
+    }
+    if (cur !== '' || inQ) out.push({ text: cur, broken: inQ });
     return out;
   }
 
@@ -504,6 +537,10 @@
   // CSV 或制表符分隔：姓名,人数
   function parseDelimited(line) {
     var cols = line.indexOf('\t') > -1 ? line.split('\t') : splitCsv(line);
+    // 必须真的带分隔符。否则从微信里多选复制时捎带进来的闲聊，每一行都会变成
+    // 一位「宾客」，把报给酒店的人数抬高——凭空多出来的人比漏掉的人更难核对出来。
+    // 只写了名字、没写人数的行会进下面的「没认出来」清单，人看见补个 ",1" 即可，不会丢。
+    if (cols.length < 2) return null;
     var name = String(cols[0] || '').trim().replace(/^["']|["']$/g, '');
     if (!name || name === '姓名') return null;    // 跳过表头
     return {
