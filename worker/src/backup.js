@@ -7,13 +7,13 @@
 // （而且 GitHub 的密钥扫描会直接把它吊销）。Worker 在国内之外，访问 github.com 没问题，
 // PAT 作为 secret 只存在服务端。
 //
-// 备份仓库必须是私有的：里面有宾客姓名，还可能有饮食禁忌这类健康信息。
+// 备份仓库必须是私有的：里面是宾客的真实姓名。
 
 export async function backup(env) {
   if (!env.BACKUP_REPO || !env.BACKUP_TOKEN) return;   // 没配就当没开
 
   const { results } = await env.DB.prepare(
-    `SELECT name, count, note, created_at, updated_at
+    `SELECT name, count, created_at, updated_at
      FROM rsvp ORDER BY updated_at DESC`
   ).all();
   const rows = results || [];
@@ -95,14 +95,14 @@ function b64(text) {
 }
 
 function toCsv(rows) {
-  const head = ['姓名', '人数', '备注', '首次登记', '最后修改'];
-  const body = rows.map((r) => [r.name, r.count, r.note, r.created_at, r.updated_at]);
+  const head = ['姓名', '人数', '首次登记', '最后修改'];
+  const body = rows.map((r) => [r.name, r.count, r.created_at, r.updated_at]);
   // 带 BOM，Excel 打开中文才不乱码。
   return '﻿' + [head, ...body].map((cols) => cols.map(cell).join(',')).join('\r\n');
 }
 
-// 除了正常转义引号，还要掐掉 Excel 公式注入：宾客在备注里写
-// =HYPERLINK("http://坏地址") 的话，双击打开 CSV 就会变成一个活的公式。
+// 除了正常转义引号，还要掐掉 Excel 公式注入：万一姓名里出现
+// =HYPERLINK("http://坏地址")，双击打开 CSV 就会变成一个活的公式。
 function cell(value) {
   let s = String(value == null ? '' : value);
   if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;

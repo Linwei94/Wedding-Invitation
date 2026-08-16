@@ -10,7 +10,6 @@
 // 密钥都等于公开。所以写入靠校验、长度上限、蜜罐和限流来兜，而不是靠密钥。
 
 const MAX_NAME = 40;
-const MAX_NOTE = 500;
 
 export default {
   async fetch(request, env) {
@@ -64,7 +63,6 @@ async function submit(request, env, cors) {
     return json({ ok: false, error: '请填写姓名' }, 400, cors);
   }
   const count = clampCount(body.count);
-  const note = str(body.note, MAX_NOTE);
 
   // 蜜罐：真人看不到那个输入框，填了的基本都是脚本。
   // 不直接拒绝，而是记下来照常返回成功——脚本不会重试，我们也不会误伤
@@ -84,8 +82,8 @@ async function submit(request, env, cors) {
   if (honeypot) {
     if (!limited) {
       await env.DB.prepare(
-        'INSERT INTO rsvp_log (name, count, note, ip_hash, honeypot, at) VALUES (?, ?, ?, ?, 1, ?)'
-      ).bind(name, count, note, ipHash, now).run();
+        'INSERT INTO rsvp_log (name, count, ip_hash, honeypot, at) VALUES (?, ?, ?, 1, ?)'
+      ).bind(name, count, ipHash, now).run();
     }
     return json({ ok: true, mode: 'created' }, 200, cors);
   }
@@ -93,20 +91,19 @@ async function submit(request, env, cors) {
   // 流水先写，名单后写。顺序是故意的：万一 upsert 失败，流水里仍留有这次提交，
   // 名单可以事后从流水还原；反过来就真丢了。
   await env.DB.prepare(
-    'INSERT INTO rsvp_log (name, count, note, ip_hash, honeypot, at) VALUES (?, ?, ?, ?, 0, ?)'
-  ).bind(name, count, note, ipHash, now).run();
+    'INSERT INTO rsvp_log (name, count, ip_hash, honeypot, at) VALUES (?, ?, ?, 0, ?)'
+  ).bind(name, count, ipHash, now).run();
 
   // 一条语句完成「有则更新、无则新增」，避免先读后写的竞态，
   // 并且用 excluded.* 保住首次登记时间 created_at。
   const res = await env.DB.prepare(
-    `INSERT INTO rsvp (name, count, note, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?)
+    `INSERT INTO rsvp (name, count, created_at, updated_at)
+     VALUES (?, ?, ?, ?)
      ON CONFLICT(name) DO UPDATE SET
        count = excluded.count,
-       note = excluded.note,
        updated_at = excluded.updated_at
      RETURNING created_at = updated_at AS is_new`
-  ).bind(name, count, note, now, now).first();
+  ).bind(name, count, now, now).first();
 
   return json({ ok: true, mode: res && res.is_new ? 'created' : 'updated' }, 200, cors);
 }
@@ -139,14 +136,13 @@ async function listAll(request, env, cors) {
 
   // 一条 SELECT 拿全部，不像 KV 那样要先 list 再逐个 get。
   const { results } = await env.DB.prepare(
-    `SELECT name, count, note, created_at, updated_at
+    `SELECT name, count, created_at, updated_at
      FROM rsvp ORDER BY updated_at DESC`
   ).all();
 
   const records = (results || []).map((r) => ({
     name: r.name,
     count: Number(r.count) || 0,
-    note: r.note || '',
     createdAt: r.created_at,
     updatedAt: r.updated_at,
   }));

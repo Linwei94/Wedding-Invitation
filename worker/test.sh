@@ -12,9 +12,9 @@ post(){ curl -s -m 10 -X POST "$B/api/rsvp" -H 'Content-Type: text/plain;charset
 list(){ curl -s -m 10 "$B/api/list" -H "x-admin-token: $1" -H "Origin: $ORG"; }
 
 echo "== 提交与修改 =="
-ck "新建"                '"mode":"created"' "$(post '{"name":"张三","count":"2","note":"带一个小孩"}')"
-ck "同名再交 = 修改"      '"mode":"updated"' "$(post '{"name":"张三","count":"3","note":"改成三人"}')"
-ck "中文+emoji 备注"      '"ok":true'        "$(post '{"name":"李四 Lisa","count":"1","note":"祝福 🎉"}')"
+ck "新建"                '"mode":"created"' "$(post '{"name":"张三","count":"2"}')"
+ck "同名再交 = 修改"      '"mode":"updated"' "$(post '{"name":"张三","count":"3"}')"
+ck "中英文混合姓名"      '"ok":true'        "$(post '{"name":"李四 Lisa","count":"1"}')"
 
 echo "== 校验 =="
 ck "空姓名被拒"          '请填写姓名'   "$(post '{"name":"   ","count":"2"}')"

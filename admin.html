@@ -78,7 +78,6 @@
   th:hover{color:var(--red);}
   th .arrow{opacity:.45;font-size:10px;}
   td.no{color:var(--ink-soft);}
-  td.note{white-space:pre-wrap;word-break:break-word;max-width:280px;}
   tr:hover td{background:var(--field);}
   .msg{font-size:13px;color:#b23b3b;margin-top:10px;}
   .empty{color:var(--ink-soft);font-size:13px;padding:18px 0;text-align:center;}
@@ -129,7 +128,6 @@
         <div class="stat"><b id="sEntries">0</b><span>登记条数</span></div>
         <div class="stat"><b id="sPeople">0</b><span>出席总人数</span></div>
         <div class="stat"><b id="sAvg">0</b><span>平均每条人数</span></div>
-        <div class="stat"><b id="sNotes">0</b><span>有备注</span></div>
       </div>
       <div class="charts">
         <div>
@@ -145,7 +143,7 @@
 
     <div class="panel">
       <div class="toolbar">
-        <div class="grow"><input type="search" id="search" placeholder="搜索姓名或备注…"></div>
+        <div class="grow"><input type="search" id="search" placeholder="搜索姓名…"></div>
         <button class="ghost" id="csvBtn">导出 Excel（CSV）</button>
         <button class="ghost" id="refreshBtn">刷新</button>
       </div>
@@ -156,7 +154,6 @@
               <th data-sort="idx">#</th>
               <th data-sort="name">姓名 <span class="arrow"></span></th>
               <th data-sort="count">人数 <span class="arrow"></span></th>
-              <th data-sort="note">备注</th>
               <th data-sort="updatedAt">登记时间 <span class="arrow"></span></th>
             </tr>
           </thead>
@@ -175,8 +172,8 @@
         把内容粘到这里。一行一条，两种格式可以混着放。解析后先让你确认，再写进服务器——
         这样名单永远只有一份，不会在这里和别处各存一半。
       </p>
-      <textarea id="importText" rows="5" placeholder="【出席登记】姓名：张三｜人数：2｜备注：忌辛辣
-李四,3,不吃海鲜"></textarea>
+      <textarea id="importText" rows="5" placeholder="【出席登记】姓名：张三｜人数：2
+李四,3"></textarea>
       <div class="toolbar" style="margin-top:10px">
         <input type="file" id="importFile" accept=".csv,.txt">
         <button class="ghost" id="parseBtn">解析</button>
@@ -216,7 +213,7 @@
   [].forEach.call(document.querySelectorAll('th[data-sort]'), function (th) {
     th.addEventListener('click', function () {
       var key = th.getAttribute('data-sort');
-      if (key === 'idx' || key === 'note') return;
+      if (key === 'idx') return;
       if (sortKey === key) sortDir = -sortDir; else { sortKey = key; sortDir = 1; }
       renderTable();
     });
@@ -265,9 +262,6 @@
     document.getElementById('sEntries').textContent = entries;
     document.getElementById('sPeople').textContent = people;
     document.getElementById('sAvg').textContent = entries ? (people / entries).toFixed(1) : '0';
-    document.getElementById('sNotes').textContent = rows.filter(function (r) {
-      return r.note && r.note.trim();
-    }).length;
   }
 
   // 人数分布：1-5 人各有多少条登记
@@ -349,8 +343,7 @@
     var q = searchEl.value.trim().toLowerCase();
     var list = rows.filter(function (r) {
       if (!q) return true;
-      return (r.name || '').toLowerCase().indexOf(q) > -1 ||
-             (r.note || '').toLowerCase().indexOf(q) > -1;
+      return (r.name || '').toLowerCase().indexOf(q) > -1;
     });
     list.sort(function (a, b) {
       var av = a[sortKey], bv = b[sortKey];
@@ -369,10 +362,9 @@
     tbody.innerHTML = '';
     list.forEach(function (r, i) {
       var tr = document.createElement('tr');
-      [i + 1, r.name, r.count, r.note || '—', fmt(r.updatedAt)].forEach(function (v, idx) {
+      [i + 1, r.name, r.count, fmt(r.updatedAt)].forEach(function (v, idx) {
         var td = document.createElement('td');
         if (idx === 0) td.className = 'no';
-        if (idx === 3) td.className = 'note';
         td.textContent = v;
         tr.appendChild(td);
       });
@@ -403,9 +395,9 @@
 
   function exportCsv() {
     var list = visibleRows();
-    var head = ['姓名', '人数', '备注', '登记时间'];
+    var head = ['姓名', '人数', '登记时间'];
     var lines = [head].concat(list.map(function (r) {
-      return [r.name, r.count, r.note || '', fmt(r.updatedAt)];
+      return [r.name, r.count, fmt(r.updatedAt)];
     }));
     var csv = lines.map(function (cols) {
       return cols.map(cell).join(',');
@@ -420,7 +412,7 @@
     URL.revokeObjectURL(a.href);
   }
 
-  // 除了转义引号，还要掐掉 Excel 的公式注入：宾客要是在备注里写
+  // 除了转义引号，还要掐掉 Excel 的公式注入：万一姓名里出现
   // =HYPERLINK("http://坏地址")，双击打开 CSV 时 Excel 会把它当活公式执行。
   // 前面加个单引号就只当文本了。
   function cell(value) {
@@ -493,7 +485,7 @@
     return out;
   }
 
-  // 【出席登记】姓名：张三｜人数：2｜备注：忌辛辣
+  // 【出席登记】姓名：张三｜人数：2
   // 全角｜：和半角|: 都要认——中文输入法、手工重打、各家客户端都可能产出半角那版，
   // 只认全角的正则在真实数据上会直接返回 null。
   function parseReceipt(line) {
@@ -501,25 +493,22 @@
     var s = line.replace(/｜/g, '|').replace(/：/g, ':');
     var name = grab(s, /姓名\s*:\s*([^|]*)/);
     if (!name) return null;
-    var note = grab(s, /备注\s*:\s*([^|]*)/);
     return {
       name: name,
-      count: grab(s, /人数\s*:\s*([^|]*)/),
-      note: note === '无' ? '' : note
+      count: grab(s, /人数\s*:\s*([^|]*)/)
     };
   }
 
   function grab(s, re) { var m = s.match(re); return m ? m[1].trim() : ''; }
 
-  // CSV 或制表符分隔：姓名,人数,备注
+  // CSV 或制表符分隔：姓名,人数
   function parseDelimited(line) {
     var cols = line.indexOf('\t') > -1 ? line.split('\t') : splitCsv(line);
     var name = String(cols[0] || '').trim().replace(/^["']|["']$/g, '');
     if (!name || name === '姓名') return null;    // 跳过表头
     return {
       name: name,
-      count: String(cols[1] == null ? '' : cols[1]).trim(),
-      note: String(cols[2] == null ? '' : cols[2]).trim()
+      count: String(cols[1] == null ? '' : cols[1]).trim()
     };
   }
 
@@ -570,14 +559,13 @@
         cb.type = 'checkbox';
         cb.id = 'imp' + i;
         // 同名的默认不勾。写入是按姓名覆盖的，一个婚礼上「张伟」很可能真是两个人，
-        // 自动合并会把先登记那位的人数和备注直接抹掉，所以这里必须让人来定。
+        // 自动合并会把先登记那位的人数直接抹掉，所以这里必须让人来定。
         cb.checked = !dup;
         cb.setAttribute('data-i', String(i));
 
         var label = document.createElement('label');
         label.setAttribute('for', cb.id);
-        label.textContent = r.name + '　' + normCount(r.count) + ' 人'
-          + (r.note ? '　' + r.note : '');
+        label.textContent = r.name + '　' + normCount(r.count) + ' 人';
         if (dup) {
           var flag = document.createElement('span');
           flag.className = 'imp-flag';
@@ -603,7 +591,7 @@
       var bad = document.createElement('div');
       bad.className = 'imp-bad';
       bad.textContent = '有 ' + parsed.bad.length + ' 行没认出来，没有被导入。'
-        + '请检查或手工改成「姓名,人数,备注」再试：\n\n' + parsed.bad.join('\n');
+        + '请检查或手工改成「姓名,人数」再试：\n\n' + parsed.bad.join('\n');
       box.appendChild(bad);
     }
   }
@@ -640,7 +628,7 @@
       fetch(RSVP_ENDPOINT + '/api/rsvp', {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-        body: JSON.stringify({ name: r.name, count: normCount(r.count), note: r.note || '' })
+        body: JSON.stringify({ name: r.name, count: normCount(r.count) })
       })
         .then(function (res) { return res.json(); })
         .then(function (data) {

@@ -607,10 +607,6 @@
             </select>
           </div>
         </div>
-        <div class="field">
-          <label for="note">备注</label>
-          <textarea id="note" name="note" placeholder="如有饮食禁忌或其他需要告知的事项，请在此留言"></textarea>
-        </div>
         <div class="hp-field" aria-hidden="true">
           <label for="website_url">网址</label>
           <input type="text" id="website_url" name="website_url" tabindex="-1" autocomplete="off">
@@ -833,7 +829,6 @@
     var payload = {
       name: document.getElementById('name').value.trim(),
       count: document.getElementById('count').value,
-      note: document.getElementById('note').value.trim(),
       website_url: document.getElementById('website_url').value
     };
     if (!payload.name) return;
@@ -931,8 +926,7 @@
     document.getElementById('fbText').textContent = composeLine(payload);
 
     if (FALLBACK_FORM_URL) {
-      // 只预填姓名和人数。备注那一栏问的是饮食禁忌，属于健康信息，放进 URL 会留在
-      // 第三方的访问日志、微信的历史记录和它的链接安全扫描里，所以让宾客在那边自己填。
+      // 预填姓名和人数，宾客到那边直接提交就行，不用重新打一遍。
       var link = document.getElementById('fbFormLink');
       link.href = FALLBACK_FORM_URL
         + (FALLBACK_FORM_URL.indexOf('?') >= 0 ? '&' : '?')
@@ -961,11 +955,10 @@
   }
 
   // 拼成一行，方便宾客整条转发给新人。
-  // ｜和【】是这行字的分隔符，姓名/备注里出现就换成空格，免得那边读串行。
+  // ｜和【】是这行字的分隔符，姓名里出现就换成空格，免得那边读串行。
   function composeLine(payload){
     return '【出席登记】姓名：' + clean(payload.name, 40)
-      + '｜人数：' + clean(payload.count, 2)
-      + '｜备注：' + (clean(payload.note, 100) || '无');
+      + '｜人数：' + clean(payload.count, 2);
   }
   function clean(s, max){
     return String(s == null ? '' : s).replace(/[｜|【】\r\n]/g, ' ').trim().slice(0, max);

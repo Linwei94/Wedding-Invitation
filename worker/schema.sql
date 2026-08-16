@@ -5,7 +5,6 @@
 CREATE TABLE IF NOT EXISTS rsvp (
   name       TEXT PRIMARY KEY,
   count      INTEGER NOT NULL DEFAULT 1,
-  note       TEXT    NOT NULL DEFAULT '',
   created_at TEXT    NOT NULL,
   updated_at TEXT    NOT NULL
 );
@@ -16,7 +15,6 @@ CREATE TABLE IF NOT EXISTS rsvp_log (
   id       INTEGER PRIMARY KEY AUTOINCREMENT,
   name     TEXT    NOT NULL,
   count    INTEGER NOT NULL,
-  note     TEXT    NOT NULL,
   ip_hash  TEXT    NOT NULL,  -- 只存盐化哈希，不存真实 IP
   honeypot INTEGER NOT NULL DEFAULT 0,
   at       TEXT    NOT NULL
