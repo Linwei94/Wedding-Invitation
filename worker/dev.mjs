@@ -34,9 +34,6 @@ const env = {
   DB: D1,
   ADMIN_TOKEN: process.env.ADMIN_TOKEN || 'test-token-1234567890',
   ALLOWED_ORIGIN: process.env.ALLOWED_ORIGIN ?? 'https://www.taolinwei.com,https://linwei94.github.io',
-  IP_SALT: 'dev-salt',
-  RATE_LIMIT: process.env.RATE_LIMIT || '60',
-  RATE_WINDOW_MIN: process.env.RATE_WINDOW_MIN || '10',
 };
 
 const worker = (await import(pathToFileURL(path.join(ROOT, 'worker/src/index.js')))).default;
@@ -55,7 +52,6 @@ http.createServer(async (req, res) => {
     for await (const c of req) chunks.push(c);
     const headers = new Headers();
     for (const [k, v] of Object.entries(req.headers)) headers.set(k, v);
-    if (!headers.has('cf-connecting-ip')) headers.set('CF-Connecting-IP', '198.51.100.7');
     const request = new Request(url, {
       method: req.method,
       headers,

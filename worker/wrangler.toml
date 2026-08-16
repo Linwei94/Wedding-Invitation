@@ -26,16 +26,10 @@ database_name = "rsvp"
 database_id = "在这里填 wrangler d1 create 输出的 database_id"
 
 [vars]
-# 只有这些来源能读名单（/api/list），英文逗号分隔。
-# 写入接口(/api/rsvp)故意不限来源，原因见 src/index.js 里的说明。
-# 正式地址是 https://www.taolinwei.com/Wedding-Invitation/ ——来源只算协议+域名，不含路径。
+# 允许调用接口的页面来源，英文逗号分隔。唯一的调用方是后台 admin.html，
+# 它跟请柬页同域，所以填请柬页的域名即可（来源只算协议+域名，不含路径）。
 # github.io 那个一起留着，方便你在换域名前后都能打开后台。
 ALLOWED_ORIGIN = "https://www.taolinwei.com,https://linwei94.github.io"
-
-# 每个 IP 在 RATE_WINDOW_MIN 分钟内最多写入多少次。给得很宽松是故意的：
-# 国内运营商大量使用 NAT，一桌亲戚可能共用一个出口 IP，卡太严会把真宾客挡在外面。
-RATE_LIMIT = "60"
-RATE_WINDOW_MIN = "10"
 
 # 备份用的私有仓库（见 src/backup.js）。不用备份就把 cron 那段删掉。
 BACKUP_REPO = ""
@@ -47,6 +41,6 @@ HEALTHCHECK_URL = ""
 crons = ["17 19 * * *"]
 
 # 以下用 `wrangler secret put <名字>` 设置，不要写进这个文件：
-#   ADMIN_TOKEN     后台口令，32 位以上随机串，不要用自己平时的密码
-#   IP_SALT         给 IP 做哈希的盐，随便一串随机字符
-#   BACKUP_TOKEN    只对那个私有备份仓库有 Contents:R/W 权限的 fine-grained PAT
+#   ADMIN_TOKEN     后台口令，也是三个接口唯一的鉴权凭据。32 位以上随机串，
+#                   不要用自己平时的密码——它是保护全部宾客姓名的唯一一道门。
+#   BACKUP_TOKEN    只对那个私有备份仓库有 Contents:R/W 权限的 fine-grained PAT（不备份可不设）

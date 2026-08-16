@@ -1,6 +1,6 @@
 # 婚礼请柬网站 · 陶林伟 & 肖佩韦
 
-一个单页静态婚礼请柬网站，包含婚礼信息展示和出席登记表单。
+一个单页静态婚礼请柬网站：宾客看信息，出席名单由新人在后台录入。
 
 ## 页面内容
 
@@ -9,10 +9,12 @@
 1. **婚礼请柬主视觉**：`images/invitation.jpg`，一张完整设计好的请柬图片（标题、新人姓名、
    日期、农历日期、签到合影/晚宴仪式时间、婚礼地址等信息都画在图里）。
    **可以点击放大**，页面也允许双指缩放，方便年长的宾客看清（页面上不作文字提示）
-2. **出席登记表单**：姓名 + 出席人数（下拉，最多 5 人）
+2. **婚礼地址**：场地名称、地址、时间，带一个"复制地址"按钮
 3. **走动动画**：手绘线条风格的小动画（详见下方"走动动画"）
 4. **图片展示区**：婚纱照 + 中式礼服，点任意一张可放大查看，支持左右切换和 Esc 关闭
 5. **页尾**：新人姓名与日期
+
+> 页面上**没有**出席登记表单，这是刻意的，原因见下方"出席名单怎么来的"。
 
 > 页面**没有**禁用缩放（`<meta viewport>` 里不要再加 `user-scalable=no`），
 > 否则年长宾客没法放大看细节。
@@ -44,7 +46,7 @@
 ```
 .
 ├── index.html          # 请柬页面，样式与交互均内嵌在此文件中
-├── admin.html          # 出席名单后台（口令进入，可导出 CSV）
+├── admin.html          # 出席名单后台（口令进入，手工补录 + 导出 CSV）
 ├── favicon.ico
 ├── images
 │   ├── invitation.jpg  # 请柬主视觉图片
@@ -55,7 +57,7 @@
 │   └── bgm.mp3         # 背景音乐（见"背景音乐"）
 ├── favicon.ico         # 真正的多尺寸 ICO（内含 16/32/48）
 ├── site.webmanifest    # 安卓"添加到主屏"用
-├── worker/             # 登记接口（Cloudflare Worker + D1），见下方"登记接口"
+├── worker/             # 名单接口（Cloudflare Worker + D1），只有后台会调用
 └── README.md
 ```
 
@@ -144,74 +146,69 @@
 可以按这个方法重新估算。
 新加照片时建议也先压到这个量级，否则手机流量打开会很慢。
 
-## 出席登记表单
+## 出席名单怎么来的
 
-访客填完表单点"提交登记"后，请求发到 Cloudflare Worker 的 `/api/rsvp`，
-记录存进 Cloudflare D1（一个免运维的 SQLite 数据库）。
+请柬页面上**没有**宾客自助登记的表单，是刻意去掉的。
 
-表单不再单独收集"是否出席"——提交表单本身就代表出席。
+原因：宾客以国内为主，而页面在 GitHub Pages、接口在境外，两段链路在国内都只能算
+"大概能通、要实测"。更糟的是提交失败是**静默**的——宾客以为登记上了，你也不会收到任何
+通知，而这个数字最后是要报给酒店的。与其赌，不如把这条链路整个拿掉。
 
-- **新增**：第一次用某个姓名提交，新建一条记录
-- **修改**：之后用同样的姓名再提交一次，会覆盖那条记录（不会产生重复），
-  首次登记时间会保留
+所以现在是：**宾客微信/电话告诉你，你在后台录入。**
+
+好处是国内可达性对宾客彻底不再是问题——他们只需要能打开请柬页面看信息，不需要连任何接口。
+唯一需要连接口的人是你自己。
+
+名单存在 Cloudflare D1（一个免运维的 SQLite），三个接口**全部要口令**：
+
+| 接口 | 用途 |
+| --- | --- |
+| `POST /api/rsvp` | 写入/更新一条，由后台的「手工补录」调用 |
+| `GET /api/list` | 读取全部名单，后台表格用 |
+| `GET /health` | 存活探测 + 当前条数 |
+
+- **新增**：第一次用某个姓名写入，新建一条记录
+- **修改**：之后用同样的姓名再写一次，覆盖那条（不产生重复），首次登记时间保留
 - 人数超出 1–5 会被自动收进范围，姓名为空会被拒绝
+- 每次写入都会往只追加的 `rsvp_log` 里留一条流水，名单被误覆盖时可以还原
 
-> 用"姓名"作为唯一标识。万一两位宾客同名，后填的会覆盖先填的。
-> 后台导入时遇到同名会明确标出"疑似重名"并且默认不勾选，由人来确认。
+> 用"姓名"作为唯一标识。所以后台录入时遇到同名会明确标出"疑似重名"并且**默认不勾选**，
+> 由你确认——一个婚礼上「张伟」很可能真是两个人。
 
-### 配置项
-
-`index.html` 和 `admin.html` 顶部各有一个 `RSVP_ENDPOINT`，填成同一个地址：
-
-```js
-// 第 1 步（workers.dev，不用动 DNS）：
-var RSVP_ENDPOINT = 'https://wedding-rsvp.<你的子域>.workers.dev';
-// 第 2 步（迁完域名之后，为了国内访问）：
-// var RSVP_ENDPOINT = 'https://rsvp.taolinwei.com';
-```
-
-具体怎么拿到这个地址见下面「部署结构」的第二节。结尾不要带斜杠——带了也会自动去掉。
-
-### 提交失败时会怎样
-
-提交会自动重试两次（10 秒 + 8 秒）。两次都失败就把按钮放开、显示一句固定中文：
-「网络不太稳定，登记没有提交成功，请稍后再点一次「提交登记」。」
-
-宾客看到的永远是这句固定文案，不会出现 `Failed to fetch` 这种看不懂的东西。
-按钮一定会被放开，所以宾客可以直接再点一次——原来那版用 `.finally()` 收尾，
-在微信老内核上会把按钮永久卡在「提交中…」。
-
-> **这里没有备用通道，所以接口必须真的通。** 宾客提交失败就只能等网络好转再试，
-> 没有第二条路可走。这也是为什么部署完之后「四、国内实测」那一节不能跳过——
-> 发请柬之前一定要确认接口在国内手机上、微信里能稳定提交。
+> **想把宾客自助表单加回来？** 那要改四处：页面加回表单、Worker 的 `POST /api/rsvp`
+> 放开鉴权、加回蜜罐与按 IP 限流、写入的 CORS 放宽。git 历史里有完整的一版
+> （包括为什么写入接口当时要对所有来源开放），`git log --oneline` 找
+> "Remove the fallback registration panel" 之前的提交。
 
 ## 本地预览
 
-直接用浏览器打开 `index.html` 能看页面样式和动画。想把登记链路**整条**跑起来
+直接用浏览器打开 `index.html` 能看页面样式和动画。想把后台整条链路跑起来
 （不用部署、不花钱）：
 
 ```bash
 node worker/dev.mjs "$PWD" 8813   # 用 node:sqlite 模拟 D1，同时把静态页面伺服起来
-bash worker/test.sh 8813          # 27 项接口测试
+bash worker/test.sh 8813          # 31 项接口测试
 ```
 
-浏览器打开 http://127.0.0.1:8813/ ，后台在 `/admin.html`，本地口令
-`test-token-1234567890`。
+浏览器打开 http://127.0.0.1:8813/admin.html ，本地口令 `test-token-1234567890`。
 
 ## 部署结构
 
 页面和接口分开部署，因为 GitHub Pages 只能托管静态文件、跑不了后端：
 
 ```
-GitHub Pages（绑 taolinwei.com）        Cloudflare Worker + D1
-https://www.taolinwei.com/              第1步 wedding-rsvp.*.workers.dev
-                                        第2步 rsvp.taolinwei.com（需迁 DNS）
+GitHub Pages（宾客访问）                 Cloudflare Worker + D1（只有你访问）
+https://www.taolinwei.com/               https://wedding-rsvp.*.workers.dev
 Wedding-Invitation/
-├── index.html        ── 调用 ──▶       ├── POST /api/rsvp   写入登记（公开）
-├── admin.html                          ├── GET  /api/list   读取名单（要口令）
-├── images/ audio/                      └── GET  /health     存活探测 + 连接预热
-└── favicon / manifest                       （数据在 D1，每天备份到私有仓库）
+├── index.html   ← 宾客只看这个，不连接口
+├── admin.html   ────── 带口令调用 ──▶    ├── POST /api/rsvp   写入一条
+├── images/ audio/                        ├── GET  /api/list   读取名单
+└── favicon / manifest                    └── GET  /health     存活探测
+                                          （数据在 D1，可每天备份到私有仓库）
 ```
+
+**宾客那条线上没有接口。** 请柬页面是纯静态的，宾客打开它不会发起任何跨境请求——
+这正是去掉自助表单换来的好处：国内可达性只剩"页面能不能打开"一个问题。
 
 > **域名怎么绑（这一步很容易搞反）**：正式地址是
 > `https://www.taolinwei.com/Wedding-Invitation/`，注意是 **www**，末尾带
@@ -247,128 +244,142 @@ Wedding-Invitation/
 3. `.nojekyll` 让 GitHub 原样输出文件，不要删
 4. 几分钟后能在 `https://www.taolinwei.com/Wedding-Invitation/` 打开
 
-### 二、部署接口 · 第 1 步：workers.dev（今天就能用）
+这一步做完，宾客那边就齐了——他们看请柬不需要后面任何东西。
 
-这一步不动任何 DNS，做完登记就通了。
+### 二、部署名单接口
+
+**在你自己的笔记本上做，不要在公司的远程机器上。** 那台机器
+`registry.npmjs.org` 和 `api.cloudflare.com` 都被代理挡着（实测都是 `000`），
+而且 `wrangler login` 要开浏览器回调 `localhost`。
 
 ```bash
 npm i -g wrangler
-wrangler login                              # 会开浏览器登录 Cloudflare
+wrangler login                               # 开浏览器授权
+wrangler whoami                              # 确认登录成功
 
 cd worker
-wrangler d1 create rsvp --location apac      # --location apac 不能省，否则库可能落在美东，
-                                             # 每次写入要多跨一次太平洋
+wrangler d1 create rsvp --location apac       # --location apac 不能省：库落在哪个区是
+                                              # 建库时定的、之后改不了
 ```
 
-把上面输出里的 `database_id` 填进 `wrangler.toml` 的 `[[d1_databases]]`，**再继续**
-（占位符没换掉后面会失败）：
+把输出里的 `database_id`（一串 UUID）填进 `wrangler.toml` 的 `[[d1_databases]]`，
+**替换掉那句中文占位符，再继续**——不换后面两条命令都会失败：
 
 ```bash
-wrangler d1 execute rsvp --remote --file=./schema.sql    # 建表，--remote 别漏
+wrangler d1 execute rsvp --remote --file=./schema.sql
+```
 
-wrangler secret put ADMIN_TOKEN              # 后台口令，32 位以上随机串，别用平时的密码
-wrangler secret put IP_SALT                  # 随便一串随机字符，用来哈希 IP
+> **`--remote` 千万别漏。** 漏掉的话它会在你笔记本上建一个本地 SQLite 文件，
+> 命令一切正常、你以为建好了，但线上那个库还是空的——部署完写入会报数据库错误，
+> 而你会去查代码。这是这套工具最容易踩的坑。
 
+```bash
+wrangler secret put ADMIN_TOKEN               # 见下面说明
 wrangler deploy
 ```
 
-`wrangler deploy` 会打印出这个 Worker 的地址，形如：
+`ADMIN_TOKEN` 是**三个接口唯一的鉴权凭据**，也是保护全部宾客姓名的唯一一道门。
+用随机串，不要用平时的密码：
+
+```bash
+openssl rand -base64 32
+```
+
+生成后存进密码管理器——登录 `admin.html` 要用它。
+
+`wrangler deploy` 会打印出地址：
 
 ```
 https://wedding-rsvp.<你的子域>.workers.dev
 ```
 
-把它填进 **`index.html`** 和 **`admin.html`** 顶部的 `RSVP_ENDPOINT`（结尾不要带斜杠），
-提交推到 `main`。
+把它填进 **`admin.html` 第 189 行**的 `RSVP_ENDPOINT`（结尾不带斜杠），推到 `main`：
 
-自己验一遍（把 `<你的子域>` 换成真的）：
+```js
+  var RSVP_ENDPOINT = 'https://wedding-rsvp.<你的子域>.workers.dev';
+```
+
+> `index.html` 里**不需要**填任何接口地址——请柬页面不连接口。
+
+### 三、验证
 
 ```bash
 B=https://wedding-rsvp.<你的子域>.workers.dev
+T=你的ADMIN_TOKEN
 
-curl $B/health                    # 期望 {"ok":true,"entries":0,...}
-curl $B/api/list                  # 期望 {"ok":false,"error":"口令不正确"}
-curl -X POST $B/api/rsvp -H 'Content-Type: text/plain;charset=UTF-8' \
-     -d '{"name":"__测试__","count":"2"}'      # 期望 {"ok":true,"mode":"created"}
+curl $B/health                                  # 期望 {"ok":false,"error":"口令不正确"}
+curl $B/health -H "x-admin-token: $T"           # 期望 {"ok":true,"entries":0,...}
+
+curl -X POST $B/api/rsvp -H "x-admin-token: $T" \
+     -H 'Content-Type: text/plain;charset=UTF-8' \
+     -d '{"name":"__测试__","count":"2"}'        # 期望 {"ok":true,"mode":"created"}
+
+curl -X POST $B/api/rsvp -H "x-admin-token: $T" \
+     -H 'Content-Type: text/plain;charset=UTF-8' \
+     -d '{"name":"__测试__","count":"4"}'        # 期望 {"ok":true,"mode":"updated"}
 ```
 
-然后打开 `admin.html`，用 `ADMIN_TOKEN` 登录，应该能看到 `__测试__` 那一条。
+第一条**必须**返回「口令不正确」——那说明没带口令的人拿不到任何东西。
 
-**发请柬前把测试数据删掉。** 系统里没有删除接口（故意的，公开接口不该能删数据），
-所以用命令删：
+然后打开 `https://www.taolinwei.com/Wedding-Invitation/admin.html`，输入口令，
+应该看到 `__测试__` 一条 4 人。再用「手工补录」粘两行 `张三,2` 试一次。
+
+**发请柬前把测试数据删掉**（系统里故意没有删除接口，公开不了的东西也就删不了）：
 
 ```bash
 wrangler d1 execute rsvp --remote \
   --command "DELETE FROM rsvp WHERE name LIKE '__测试__%'; DELETE FROM rsvp_log WHERE name LIKE '__测试__%';"
 ```
 
-> `--command` 这个参数名请用 `wrangler d1 execute --help` 复核一下——我没有网络，
-> 没法确认当前版本 wrangler 的确切拼写。
+> `--command` 的确切拼写请用 `wrangler d1 execute --help` 复核——我没有网络，
+> 没法确认当前版本 wrangler 的参数名。
 
-到这一步：**海外宾客已经可以正常登记了**。国内能不能用是下一步的事。
+### 四、国内可达性：现在只剩一件事要测
 
-### 三、部署接口 · 第 2 步：换成自己的域名（为了国内访问）
+去掉自助表单之后，**宾客不需要连任何接口**，所以要测的只有"页面本身在国内能不能打开"。
 
-`*.workers.dev` 在国内被 DNS 污染的报告很多（污染是按域名匹配的），所以国内要靠自己的域名。
-但 Cloudflare 的 Custom Domain **要求该域名的 DNS 托管在 Cloudflare**，而 `taolinwei.com`
-现在的 NS 是 GoDaddy：
+用国内手机、手机流量、关 WiFi、关 VPN：
 
-```
-taolinwei.com  NS  ns67.domaincontrol.com / ns68.domaincontrol.com     ← GoDaddy
-```
+1. 把 `https://www.taolinwei.com/Wedding-Invitation/` 发给微信「文件传输助手」
+2. **在微信里点开**（测的是微信 X5 内核，不是 Safari）
+3. 记录：能不能打开、请柬图几秒出来、相册能不能划、分享卡片有没有缩略图
+4. 晚上 21:00–22:30 再测一次（国际链路最堵的时候）
+5. 让 2–3 位不同省份、不同运营商的亲戚也点一下，其中一位用家里最老的安卓机
 
-所以必须先迁 NS。要留意的是，这一迁是**整个域名**交给 Cloudflare 托管，包括现在指向
-GitHub Pages 的那条 `www` 记录——**迁移时务必把已有记录逐条照抄过去，否则网站本身会先挂掉。**
+打不开的话告诉我——那是页面托管的问题，得把静态站换到国内能稳定访问的地方，
+和接口无关。
 
-1. Cloudflare 控制台 → Add a site → 填 `taolinwei.com`，它会自动扫描现有 DNS 记录
+> **`workers.dev` 在国内通不通不重要了。** 唯一需要连接口的是你自己，而你在英国。
+> 只有一种情况需要在意：婚礼当天你想在上海用手机打开后台看名单。
+> 那就**婚礼前一天把 CSV 导出来、或者直接打印一份纸质名单**——比依赖当场能不能联网可靠得多。
+
+### 五、（可选）把接口换成自己的域名
+
+**大多数情况不需要做这一步了。** 之前它是必须的，因为宾客要连接口；现在宾客不连了，
+`workers.dev` 完全够用。
+
+只有一个理由值得做：你想在国内也能打开后台。那就要把 `taolinwei.com` 的 NS 从
+GoDaddy（`ns67/ns68.domaincontrol.com`）迁到 Cloudflare，才能绑 `rsvp.taolinwei.com`。
+
+**这一迁是整个域名交给 Cloudflare 托管，包括现在指向 GitHub Pages 的 `www` 记录——
+弄错请柬页面本身会先挂。** 权衡一下：为了"当天能在国内看后台"这一个便利，
+去动一条正在给几百位宾客服务的 DNS 记录，通常不值得（导出 CSV 就解决了）。
+
+真要做：
+
+1. Cloudflare → Add a site → `taolinwei.com`，它会自动扫描现有 DNS 记录
 2. **逐条核对**扫出来的记录，特别是 `www`（应该指向 `linwei94.github.io`）
-3. 去 GoDaddy 把 NS 改成 Cloudflare 给的两个，等生效（通常几分钟到几小时）
-4. 生效后先确认 `https://www.taolinwei.com/Wedding-Invitation/` 还能正常打开
-5. 把 `worker/wrangler.toml` 里 `routes` 那几行取消注释，`wrangler deploy`
-6. 把两个文件里的 `RSVP_ENDPOINT` 换成 `https://rsvp.taolinwei.com`，推到 `main`
-7. 做下面第四节的国内实测
+3. GoDaddy 把 NS 改成 Cloudflare 给的两个，等生效
+4. 先确认 `https://www.taolinwei.com/Wedding-Invitation/` 还能正常打开
+5. `worker/wrangler.toml` 里 `routes` 那几行取消注释，`wrangler deploy`
+6. `admin.html` 的 `RSVP_ENDPOINT` 换成 `https://rsvp.taolinwei.com`
 
-> 不想动 DNS 也是一种选择：那就一直用 `workers.dev` 的地址。海外宾客没问题，
-> 国内宾客能不能提交要实测（见下一节）。页面上已经没有备用通道了，
-> 所以国内提交失败就是真的没登记上。
->
-> 别用 `.xyz`/`.top` 这类便宜后缀做接口域名，在国内更容易被微信的域名管控拦下来。
-
-### 四、国内实测（接口部署完之后做）
-
-我**没有网络，没有验证过任何一条国内可达性**。Cloudflare 在国内大致是"通常能连上、
-有时很慢"，必须你用国内手机实测。手机流量、关 WiFi、关 VPN。
-
-下面把接口地址记作 `$B`：第 2 步做完就用 `https://rsvp.taolinwei.com`，
-还没迁域名就用 `https://wedding-rsvp.<你的子域>.workers.dev`。
-
-| # | 测什么 | 怎么测 | 判断 |
-| --- | --- | --- | --- |
-| 1 | 能不能解析 | 用 `114.114.114.114` 解析 `$B` 的域名 | 拿到真实 Cloudflare IP = 没被污染。这一步区分"被墙"和"只是慢" |
-| 2 | 走哪个机房 | 打开 `$B/cdn-cgi/trace` 看 `colo=` | HKG/NRT 好；LAX/SJC/SEA 说明绕到了美西，每次提交多跨一次太平洋 |
-| 3 | 接口通不通 | 打开 `$B/health` | 返回 JSON 就是通的 |
-| 4 | **微信里** | 把 `$B/health` 发给"文件传输助手"，**在微信里点开** | 测的是微信 X5 内核；出现"已停止访问该网页"说明域名被微信拦了 |
-| 5 | 真提交一次 | 微信里打开正式页面，填表提交，**掐表** | 2 秒内好；反复超过 5 秒宾客会放弃 |
-| 6 | 最坏情况 | 晚上 21:00–22:30 再测一遍第 5 项，最好三家运营商都试 | 只有白天能用的站，婚礼当周会出事 |
-
-> 第 2 项如果返回的是 `{"ok":false,"error":"接口不存在"}`，那说明 `/cdn-cgi/trace`
-> 这个路径落到了我们的 Worker 上而不是 Cloudflare 自己处理——**这不是"不通"的证据**，
-> 跳过这一项即可，看第 1、3、4 项。
-
-还要单独测**页面本身**：把 `https://www.taolinwei.com/Wedding-Invitation/` 发到微信里打开，
-看能不能打开、请柬图几秒出来。这条是任何后端方案都救不了的——页面打不开，
-宾客连表单都看不见。
-
-**用自己域名测下来第 1/4 项就挂了的话别硬上**——告诉我，我们把国内表单服务改成主通道。
-（注意：这条判断只对第 2 步的自有域名有效。用 `workers.dev` 测失败只说明
-"workers.dev 在国内不可用"，那本来就是预期，不代表 Cloudflare 这条路不通。）
-
-### 五、每天自动备份名单
+### 六、（可选）每天自动备份名单
 
 名单是这个项目里唯一不可再生的东西，所以 `worker/src/backup.js` 每天把它
 提交到一个**私有**仓库（`wrangler.toml` 里的 cron 触发）：
 
-1. 新建一个**私有** GitHub 仓库，确认真的是 private——里面有宾客的真实姓名
+1. 新建一个**私有** GitHub 仓库，确认真的是 private——里面有几百位宾客的真实姓名
 2. 建一个只对这个仓库有 Contents 读写权限的 fine-grained PAT，
    用 `wrangler secret put BACKUP_TOKEN` 存进去
 3. `wrangler.toml` 里把 `BACKUP_REPO` 填成 `用户名/仓库名`
@@ -383,19 +394,28 @@ GitHub Pages 的那条 `www` 记录——**迁移时务必把已有记录逐条�
 
 ## 查看名单（数据管理后台）
 
-打开 `https://www.taolinwei.com/Wedding-Invitation/admin.html`，输入 `ADMIN_TOKEN` 设的口令，可以看到：
+打开 `https://www.taolinwei.com/Wedding-Invitation/admin.html`，输入 `ADMIN_TOKEN` 设的口令。
+这是名单唯一的入口，既用来看也用来录。
+
+**录入（主要功能）**——「手工补录」：宾客微信/电话告诉你之后，写成「姓名,人数」
+一行一位粘进去（制表符分隔、Excel 直接粘也行），解析后先让你确认再写进服务器。
+三条保护：
+
+- 同名会标出"疑似重名"并且**默认不勾选**，由你判断是同一个人还是两位同名宾客
+- 没认出来的行会**原样列出来**告诉你，绝不悄悄丢掉
+- 没带分隔符的单独一行不会被当成宾客——否则从微信里多选复制时捎带进来的闲聊，
+  每一行都会变成一位"宾客"，把报给酒店的人数抬高（凭空多出来的人比漏掉的更难核对）
+
+**查看**：
 
 - **三个统计**：登记条数、出席总人数、平均每条人数
 - **出席人数分布**：1–5 人各有多少条登记的横向柱状图
-- **每日登记趋势**：按天聚合的累计折线图（登记满两天后才显示）
+- **每日登记趋势**：按天聚合的累计折线图（录满两天后才显示）
 - **可搜索、可排序的名单表格**：支持按姓名搜索，点表头按人数或时间排序
-- **导出 CSV**：导出的是当前筛选结果，文件带 UTF-8 BOM，Excel 打开中文不乱码
-- **「最近一条登记：X 天前」**：超过 7 天标红。每一种静默故障（接口挂了、额度用光、
-  域名被墙）在名单上长得都一样——没有新登记，所以要把这个显式显示出来
-- **手工补录**：打电话/当面告诉你的宾客，写成「姓名,人数」一行一位粘进去，
-  解析后确认再写回服务器。同名会标"疑似重名"且默认不勾选；
-  没认出来的行会原样列出来告诉你，**不会悄悄丢掉**（也因此，没带分隔符的
-  单独一行不会被当成宾客——免得从微信里多选复制时捎带的闲聊变成凭空多出的人）
+- **导出 CSV**：导出的是当前筛选结果，文件带 UTF-8 BOM，Excel 打开中文不乱码。
+  **婚礼前一天务必导一份出来、最好打印一张纸**——当天现场不要指望网络
+- **「最近一条登记：X 天前」**：现在的含义是"你上次录入是多久前"，
+  提醒你别攒太多没录
 
 口令只临时存在浏览器当前标签页，关掉即清空。页面加了 `noindex` 不会被搜索引擎收录，
 但**知道网址的人仍能看到登录框**——口令用 32 位以上随机串，别用平时的密码，
@@ -405,5 +425,5 @@ GitHub Pages 的那条 `www` 记录——**迁移时务必把已有记录逐条�
 
 - 请柬视觉内容（标题、姓名、日期、地址等）都画在 `images/invitation.jpg` 这张图片里，
   要改这些内容需要重新出一张图替换掉这个文件
-- 走动动画、表单字段这些是 `index.html` 里的文本/代码，可以直接改，
+- 走动动画、地址文字这些是 `index.html` 里的文本/代码，可以直接改，
   也可以把要改的内容发给我，由我代为修改后重新推送。
