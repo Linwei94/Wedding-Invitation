@@ -55,8 +55,8 @@
 │   └── bgm.mp3         # 背景音乐（见"背景音乐"）
 ├── favicon.ico         # 真正的多尺寸 ICO（内含 16/32/48）
 ├── site.webmanifest    # 安卓"添加到主屏"用
-├── CNAME               # GitHub Pages 自定义域名
-├── server/             # 登记接口服务（部署在自己的服务器上，另见 server/README.md）
+├── functions/api/      # 登记接口，部署在 EdgeOne Pages Functions 上（见下方"部署结构"）
+├── server/             # 备用方案：整站搬到自建服务器（当前未使用，见 server/README.md）
 └── README.md
 ```
 
@@ -147,8 +147,8 @@
 
 ## 出席登记表单
 
-访客填完表单点"提交登记"后，请求发到自己服务器上的 `/api/rsvp`，记录存进
-`server/data/rsvp.json`（不是数据库——原因和可靠性说明见 `server/README.md`）。
+访客填完表单点"提交登记"后，请求发到 EdgeOne Pages Functions 的 `/api/rsvp`，
+记录存进 EdgeOne 的 KV 存储（键值对数据库，不用自己管服务器）。
 
 表单不再单独收集"是否出席"——提交表单本身就代表出席。
 
@@ -170,35 +170,59 @@
 页面和接口**分开部署在两个地方**，因为 GitHub Pages 只能托管静态文件、跑不了后端：
 
 ```
-GitHub Pages                        你的腾讯云服务器 120.53.229.45
-https://wedding.taolinwei.com/      https://tlwxpw.xyz/
-├── index.html                      ├── api/rsvp   写入登记
-├── admin.html         ── 跨域调用 ──▶ └── api/list   读取名单
-├── images/ audio/                  （代码见仓库 server/ 目录）
+GitHub Pages                              EdgeOne Pages（腾讯云，国内可直接访问）
+https://linwei94.github.io/               https://weddinginvitation-xxxxx.edgeone.cool/
+Wedding-Invitation/
+├── index.html                            ├── functions/api/rsvp.js   写入登记
+├── admin.html            ── 跨域调用 ──▶ └── functions/api/list.js   读取名单
+├── images/ audio/                             （数据存在 EdgeOne KV 里，免运维）
 └── favicon / manifest
 ```
 
 两边的连接点是 `index.html` 和 `admin.html` 里的 `API_BASE` 常量。
+选这个组合是因为**两边都不用自己管服务器**：GitHub Pages 和 EdgeOne Pages 都是托管平台，
+不需要买 VM、装系统、开 SSH，出问题也不用登服务器排查——这是当前最简单、
+同时国内访客能直接打开（不用翻墙）的组合。
+
+> 仓库里还留着 `server/`（把网页和接口都搬到自建腾讯云服务器的方案），
+> 这条路线**暂不使用**，先不用管它。
 
 ### 一、页面部署到 GitHub Pages
 
-1. 把分支合并到默认分支（`main`）
+1. 把这个分支合并到默认分支（`main`）
 2. 仓库 Settings → Pages → Source 选 `main` 分支、目录 `/ (root)`
-3. 仓库根目录的 `CNAME` 文件内容是 `wedding.taolinwei.com`，GitHub 会据此绑定域名
-4. 在域名商给 `wedding.taolinwei.com` 加一条 **CNAME 记录**指向 `linwei94.github.io`
-5. Settings → Pages 里勾上 **Enforce HTTPS**
-6. `.nojekyll` 让 GitHub 原样输出文件，不要删
+3. 不用配自定义域名的话到这步就好了，几分钟后能在
+   `https://linwei94.github.io/Wedding-Invitation/` 打开
+4. `.nojekyll` 让 GitHub 原样输出文件，不要删
+5. 如果之后想换成自己的域名（比如 `wedding.taolinwei.com`），
+   加一个内容为该域名的 `CNAME` 文件到仓库根目录，域名商那边加一条 CNAME 记录指向
+   `linwei94.github.io`，再在 Settings → Pages 勾 **Enforce HTTPS**——同时要记得把
+   `index.html` 里 `og:url`/`og:image` 等几行换成新域名
 
-### 二、接口部署到自己的服务器
+### 二、接口部署到 EdgeOne Pages Functions
 
-完整步骤见 **[`server/README.md`](server/README.md)**，那里有可以直接复制粘贴的命令。
-概括来说：装 Node → 放代码 → systemd 起服务 → nginx 反代 → certbot 申请 HTTPS。
+1. 登录腾讯云 EdgeOne 控制台 → Pages → 新建项目，关联这个 GitHub 仓库
+   （如果之前建过项目 `weddinginvitation-dpcecgtcs5rh`，确认它还在，直接复用即可）
+2. 项目的构建产物目录留空/根目录即可——真正会被识别为接口的是 `functions/api/` 下的文件，
+   EdgeOne 会自动把它们发布成 `/api/rsvp`、`/api/list` 两个接口，不需要额外构建步骤
+3. 项目设置里绑定一个 **KV 命名空间**，变量名必须是 `RSVP_KV`（代码里写死的名字）
+4. 项目设置里加两个环境变量：
+   - `ADMIN_TOKEN`：后台登录口令，自己设一个复杂的
+   - `ALLOWED_ORIGIN`：填 GitHub Pages 的地址，`https://linwei94.github.io`
+     （限制只有自己的页面能调接口；不设的话谁都能调，仅供临时测试用）
+5. 部署完成后，控制台会给一个形如 `https://xxxxx.edgeone.cool/` 的项目地址，
+   把它填进 `index.html` 和 `admin.html` 里的 `API_BASE`（当前文件里先占位填的是
+   `https://weddinginvitation-dpcecgtcs5rh.edgeone.cool/`，如果这个项目还在用就不用改，
+   不在了就换成新地址）
+6. 验证：`curl https://你的地址/api/list`，没带口令应该返回
+   `{"ok":false,"error":"口令不正确"}`，说明接口和 KV 绑定都正常
 
 > **接口必须是 HTTPS**：网页在 https 上，浏览器不允许它去调 http 接口。
+> EdgeOne Pages 的项目地址默认就是 HTTPS，不用额外配证书。
 
 ## 查看名单（数据管理后台）
 
-打开 `https://wedding.taolinwei.com/admin.html`，输入 `ADMIN_TOKEN` 设的口令，可以看到：
+打开 `https://linwei94.github.io/Wedding-Invitation/admin.html`，输入 `ADMIN_TOKEN` 设的口令，可以看到：
 
 - **四个统计**：登记条数、出席总人数、平均每条人数、有备注条数
 - **出席人数分布**：1–5 人各有多少条登记的横向柱状图

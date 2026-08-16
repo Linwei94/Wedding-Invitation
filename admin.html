@@ -148,9 +148,9 @@
 </div>
 
 <script>
-  // 与 index.html 里的 API_BASE 保持一致（接口部署在自己的服务器上，结尾带斜杠）
-  var API_BASE = '';   // 网页与接口同源（都在 wedding.taolinwei.com），留空即可
-  function apiUrl(p){ return (API_BASE || '/') + p; }
+  // 与 index.html 里的 API_BASE 保持一致（接口部署在 EdgeOne Pages Functions 上，结尾带斜杠）
+  var API_BASE = 'https://weddinginvitation-dpcecgtcs5rh.edgeone.cool/';
+  function apiUrl(p){ return (API_BASE || location.pathname.replace(/[^/]*$/, '')) + p; }
 
   var tokenInput = document.getElementById('token');
   var msgEl = document.getElementById('msg');

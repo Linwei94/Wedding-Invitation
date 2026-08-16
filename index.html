@@ -8,15 +8,15 @@
 <meta property="og:title" content="陶林伟 & 肖佩韦 · 婚礼请柬">
 <meta property="og:description" content="2026年10月17日 · 上海松江广富林希尔顿酒店，诚邀您的光临">
 <meta property="og:type" content="website">
-<!-- 微信/多数抓取程序只认绝对地址，换域名后这两行要一起改 -->
-<meta property="og:url" content="https://wedding.taolinwei.com/">
-<meta property="og:image" content="https://wedding.taolinwei.com/images/share.jpg?v=2">
+<!-- 微信/多数抓取程序只认绝对地址，换域名后这几行要一起改 -->
+<meta property="og:url" content="https://linwei94.github.io/Wedding-Invitation/">
+<meta property="og:image" content="https://linwei94.github.io/Wedding-Invitation/images/share.jpg?v=2">
 <meta property="og:image:width" content="400">
 <meta property="og:image:height" content="400">
-<meta itemprop="image" content="https://wedding.taolinwei.com/images/share.jpg?v=2">
-<link rel="image_src" href="https://wedding.taolinwei.com/images/share.jpg?v=2">
+<meta itemprop="image" content="https://linwei94.github.io/Wedding-Invitation/images/share.jpg?v=2">
+<link rel="image_src" href="https://linwei94.github.io/Wedding-Invitation/images/share.jpg?v=2">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://wedding.taolinwei.com/images/share.jpg?v=2">
+<meta name="twitter:image" content="https://linwei94.github.io/Wedding-Invitation/images/share.jpg?v=2">
 <link rel="icon" href="favicon.ico?v=3" sizes="16x16 32x32 48x48">
 <link rel="icon" type="image/png" href="images/icons/icon-32.png?v=3" sizes="32x32">
 <link rel="icon" type="image/png" href="images/icons/icon-192.png?v=3" sizes="192x192">
@@ -698,13 +698,13 @@
   </div>
 
 <script>
-  // 网页是静态的、托管在 GitHub Pages 上，跑不了后端；登记接口单独部署在
-  // 自己的服务器上（见仓库里的 server/），所以这里要填接口的完整地址（结尾带斜杠）。
-  // 换了接口地址，改这一行即可；留空字符串 '' 则改为同源请求。
-  var API_BASE = '';   // 网页与接口同源（都在 wedding.taolinwei.com），留空即可
+  // 网页是静态的、托管在 GitHub Pages 上，跑不了后端；登记接口部署在 EdgeOne Pages
+  // Functions 上（见仓库里的 functions/），所以这里要填 EdgeOne 项目的完整地址
+  // （结尾带斜杠）。EdgeOne Pages 控制台里能看到这个地址，换了项目/域名，改这一行即可。
+  var API_BASE = 'https://weddinginvitation-dpcecgtcs5rh.edgeone.cool/';
 
   function apiUrl(p){
-    return (API_BASE || '/') + p;
+    return (API_BASE || location.pathname.replace(/[^/]*$/, '')) + p;
   }
 
   var form = document.getElementById('rsvpForm');
