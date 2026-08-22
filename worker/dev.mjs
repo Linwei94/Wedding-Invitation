@@ -63,7 +63,12 @@ http.createServer(async (req, res) => {
     return;
   }
 
-  const file = path.join(ROOT, url.pathname === '/' ? 'index.html' : decodeURIComponent(url.pathname));
+  let file = path.join(ROOT, decodeURIComponent(url.pathname));
+  // 目录当成 index.html，跟 GitHub Pages 的行为保持一致——
+  // 否则本地看 /en/ 是 404，而线上是好的，白排查一轮。
+  if (fs.existsSync(file) && fs.statSync(file).isDirectory()) {
+    file = path.join(file, 'index.html');
+  }
   if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
     res.writeHead(404).end('not found');
     return;

@@ -1,6 +1,13 @@
 # 婚礼请柬网站 · 陶林伟 & 肖佩韦
 
-一个单页静态婚礼请柬网站：宾客看信息，出席名单由新人在后台录入。
+一个单页静态婚礼请柬网站：宾客看信息，出席名单由新人在后台录入。中英文两个版本。
+
+| 版本 | 网址 |
+| --- | --- |
+| 中文 | `https://www.taolinwei.com/Wedding-Invitation/` |
+| English | `https://www.taolinwei.com/Wedding-Invitation/en/` |
+
+两页在页尾互相有一个小链接，宾客点错了语言也能自己切过去。
 
 ## 页面内容
 
@@ -45,7 +52,10 @@
 
 ```
 .
-├── index.html          # 请柬页面，样式与交互均内嵌在此文件中
+├── index.html          # 中文请柬页，样式与交互均内嵌在此文件中
+├── en/
+│   ├── index.html      # 英文请柬页（见下方"英文版"）
+│   └── site.webmanifest
 ├── admin.html          # 出席名单后台（口令进入，手工补录 + 导出 CSV）
 ├── favicon.ico
 ├── images
@@ -63,6 +73,31 @@
 
 > 部署时务必把 `images/` 文件夹和 `index.html` 一起上传/提交，漏传会导致图片 404
 > （之前踩过这个坑）。
+
+## 英文版
+
+`en/index.html`，网址 `https://www.taolinwei.com/Wedding-Invitation/en/`。
+和中文版共用同一批图片、音频、图标——**没有复制任何素材**，
+所以换照片、换音乐只改一处，两个版本一起生效。
+
+改英文版要注意的几点：
+
+- **所有资源路径都带 `../`**（因为它在 `en/` 子目录里）。加图片时别忘了这个前缀，
+  漏了就是 404。`en/site.webmanifest` 里的图标路径同理。
+- **请柬主视觉那张图仍然是中文的**（`images/invitation.jpg` 里的字是画上去的）。
+  英文读者看不懂那张图，所以英文版在图片下面用**真文字**补了一段引导：
+  新人姓名、日期、城市，外加下面场地卡片里的完整信息。这样英文宾客拿到的信息是齐的。
+  如果想让英文宾客也看到一张英文请柬图，需要重新设计一张图片放成
+  `en/images/invitation.jpg` 并改那一行 `src`——这件事我做不了。
+- **地址那一块特意保留了中文**，样式是虚线框、可长按全选：英文宾客在上海要给司机看、
+  或者粘进地图 App，中文地址比英文拼音有用得多。"复制地址"按钮复制的也是中文，
+  按钮文案写的是 "Copy address in Chinese"，不是笔误。
+- `og:url` 指向 `/en/`，但 `og:image` 仍然指向根目录那张 `share.jpg`（绝对地址，两版共用）。
+- 页尾的语言切换链接：中文版 → `en/`，英文版 → `../`。不想要的话删掉那一行 `<a class="lang-switch">` 即可。
+
+> 姓名的英文拼写用的是 **Linwei Tao & Peiwei Xiao**，酒店英文名写的是
+> **Hilton Shanghai Songjiang Guangfulin**。这两个我没法联网核实，
+> 尤其酒店的官方英文名建议你确认一下再发出去。
 
 ## 微信分享卡片
 
@@ -190,7 +225,14 @@ node worker/dev.mjs "$PWD" 8813   # 用 node:sqlite 模拟 D1，同时把静态�
 bash worker/test.sh 8813          # 31 项接口测试
 ```
 
-浏览器打开 http://127.0.0.1:8813/admin.html ，本地口令 `test-token-1234567890`。
+浏览器打开：
+
+- 中文版 http://127.0.0.1:8813/
+- 英文版 http://127.0.0.1:8813/en/
+- 后台   http://127.0.0.1:8813/admin.html （本地口令 `test-token-1234567890`）
+
+`worker/dev.mjs` 会像 GitHub Pages 一样把目录解析成 `index.html`，所以本地
+`/en/` 的行为和线上一致。
 
 ## 部署结构
 

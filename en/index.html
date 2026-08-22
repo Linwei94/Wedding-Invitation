@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>陶林伟 & 肖佩韦 · 婚礼请柬</title>
-<meta name="description" content="2026年10月17日 · 上海松江广富林希尔顿酒店，诚邀您的光临">
-<meta property="og:title" content="陶林伟 & 肖佩韦 · 婚礼请柬">
-<meta property="og:description" content="2026年10月17日 · 上海松江广富林希尔顿酒店，诚邀您的光临">
+<title>Linwei Tao &amp; Peiwei Xiao · Wedding Invitation</title>
+<meta name="description" content="Saturday 17 October 2026 · Hilton Shanghai Songjiang Guangfulin — we would be delighted to have you with us">
+<meta property="og:title" content="Linwei Tao &amp; Peiwei Xiao · Wedding Invitation">
+<meta property="og:description" content="Saturday 17 October 2026 · Hilton Shanghai Songjiang Guangfulin — we would be delighted to have you with us">
 <meta property="og:type" content="website">
 <!-- 微信/多数抓取程序只认绝对地址，换域名后这几行要一起改 -->
-<meta property="og:url" content="https://www.taolinwei.com/Wedding-Invitation/">
+<meta property="og:url" content="https://www.taolinwei.com/Wedding-Invitation/en/">
 <meta property="og:image" content="https://www.taolinwei.com/Wedding-Invitation/images/share.jpg?v=2">
 <meta property="og:image:width" content="400">
 <meta property="og:image:height" content="400">
@@ -17,13 +17,13 @@
 <link rel="image_src" href="https://www.taolinwei.com/Wedding-Invitation/images/share.jpg?v=2">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://www.taolinwei.com/Wedding-Invitation/images/share.jpg?v=2">
-<link rel="icon" href="favicon.ico?v=3" sizes="16x16 32x32 48x48">
-<link rel="icon" type="image/png" href="images/icons/icon-32.png?v=3" sizes="32x32">
-<link rel="icon" type="image/png" href="images/icons/icon-192.png?v=3" sizes="192x192">
-<link rel="apple-touch-icon" href="images/icons/icon-180.png?v=3">
+<link rel="icon" href="../favicon.ico?v=3" sizes="16x16 32x32 48x48">
+<link rel="icon" type="image/png" href="../images/icons/icon-32.png?v=3" sizes="32x32">
+<link rel="icon" type="image/png" href="../images/icons/icon-192.png?v=3" sizes="192x192">
+<link rel="apple-touch-icon" href="../images/icons/icon-180.png?v=3">
 <link rel="manifest" href="site.webmanifest?v=3">
 <meta name="theme-color" content="#7a1f1f">
-<meta name="apple-mobile-web-app-title" content="婚礼请柬">
+<meta name="apple-mobile-web-app-title" content="Wedding">
 <style>
   :root{
     --card:#ffffff;
@@ -98,6 +98,35 @@
     cursor:zoom-in;
     -webkit-tap-highlight-color:transparent;
   }
+  /* ---------- English intro ----------
+     中文版的所有信息都画在请柬图里，但英文读者看不懂那张图，
+     所以这里用真文字把「谁、什么时候」补上，图片则退化成纯视觉。 */
+  .en-intro{padding:26px 24px 4px;text-align:center;}
+  .en-kicker{
+    font-family:var(--serif-en);
+    font-size:11.5px;
+    font-style:italic;
+    letter-spacing:2px;
+    color:var(--ink-soft);
+    margin:0 0 10px;
+  }
+  .en-names{
+    font-family:var(--serif-en);
+    font-size:23px;
+    font-weight:400;
+    line-height:1.4;
+    letter-spacing:1px;
+    color:var(--red);
+    margin:0 0 10px;
+  }
+  .en-names span{font-size:17px;color:var(--ink-soft);padding:0 4px;}
+  .en-date{
+    font-family:var(--serif-en);
+    font-size:13px;
+    letter-spacing:2px;
+    color:var(--ink);
+    margin:0;
+  }
   /* ---------- ornament divider ---------- */
   .ornament{
     display:flex;
@@ -140,6 +169,21 @@
   .venue-name{font-size:15px;font-weight:700;margin:0 0 5px;line-height:1.5;}
   .venue-addr{font-size:13px;color:var(--ink-soft);margin:0 0 4px;line-height:1.7;}
   .venue-time{font-size:12.5px;color:var(--ink-soft);margin:0 0 14px;}
+  /* 中文地址：给出租车司机看、或者粘进地图 App 用。
+     用中文字体栈，并且允许长按选中——这是英文版最实用的一块。 */
+  .venue-zh{
+    font-family:var(--serif);
+    font-size:12.5px;
+    line-height:1.9;
+    color:var(--ink-soft);
+    margin:0 0 12px;
+    padding:9px 10px;
+    background:var(--card);
+    border:1px dashed var(--line);
+    border-radius:3px;
+    -webkit-user-select:all;
+    user-select:all;
+  }
   .copy-addr{
     display:block;width:100%;margin-top:8px;
     padding:11px 8px;font-size:13.5px;font-family:inherit;
@@ -393,16 +437,22 @@
 </head>
 <body>
   <!-- 微信抓取缩略图时常取 HTML 里的第一张图，这里放一张方形的备用图 -->
-  <img src="images/share.jpg?v=2" alt="陶林伟 & 肖佩韦" width="400" height="400"
+  <img src="../images/share.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao" width="400" height="400"
        loading="lazy" style="position:absolute;left:-99999px;top:0;">
 
   <div class="card">
     <button type="button" class="invitation-zoom reveal d1">
-      <img class="invitation-image" src="images/invitation.jpg?v=2" width="1111" height="1700" fetchpriority="high" decoding="async" alt="陶林伟 & 肖佩韦 婚礼请柬，2026.10.17 星期六，松江广富林希尔顿酒店会议中心一楼大宴会厅">
+      <img class="invitation-image" src="../images/invitation.jpg?v=2" width="1111" height="1700" fetchpriority="high" decoding="async" alt="Wedding invitation for Linwei Tao &amp; Peiwei Xiao — Saturday 17 October 2026, Grand Ballroom, Hilton Shanghai Songjiang Guangfulin">
     </button>
 
+    <div class="en-intro reveal d1">
+      <p class="en-kicker">Together with our families, we invite you to celebrate the wedding of</p>
+      <h1 class="en-names">Linwei Tao <span>&amp;</span> Peiwei Xiao</h1>
+      <p class="en-date">Saturday, 17 October 2026 · Shanghai</p>
+    </div>
+
     <div class="venue reveal d2">
-      <h2>婚礼地址</h2>
+      <h2>Venue</h2>
       <div class="venue-card">
         <div class="venue-art" aria-hidden="true">
           <svg viewBox="0 0 320 112" preserveAspectRatio="xMidYMid slice">
@@ -420,10 +470,11 @@
           </svg>
         </div>
         <div class="venue-body">
-          <p class="venue-name">松江广富林希尔顿酒店会议中心 · 一楼大宴会厅</p>
-          <p class="venue-addr">上海市松江区广轩路 1199 号</p>
-          <p class="venue-time">2026 年 10 月 17 日（周六）17:08 签到 · 18:08 晚宴</p>
-          <button type="button" class="copy-addr" id="copyAddr">复制地址</button>
+          <p class="venue-name">Hilton Shanghai Songjiang Guangfulin<br>Convention Centre · Grand Ballroom, Level 1</p>
+          <p class="venue-addr">No. 1199 Guangxuan Road, Songjiang District, Shanghai</p>
+          <p class="venue-zh" lang="zh-CN">松江广富林希尔顿酒店会议中心 · 一楼大宴会厅<br>上海市松江区广轩路 1199 号</p>
+          <p class="venue-time">Saturday, 17 October 2026 · Reception 17:08 · Dinner 18:08</p>
+          <button type="button" class="copy-addr" id="copyAddr">Copy address in Chinese</button>
         </div>
       </div>
     </div>
@@ -539,51 +590,51 @@
 
     <div class="gallery reveal d4">
       <div class="gsec">
-        <div class="glabel"><i></i><span>婚 纱 照<em>Wedding</em></span><i></i></div>
+        <div class="glabel"><i></i><span>P H O T O S<em>Wedding Day</em></span><i></i></div>
         <div class="grid">
-          <button type="button" class="tile full r23"><img data-src="images/gallery/p00.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r32"><img data-src="images/gallery/p01.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img data-src="images/gallery/p09.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img data-src="images/gallery/p14.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r32"><img data-src="images/gallery/p04.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img data-src="images/gallery/p15.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img data-src="images/gallery/p18.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r32"><img data-src="images/gallery/p19.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img data-src="images/gallery/p20.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img data-src="images/gallery/p21.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r32"><img data-src="images/gallery/p22.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img data-src="images/gallery/p23.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img data-src="images/gallery/p24.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r32"><img data-src="images/gallery/p28.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img data-src="images/gallery/p26.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img data-src="images/gallery/p30.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r32"><img data-src="images/gallery/p31.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img data-src="images/gallery/p33.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile r23"><img data-src="images/gallery/p34.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r32"><img data-src="images/gallery/p37.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
-          <button type="button" class="tile full r23"><img data-src="images/gallery/p40.jpg?v=2" alt="陶林伟 &amp; 肖佩韦 婚纱照" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r23"><img data-src="../images/gallery/p00.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img data-src="../images/gallery/p01.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="../images/gallery/p09.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="../images/gallery/p14.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img data-src="../images/gallery/p04.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="../images/gallery/p15.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="../images/gallery/p18.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img data-src="../images/gallery/p19.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="../images/gallery/p20.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="../images/gallery/p21.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img data-src="../images/gallery/p22.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="../images/gallery/p23.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="../images/gallery/p24.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img data-src="../images/gallery/p28.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="../images/gallery/p26.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="../images/gallery/p30.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img data-src="../images/gallery/p31.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="../images/gallery/p33.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile r23"><img data-src="../images/gallery/p34.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r32"><img data-src="../images/gallery/p37.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
+          <button type="button" class="tile full r23"><img data-src="../images/gallery/p40.jpg?v=2" alt="Linwei Tao &amp; Peiwei Xiao wedding photograph" decoding="async" fetchpriority="low"></button>
         </div>
       </div>
     </div>
 
     <div class="footer">
-      <p class="names">陶林伟 &amp; 肖佩韦</p>
+      <p class="names">Linwei Tao &amp; Peiwei Xiao</p>
       <p class="date">2026 . 10 . 17</p>
-      <a class="lang-switch" href="en/" hreflang="en">English</a>
+      <a class="lang-switch" href="../" lang="zh-CN">中文版</a>
     </div>
   </div>
 
   <!-- 背景音乐：把 mp3 放到 audio/bgm.mp3 即可启用；文件不存在时按钮保持隐藏 -->
-  <audio id="bgm" src="audio/bgm.mp3" loop preload="none"></audio>
-  <button type="button" class="bgm-toggle" id="bgmBtn" aria-label="背景音乐开关">
+  <audio id="bgm" src="../audio/bgm.mp3" loop preload="none"></audio>
+  <button type="button" class="bgm-toggle" id="bgmBtn" aria-label="Toggle background music">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.2"/><path d="M12,3 a9,9 0 0 1 7.8,4.5"/></svg>
   </button>
 
   <div class="lightbox" id="lightbox" hidden>
-    <button class="lb-close" id="lbClose" aria-label="关闭">&times;</button>
-    <button class="lb-nav lb-prev" id="lbPrev" aria-label="上一张">&#8249;</button>
+    <button class="lb-close" id="lbClose" aria-label="Close">&times;</button>
+    <button class="lb-nav lb-prev" id="lbPrev" aria-label="Previous photo">&#8249;</button>
     <img id="lbImg" alt="">
-    <button class="lb-nav lb-next" id="lbNext" aria-label="下一张">&#8250;</button>
+    <button class="lb-nav lb-next" id="lbNext" aria-label="Next photo">&#8250;</button>
   </div>
 
 <script>
@@ -799,10 +850,10 @@
       // 复用登记那边的 copyToClipboard，它会真的检查 execCommand 的返回值，
       // 不会在复制失败时谎报「已复制」。
       copyToClipboard(text, function(ok){
-        btn.textContent = ok ? '地址已复制' : '复制失败，请长按选中';
+        btn.textContent = ok ? 'Address copied' : 'Copy failed — press and hold to select';
         btn.classList.add('done');
         setTimeout(function(){
-          btn.textContent = '复制地址';
+          btn.textContent = 'Copy address in Chinese';
           btn.classList.remove('done');
         }, 2000);
       });
